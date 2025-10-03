@@ -160,6 +160,13 @@ class BorrowRequestController extends Controller
         $request->reject_reason = $req->input('reason');
         $request->save();
 
+        // Make equipment available again
+        $equipment = $request->equipment;
+        if ($equipment) {
+            $equipment->status = 'available';
+            $equipment->save();
+        }
+
         // Save new data after changes
         $newData = [
             'status' => $request->status,

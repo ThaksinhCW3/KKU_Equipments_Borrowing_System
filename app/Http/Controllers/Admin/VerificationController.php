@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\VerificationRequest;
 use App\Models\User;
+use App\Notifications\VerificationRequestProcessed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,6 +18,21 @@ class VerificationController extends Controller
             ->paginate(10);
 
         return view('admin.verification.index', compact('verificationRequests'));
+    }
+
+    public function api(Request $request)
+    {
+        $query = VerificationRequest::with(['user', 'processedBy'])
+            ->orderBy('created_at', 'desc');
+
+        // Filter by status if provided
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $verificationRequests = $query->paginate(10);
+
+        return response()->json($verificationRequests);
     }
 
     public function show($id)
@@ -40,6 +56,9 @@ class VerificationController extends Controller
             'process_at' => now(),
         ]);
 
+        // Send notification to user
+        $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'approved'));
+
         return redirect()->back()->with('success', 'อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว');
     }
 
@@ -57,6 +76,9 @@ class VerificationController extends Controller
             'processed_by' => Auth::id(),
             'process_at' => now(),
         ]);
+
+        // Send notification to user
+        $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'rejected'));
 
         return redirect()->back()->with('success', 'ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว');
     }

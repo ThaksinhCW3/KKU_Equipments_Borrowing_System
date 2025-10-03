@@ -74,6 +74,13 @@ class BorrowerCtrl extends Controller
         $req->cancel_reason = $reasons;
         $req->save();
 
+        // Make equipment available again
+        $equipment = $req->equipment;
+        if ($equipment) {
+            $equipment->status = 'available';
+            $equipment->save();
+        }
+
         Cache::forget("myreq:{$req->users_id}");
         Cache::forget("reqdetail:{$req->req_id}");
 
@@ -99,6 +106,7 @@ class BorrowerCtrl extends Controller
             'end_at' => 'required|date|after_or_equal:start_at',
             'equipments_id' => 'required|exists:equipments,id',
             'request_reason' => 'required|string|max:255',
+            'request_reason_detail' => 'nullable|string|max:500',
         ]);
 
         // Validate business days only (Monday-Friday)
@@ -156,15 +164,22 @@ class BorrowerCtrl extends Controller
         $borrowRequest->end_at = $end;
         $borrowRequest->status = 'pending';
         $borrowRequest->request_reason = $request->request_reason;
+        $borrowRequest->request_reason_detail = $request->request_reason_detail;
         
         $borrowRequest->save();
+
+        // Make equipment unavailable
+        $equipment->status = 'unavailable';
+        $equipment->save();
 
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             $admin->notify(new BorrowRequestCreated($borrowRequest));
         }
-            Cache::forget("myreq:" . Auth::id());
-        return redirect()->back()
+        
+        Cache::forget("myreq:" . Auth::id());
+        
+        return redirect()->route('borrower.equipments.reqdetail', $borrowRequest->req_id)
             ->with('success', 'ส่งคำขอยืมสำเร็จ');
     }
     public function search(Request $request)

@@ -1,6 +1,19 @@
 <x-app-layout>
     <div class="max-w-screen-2xl mx-auto py-6 px-3 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">คำขอยืมอุปกรณ์</h1>
+
+        @if(session('success'))
+            <script>
+                Swal.fire({
+                    title: 'สำเร็จ!',
+                    text: '{{ session('success') }}',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            </script>
+        @endif
             @php
                 $activeRequests = $reQuests->where('status', '!=', 'cancelled');
             @endphp
@@ -76,6 +89,29 @@
                             <p class="text-sm text-gray-600">เริ่มต้น: {{ $req->start_at->format('d/m/Y') }}</p>
                             <p class="text-sm text-gray-600">สิ้นสุด: {{ $req->end_at->format('d/m/Y') }}</p>
                         </div>
+
+                        @if($req->request_reason)
+                            <div class="mb-4">
+                                <h3 class="font-semibold text-gray-700">เหตุผลในการยืม</h3>
+                                <p class="text-sm text-gray-600 mb-1">
+                                    <span class="text-gray-500">ประเภท:</span> 
+                                    @if($req->request_reason === 'assignment')
+                                        งานมอบหมาย/การบ้าน
+                                    @elseif($req->request_reason === 'personal')
+                                        ใช้ส่วนตัว
+                                    @elseif($req->request_reason === 'others')
+                                        อื่นๆ
+                                    @else
+                                        {{ $req->request_reason }}
+                                    @endif
+                                </p>
+                                @if($req->request_reason_detail)
+                                    <p class="text-sm text-gray-600">
+                                        <span class="text-gray-500">รายละเอียด:</span> {{ $req->request_reason_detail }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
 
                         @if ($req->status === 'rejected')
                             <h1 class="text-lg text-red-600 font-semibold ">

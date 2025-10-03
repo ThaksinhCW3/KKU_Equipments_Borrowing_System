@@ -27,10 +27,15 @@
                                     class="absolute top-2 right-2 bg-gray-600 text-white text-xs px-1.5 py-0.5 rounded">
                                     {{ ucfirst($equipment->status) }}
                                 </span>
-                            @else
+                            @elseif ($equipment->available_quantity > 0)
                                 <span
                                     class="absolute top-2 right-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">
-                                    {{ ucfirst($equipment->status) }}
+                                    Available
+                                </span>
+                            @else
+                                <span
+                                    class="absolute top-2 right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded">
+                                    Unavailable
                                 </span>
                             @endif
                         </div>

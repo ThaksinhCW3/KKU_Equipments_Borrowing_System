@@ -151,6 +151,46 @@
                     <div class="hidden md:block"><p class="break-words">{{ $equipment->description }}</p></div>
                 </div>
                 <div class="mt-4 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                    @php
+                                    // Find all equipment with the same name
+                                    $sameNameEquipment = \App\Models\Equipment::where('name', $equipment->name)->get();
+                                    
+                                    // Get all active borrow requests for equipment with same name
+                                    $activeRequests = \App\Models\BorrowRequest::whereIn('equipments_id', $sameNameEquipment->pluck('id'))
+                                        ->whereIn('status', ['pending', 'approved'])
+                                        ->where('end_at', '>=', now())
+                                        ->orderBy('end_at', 'asc')
+                                        ->get();
+                                    
+                                    // Find the earliest return date
+                                    $earliestReturn = $activeRequests->min('end_at');
+                                @endphp
+                                
+                                @if($earliestReturn)
+                                    <div class="m-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <div class="flex items-start space-x-2">
+                                            <div class="text-blue-600 mt-0.5">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-sm text-blue-800">
+                                                <p class="text-xs leading-relaxed">
+                                                    อุปกรณ์{{ $equipment->name }} จะว่างเร็วที่สุดในวันที่<br>
+                                                    <span class="font-medium text-blue-900">{{ \Carbon\Carbon::parse($earliestReturn)->format('d/m/Y') }}</span>
+                                                    @php
+                                                        $daysUntilAvailable = \Carbon\Carbon::parse($earliestReturn)->diffInDays(now());
+                                                    @endphp
+                                                    @if($daysUntilAvailable == 0)
+                                                        <span class="text-green-700">(วันนี้)</span>
+                                                    @elseif($daysUntilAvailable == 1)
+                                                        <span class="text-green-700">(พรุ่งนี้)</span>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                                     <!-- Pickup Time Information -->
                 <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div class="flex items-start space-x-2">
@@ -159,6 +199,7 @@
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                             </svg>
                         </div>
+                        
                         <div class="text-sm text-yellow-800">
                             <p class="font-medium mb-1"> เวลารับอุปกรณ์</p>
                             <p class="text-xs leading-relaxed">
@@ -194,8 +235,18 @@
                             <label for="request_details" class="block text-sm font-medium text-gray-700 mb-2">
                                 <span id="details-label">รายละเอียด</span>
                             </label>
-                            <input type="text" id="request_details" name="request_details" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ" @if ($hasBorrowed) disabled @endif>
+                            <textarea 
+                                id="request_details" 
+                                name="request_reason_detail" 
+                                maxlength="500"
+                                rows="3"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ"
+                                @if ($hasBorrowed) disabled @endif
+                            ></textarea>
+
                             <input type="hidden" id="request_reason" name="request_reason" value="">
+
                         </div>
 
 
@@ -215,7 +266,9 @@
                         @elseif ($equipment->status === 'maintenance')
                             <button type="button" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>อุปกรณ์อยู่ระหว่างซ่อมบำรุง</button>
                         @elseif ($equipment->status !== 'available')
-                            <button type="button" class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
+                            <div class="w-full"></div>
+                                <button type="button" class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
+                            </div>
                         @else
                             <button type="submit" id="borrowButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 disabled:opacity-50" disabled>ยืม</button>
                         @endif
@@ -385,11 +438,11 @@
                 
                 // Update label and placeholder based on selection
                 if (reasonType.value === 'assignment') {
-                    detailsLabel.textContent = 'วิชา/รายวิชา';
-                    detailsInput.placeholder = 'เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ';
+                    detailsLabel.textContent = 'รายละเอียด';
+                    detailsInput.placeholder = 'เช่น วิชา/รายวิชา ,รายละเอียดการใช้งาน';
                 } else if (reasonType.value === 'personal') {
-                    detailsLabel.textContent = 'หัวข้อ/เรื่อง';
-                    detailsInput.placeholder = 'เช่น ถ่ายรูปท่องเที่ยว, งานอดิเรก, การเรียนรู้';
+                    detailsLabel.textContent = 'รายละเอียด';
+                    detailsInput.placeholder = 'เช่น, งานอดิเรก, การเรียนรู้';
                 } else if (reasonType.value === 'others') {
                     detailsLabel.textContent = 'รายละเอียด';
                     detailsInput.placeholder = 'เช่น กิจกรรมพิเศษ, โครงการส่วนตัว';
@@ -403,21 +456,14 @@
         }
     }
 
-    // Combine reason type and details into request_reason
+    // Set request_reason to just the type (assignment, personal, others)
     function updateRequestReason() {
         const reasonType = document.getElementById('reason_type');
-        const detailsInput = document.getElementById('request_details');
         const hiddenInput = document.getElementById('request_reason');
         
-        if (reasonType && detailsInput && hiddenInput) {
+        if (reasonType && hiddenInput) {
             const type = reasonType.value;
-            const details = detailsInput.value.trim();
-            
-            if (type && details) {
-                hiddenInput.value = `${type} ${details}`;
-            } else {
-                hiddenInput.value = '';
-            }
+            hiddenInput.value = type;
         }
     }
 

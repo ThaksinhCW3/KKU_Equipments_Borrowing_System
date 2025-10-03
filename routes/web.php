@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
         // Verification management
         Route::prefix('admin/verification')->group(function () {
             Route::get('/', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
+            Route::get('/api', [AdminVerificationController::class, 'api'])->name('admin.verification.api');
             Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
             Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
             Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
