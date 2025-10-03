@@ -39,7 +39,7 @@ class VerificationRequestProcessed extends Notification implements ShouldQueue
             ->when($this->verificationRequest->admin_note, function ($mail) {
                 return $mail->line('หมายเหตุ: ' . $this->verificationRequest->admin_note);
             })
-            ->action('ดูสถานะการยืนยัน', route('verification.index'));
+            ->action('ดูสถานะการยืนยัน', route('verification/index'));
     }
 
     public function toDatabase($notifiable)
@@ -55,7 +55,7 @@ class VerificationRequestProcessed extends Notification implements ShouldQueue
             'admin_note' => $this->verificationRequest->admin_note,
             'processed_by' => $this->verificationRequest->processedBy->name ?? 'ผู้ดูแลระบบ',
             'type' => 'verification_processed',
-            'url' => route('verification.index'),
+            'url' => route('verification/index'),
             'created_at' => now()->toDateTimeString(),
         ];
     }

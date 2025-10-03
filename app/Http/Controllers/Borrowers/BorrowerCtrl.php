@@ -10,6 +10,7 @@ use App\Models\Categories;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use App\Notifications\BorrowRequestCreated;
+use App\Notifications\BorrowRequestCancelled;
 
 use App\Models\Equipment;
 use App\Models\Category;
@@ -52,14 +53,49 @@ class BorrowerCtrl extends Controller
         return BorrowRequest::with(
             'equipment:id,code,name,description,categories_id,photo_path',
             'user:id,uid,name,email,phonenumber',
-            'equipment.category:id,name'
+            'equipment.category:id,name',
+            'transaction'
         )
             ->where('users_id', $userId)
+            ->orderBy('created_at', 'desc')
             ->get();
     });
 
     return view('equipments.myreq', compact('reQuests'));
 }
+
+    public function myreqPaginated(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $userId = Auth::id();
+        $page = $request->get('page', 1);
+        $perPage = 6; // Load 6 requests per page
+        $offset = ($page - 1) * $perPage;
+        $sort = $request->get('sort', 'desc'); // Default to desc
+
+        $requests = BorrowRequest::with(
+            'equipment:id,code,name,description,categories_id,photo_path',
+            'user:id,uid,name,email,phonenumber',
+            'equipment.category:id,name',
+            'transaction'
+        )
+            ->where('users_id', $userId)
+            ->orderBy('created_at', $sort)
+            ->skip($offset)
+            ->take($perPage)
+            ->get();
+
+        $hasMore = $requests->count() === $perPage;
+
+        return response()->json([
+            'requests' => $requests,
+            'hasMore' => $hasMore,
+            'page' => $page
+        ]);
+    }
 
     public function cancel(Request $request, $id)
     {
@@ -79,6 +115,12 @@ class BorrowerCtrl extends Controller
         if ($equipment) {
             $equipment->status = 'available';
             $equipment->save();
+        }
+
+        // Send notification to all admins
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new BorrowRequestCancelled($req));
         }
 
         Cache::forget("myreq:{$req->users_id}");
@@ -186,7 +228,9 @@ class BorrowerCtrl extends Controller
     {
         try {
             $q = $request->query('q');
-            $equipments = Equipment::with('category')
+            
+            // Get all equipment that match the search criteria
+            $allEquipments = Equipment::with('category')
                 ->when($q, function($query) use ($q) {
                     $query->where(function($subQuery) use ($q) {
                         $subQuery->where('name', 'like', "%$q%")
@@ -198,10 +242,23 @@ class BorrowerCtrl extends Controller
                     });
                 })
                 ->orderBy('name')
-                ->limit(20)
                 ->get();
 
-            return response()->json(['data' => $equipments]);
+            // Group by name and show only one representative item per equipment type
+            // Prioritize available items, but show unavailable if no available items exist
+            $groupedEquipments = $allEquipments->groupBy('name')->map(function ($equipmentGroup) {
+                $availableItem = $equipmentGroup->where('status', 'available')->first();
+                $representative = $availableItem ?: $equipmentGroup->first();
+                
+                // Add quantity calculations
+                $equipmentName = $representative->name;
+                $representative->available_quantity = Equipment::where('name', $equipmentName)->where('status', 'available')->count();
+                $representative->total_quantity = Equipment::where('name', $equipmentName)->count();
+                
+                return $representative;
+            })->values();
+
+            return response()->json(['data' => $groupedEquipments->take(20)]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -211,10 +268,26 @@ class BorrowerCtrl extends Controller
 {
     try {
         $equipments = Cache::remember('all_equipment_list', 1800, function () { 
-            return Equipment::with('category')
+            // Get all equipment
+            $allEquipments = Equipment::with('category')
                 ->orderBy('name')
-                ->limit(50)
                 ->get();
+
+            // Group by name and show only one representative item per equipment type
+            // Prioritize available items, but show unavailable if no available items exist
+            $groupedEquipments = $allEquipments->groupBy('name')->map(function ($equipmentGroup) {
+                $availableItem = $equipmentGroup->where('status', 'available')->first();
+                $representative = $availableItem ?: $equipmentGroup->first();
+                
+                // Add quantity calculations
+                $equipmentName = $representative->name;
+                $representative->available_quantity = Equipment::where('name', $equipmentName)->where('status', 'available')->count();
+                $representative->total_quantity = Equipment::where('name', $equipmentName)->count();
+                
+                return $representative;
+            })->values();
+
+            return $groupedEquipments->take(50);
         });
 
         return response()->json(['data' => $equipments]);
@@ -229,7 +302,7 @@ class BorrowerCtrl extends Controller
     }
     $reQuests = Cache::remember("reqdetail:{$req_id}", 600, function () use ($req_id) { 
         return BorrowRequest::with(
-            'equipment:id,code,name,description,categories_id,photo_path',
+            'equipment:id,code,name,description,categories_id,photo_path,accessories',
             'user:id,uid,name,email,phonenumber',
             'equipment.category:id,name'
         )

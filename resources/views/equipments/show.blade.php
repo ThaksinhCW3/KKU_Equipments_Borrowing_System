@@ -138,18 +138,29 @@
 
             <div class="w-full lg:w-1/2 flex flex-col justify-start gap-4 p-4 sm:p-5 border border-gray-200 rounded-lg shadow-sm">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 break-words">{{ $equipment->name }}</h1>
-                <p class="text-gray-500 text-lg break-words">{{ $equipment->category->name }}</p>
-                <p class="text-gray-500 text-lg break-words">{{ $equipment->code }}</p>
+                <p class="text-gray-500 text-lg break-words">หมายเลขครุภัณฑ์: {{ $equipment->code }}</p>
+                <p class="text-gray-500 text-lg break-words">หมวดหมู่: {{ $equipment->category->name }}</p>
+                <p class="text-gray-600 text-base leading-relaxed break-words">{{ $equipment->description }}</p>
+                
+                @php
+                    $accessories = json_decode($equipment->accessories ?? '[]', true);
+                @endphp
+                
+                @if(!empty($accessories) && is_array($accessories))
                 <div class="text-gray-600 text-base leading-relaxed">
-                    <div x-data="{ expanded: false }" class="block md:hidden">
-                        <span x-show="!expanded" x-transition class="break-words">{{ \Illuminate\Support\Str::limit($equipment->description, 100, '...') }}</span>
-                        <span x-show="expanded" x-collapse class="break-words">{{ $equipment->description }}</span>
-                        @if (strlen($equipment->description) > 100)
-                        <button @click="expanded = !expanded" class="mt-1 text-blue-600 font-semibold hover:underline focus:outline-none"><span x-show="!expanded">ดูเพิ่มเติม</span><span x-show="expanded">แสดงน้อยลง</span></button>
-                        @endif
+                        <p class="font-medium text-gray-700 mb-2">เซ็ตของที่ติดมากับเครื่อง:</p>
+                        <div class="space-y-1">
+                            @foreach($accessories as $accessory)
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                    <span class="text-gray-700">{{ $accessory }}</span>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    <div class="hidden md:block"><p class="break-words">{{ $equipment->description }}</p></div>
-                </div>
+                @else
+                    <p class="text-gray-600 text-base leading-relaxed">เซ็ตของที่ติดมากับเครื่อง: ไม่มี</p>
+                @endif
                 <div class="mt-4 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg">
                     @php
                                     // Find all equipment with the same name
@@ -267,7 +278,7 @@
                             <button type="button" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>อุปกรณ์อยู่ระหว่างซ่อมบำรุง</button>
                         @elseif ($equipment->status !== 'available')
                             <div class="w-full"></div>
-                                <button type="button" class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
+                            <button type="button" class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
                             </div>
                         @else
                             <button type="submit" id="borrowButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 disabled:opacity-50" disabled>ยืม</button>

@@ -20,6 +20,7 @@ class BorrowRequest extends Model
         'request_reason_detail',
         'reject_reason',
         'cancel_reason',
+        'pickup_deadline',
         'uid',
         'photo_path',
         'email',
@@ -33,6 +34,7 @@ class BorrowRequest extends Model
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'pickup_deadline' => 'datetime',
     ];
 
     // Relationships

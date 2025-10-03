@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\BorrowRequestController;
 use App\Http\Controllers\Admin\ReportExportController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Borrowers\BorrowerCtrl;
 use App\Http\Controllers\VerificationController;
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('/borrower')->group(function () {
         Route::post('/borrow_request', [BorrowerCtrl::class, 'myRequests'])->name('borrower.borrow_request');
         Route::get('/myrequest', [BorrowerCtrl::class, 'myreq'])->name('borrower.equipments.myreq');
+        Route::get('/myrequest/paginated', [BorrowerCtrl::class, 'myreqPaginated'])->name('borrower.equipments.myreq.paginated');
         Route::get('/reqdetail/{req_id}', [BorrowerCtrl::class, 'reqdetail'])->name('borrower.equipments.reqdetail');
         // fixed path (prefix already includes /borrower)
         Route::patch('/requests/{id}/cancel', [BorrowerCtrl::class, 'cancel'])->name('borrower.requests.cancel');
@@ -100,6 +102,54 @@ Route::middleware('auth')->group(function () {
         Route::prefix('admin/equipment')->group(function () {
             Route::get('/', [EquipmentController::class, 'index'])->name('admin.equipment.index');
         });
+    });
+});
+
+// Notification routes for Vue component
+Route::middleware('auth')->group(function () {
+    // Get user notifications
+    Route::get('/api/notifications', function () {
+        $user = Auth::user();
+        $notifications = $user->notifications()
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'data' => $notification->data,
+                    'read_at' => $notification->read_at,
+                    'created_at' => $notification->created_at,
+                    'created_at_human' => $notification->created_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json([
+            'notifications' => $notifications,
+            'unread_count' => $user->unreadNotifications->count()
+        ]);
+    });
+
+    // Mark notification as read
+    Route::patch('/api/notifications/{id}/read', function ($id) {
+        $user = Auth::user();
+        $notification = $user->notifications()->find($id);
+        
+        if ($notification) {
+            $notification->markAsRead();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['error' => 'Notification not found'], 404);
+    });
+
+    // Mark all notifications as read
+    Route::patch('/api/notifications/mark-all-read', function () {
+        $user = Auth::user();
+        $user->unreadNotifications->markAsRead();
+        
+        return response()->json(['success' => true]);
     });
 });
 

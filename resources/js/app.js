@@ -13,6 +13,7 @@ import EquipmentTable from './components/tables/EquipmentTable.vue';
 import CategoriesTable from './components/tables/CategoryTable.vue';
 import UsersTable from './components/tables/UserTable.vue';
 import RecentAct from './components/RecentAct.vue';
+import NotificationBell from './components/NotificationBell.vue';
 
 // Header Search
 const headerEl = document.getElementById('header-search');
@@ -72,3 +73,9 @@ const userTableEl = document.getElementById('user-table');
 if (userTableEl) {
   createApp(UsersTable).mount(userTableEl);
 }
+
+// Notification Bell
+const notificationBellEls = document.querySelectorAll('notification-bell');
+notificationBellEls.forEach(el => {
+  createApp(NotificationBell).mount(el);
+});

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BorrowRequest;
-use App\Models\BorrowRequestHistory;
 use App\Models\BorrowTransaction;
 use App\Models\Log;
 use Illuminate\Http\Request;
@@ -115,6 +114,7 @@ class BorrowRequestController extends Controller
         }
 
         $borrowRequest->status = 'approved';
+        $borrowRequest->pickup_deadline = now()->addDays(3); // 3 days to pickup
         $borrowRequest->save();
 
         // Save new data after changes
@@ -125,17 +125,6 @@ class BorrowRequestController extends Controller
             'updated_at' => $borrowRequest->updated_at,
         ];
 
-        // Create history record
-        BorrowRequestHistory::create([
-            'borrow_request_id' => $borrowRequest->id,
-            'old_status' => $oldData['status'],
-            'new_status' => $newData['status'],
-            'old_data' => $oldData,
-            'new_data' => $newData,
-            'action' => 'approved',
-            'admin_id' => auth()->id(),
-            'notes' => 'Request approved by admin'
-        ]);
 
         // Log the action
         Log::create([
@@ -190,17 +179,6 @@ class BorrowRequestController extends Controller
             'updated_at' => $request->updated_at,
         ];
 
-        // Create history record
-        BorrowRequestHistory::create([
-            'borrow_request_id' => $request->id,
-            'old_status' => $oldData['status'],
-            'new_status' => $newData['status'],
-            'old_data' => $oldData,
-            'new_data' => $newData,
-            'action' => 'rejected',
-            'admin_id' => auth()->id(),
-            'notes' => 'Request rejected by admin. Reason: ' . $request->reject_reason
-        ]);
 
         // Log the action
         Log::create([

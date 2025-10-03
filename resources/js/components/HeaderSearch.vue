@@ -77,6 +77,16 @@ function getFirstPhoto(equipment) {
     return equipment.photo_path;
   }
 }
+
+function getAvailableQuantity(equipment) {
+  // This will be calculated on the backend and passed in the response
+  return equipment.available_quantity || 0;
+}
+
+function getTotalQuantity(equipment) {
+  // This will be calculated on the backend and passed in the response
+  return equipment.total_quantity || 0;
+}
 </script>
 
 <template>
@@ -155,15 +165,20 @@ function getFirstPhoto(equipment) {
                   <div class="font-medium text-gray-800 hover:text-blue-600 transition-colors duration-200">
                     {{ item.name }}
                   </div>
-                  <!-- <div class="text-gray-500 text-xs mt-1">
-                    <span class="inline-block px-2 py-1 rounded mr-2">{{ item.code }}</span>
-                    <span class="inline-block px-2 py-1 rounded mr-2">
-                      {{ item.category?.name || 'ไม่มีหมวดหมู่' }}
+                  <div class="text-gray-500 text-xs mt-1">
+                    <span 
+                      class="inline-block px-2 py-1 rounded-full text-xs font-medium mr-2"
+                      :class="getAvailableQuantity(item) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    >
+                      Available: {{ getAvailableQuantity(item) }}
+                    </span>
+                    <span 
+                      v-if="getTotalQuantity(item) > 1"
+                      class="inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      Total: {{ getTotalQuantity(item) }}
                     </span>
                   </div>
-                  <div v-if="item.description" class="text-gray-600 text-xs mt-1 line-clamp-2">
-                    {{ item.description }}
-                  </div> -->
                 </div>
               </div>
             </a>
