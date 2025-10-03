@@ -52,6 +52,15 @@
           ></textarea>
         </div>
         <div class="mb-4">
+          <label class="block text-gray-700 font-semibold mb-1">อุปกรณ์เสริม</label>
+          <textarea
+            v-model.trim="form.accessories"
+            class="w-full h-20 border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            placeholder="กรอกรายการอุปกรณ์เสริม (เช่น สายไฟ, แบตเตอรี่, คู่มือ)&#10;สามารถแยกด้วยเครื่องหมายจุลภาค (,) หรือขึ้นบรรทัดใหม่"
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">ตัวอย่าง: สายไฟ, แบตเตอรี่, คู่มือ หรือแยกแต่ละรายการในบรรทัดใหม่</p>
+        </div>
+        <div class="mb-4">
           <label class="block text-gray-700 font-semibold mb-1">สถานะ</label>
           <select
             required
@@ -164,6 +173,18 @@ export default {
     setupForm() {
       this.form = JSON.parse(JSON.stringify(this.equipment));
       this.form.categories_id = this.equipment.category?.id || null;
+      
+      // Handle accessories - convert from JSON array to string for editing
+      if (this.equipment.accessories) {
+        if (Array.isArray(this.equipment.accessories)) {
+          this.form.accessories = this.equipment.accessories.join(', ');
+        } else {
+          this.form.accessories = this.equipment.accessories;
+        }
+      } else {
+        this.form.accessories = '';
+      }
+      
       this.existingImages = [];
       this.selectedMainIdentifier = null; // CHANGED
 

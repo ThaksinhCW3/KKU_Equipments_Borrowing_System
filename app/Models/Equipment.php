@@ -18,6 +18,10 @@ class Equipment extends Model
         'accessories'
     ];
 
+    protected $casts = [
+        'accessories' => 'array',
+    ];
+
 
     public function category()
     {

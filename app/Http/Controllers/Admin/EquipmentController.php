@@ -40,6 +40,15 @@ class EquipmentController extends Controller
                 "selectedProfileImage" => "nullable|integer|min:0",
             ]);
 
+            // Convert accessories string to JSON array
+            if (!empty($data['accessories'])) {
+                // Split by common delimiters and clean up
+                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $data['accessories'])));
+                $data['accessories'] = json_encode($accessoriesArray);
+            } else {
+                $data['accessories'] = json_encode([]);
+            }
+
             $paths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
@@ -117,6 +126,15 @@ class EquipmentController extends Controller
                 "images_to_delete.*" => "string", 
                 "selected_main_identifier" => "nullable|string", 
             ]);
+
+            // Convert accessories string to JSON array
+            if (!empty($validatedData['accessories'])) {
+                // Split by common delimiters and clean up
+                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $validatedData['accessories'])));
+                $validatedData['accessories'] = json_encode($accessoriesArray);
+            } else {
+                $validatedData['accessories'] = json_encode([]);
+            }
 
             $currentPhotos = json_decode($equipment->photo_path, true) ?? [];
 
