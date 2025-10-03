@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\BorrowRequest;
 use App\Models\BorrowRequestHistory;
 use App\Models\BorrowTransaction;
+use App\Models\Log;
 use Illuminate\Http\Request;
 use App\Notifications\BorrowRequestApproved;
 use App\Notifications\BorrowRequestRejected;
 use Illuminate\Support\Carbon;
 use App\Traits\ClearsDashboardCache;
+use Illuminate\Support\Facades\Auth;
 
 class BorrowRequestController extends Controller
 {
@@ -135,6 +137,20 @@ class BorrowRequestController extends Controller
             'notes' => 'Request approved by admin'
         ]);
 
+        // Log the action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'approve',
+            'target_type' => 'borrow_request',
+            'target_id' => $borrowRequest->id,
+            'target_name' => $borrowRequest->req_id,
+            'description' => "Approved borrow request: {$borrowRequest->req_id}",
+            'module' => 'borrow_request',
+            'severity' => 'info',
+            'old_values' => $oldData,
+            'new_values' => $newData
+        ]);
+
         $user = $borrowRequest->user;
         if ($user) {
             $user->notify(new BorrowRequestApproved($borrowRequest));
@@ -184,6 +200,20 @@ class BorrowRequestController extends Controller
             'action' => 'rejected',
             'admin_id' => auth()->id(),
             'notes' => 'Request rejected by admin. Reason: ' . $request->reject_reason
+        ]);
+
+        // Log the action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'reject',
+            'target_type' => 'borrow_request',
+            'target_id' => $request->id,
+            'target_name' => $request->req_id,
+            'description' => "Rejected borrow request: {$request->req_id}",
+            'module' => 'borrow_request',
+            'severity' => 'warning',
+            'old_values' => $oldData,
+            'new_values' => $newData
         ]);
 
         $user = $request->user;

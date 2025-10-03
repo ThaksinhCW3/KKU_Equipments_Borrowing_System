@@ -211,11 +211,37 @@ class EquipmentController extends Controller
             $updatePayload['photo_path'] = json_encode(array_values($finalPhotoList));
             unset($updatePayload['images'], $updatePayload['images_to_delete'], $updatePayload['selected_main_identifier']);
             
+            // Store old values for logging
+            $oldValues = [
+                'name' => $equipment->name,
+                'code' => $equipment->code,
+                'description' => $equipment->description,
+                'accessories' => $equipment->accessories,
+                'categories_id' => $equipment->categories_id,
+                'status' => $equipment->status,
+                'photo_path' => $equipment->photo_path
+            ];
+
             $equipment->update($updatePayload);
 
             Cache::forget('equipments_with_category');
             
             $updatedEquipment = $equipment->fresh()->load('category');
+            
+            // Log the action
+            Log::create([
+                'admin_id' => Auth::id() ?? 1,
+                'action' => 'update',
+                'target_type' => 'equipment',
+                'target_id' => $equipment->id,
+                'target_name' => $equipment->name,
+                'description' => "Updated equipment: {$equipment->name} (ID {$equipment->code})",
+                'module' => 'equipment',
+                'severity' => 'info',
+                'old_values' => $oldValues,
+                'new_values' => $updatePayload
+            ]);
+            
             \Log::info('Updated equipment data:', ['equipment' => $updatedEquipment->toArray()]);
 
             return response()->json([

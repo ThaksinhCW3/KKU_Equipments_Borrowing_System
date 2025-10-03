@@ -7,8 +7,6 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BorrowRequestController;
 use App\Http\Controllers\Admin\ReportExportController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
-
-use App\Http\Controllers\LogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Borrowers\BorrowerCtrl;
@@ -61,7 +59,7 @@ Route::middleware('auth')->group(function () {
 
         // Reports (subset)
         Route::prefix('admin/report')->group(function () {
-            Route::get('/logs', [LogController::class, 'logReport'])->name('admin.report.logs');
+            Route::get('/logs', [ReportController::class, 'logReport'])->name('admin.report.logs');
         });
     });
 

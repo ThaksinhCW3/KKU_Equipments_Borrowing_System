@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
+use App\Models\Log;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -48,6 +49,20 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
         $defaultRoute = route('home', absolute: false);
 
+        // Log login action
+        Log::create([
+            'admin_id' => $user->id,
+            'action' => 'login',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+            'target_name' => $user->name,
+            'description' => "User logged in: {$user->name} ({$user->email})",
+            'module' => 'authentication',
+            'severity' => 'info',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
         if (in_array($user->role, ['admin', 'staff'])) {
             $defaultRoute = route('admin.index', absolute: false);
         }
@@ -60,6 +75,24 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        
+        // Log logout action before logout
+        if ($user) {
+            Log::create([
+                'admin_id' => $user->id,
+                'action' => 'logout',
+                'target_type' => 'user',
+                'target_id' => $user->id,
+                'target_name' => $user->name,
+                'description' => "User logged out: {$user->name} ({$user->email})",
+                'module' => 'authentication',
+                'severity' => 'info',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

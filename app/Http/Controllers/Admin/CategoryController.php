@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Category;
+use App\Models\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -26,6 +28,18 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
+        // Log the action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'create',
+            'target_type' => 'category',
+            'target_id' => $category->id,
+            'target_name' => $category->name,
+            'description' => "Created category: {$category->name} (ID {$category->id})",
+            'module' => 'equipment',
+            'severity' => 'info'
+        ]);
+
         return response()->json([
             'status' => true,
             'category' => $category,
@@ -41,7 +55,27 @@ class CategoryController extends Controller
         ]);
 
         $category = Category::findOrFail($id);
+        
+        // Store old values for logging
+        $oldValues = [
+            'name' => $category->name
+        ];
+        
         $category->update($validated);
+
+        // Log the action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'update',
+            'target_type' => 'category',
+            'target_id' => $category->id,
+            'target_name' => $category->name,
+            'description' => "Updated category: {$category->name} (ID {$category->id})",
+            'module' => 'equipment',
+            'severity' => 'info',
+            'old_values' => $oldValues,
+            'new_values' => $validated
+        ]);
 
         return response()->json([
             'status' => true,
@@ -54,6 +88,19 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
+        
+        // Log the action before deletion
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'delete',
+            'target_type' => 'category',
+            'target_id' => $category->id,
+            'target_name' => $category->name,
+            'description' => "Deleted category: {$category->name} (ID {$category->id})",
+            'module' => 'equipment',
+            'severity' => 'warning'
+        ]);
+        
         $category->delete();
 
         return response()->json(

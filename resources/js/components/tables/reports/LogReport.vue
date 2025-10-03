@@ -1,5 +1,5 @@
 <template>
-    <BaseReportTable :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
+    <BaseReportTable ref="baseTable" :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
         :data="logs" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, เป้าหมาย, หรือรายละเอียด...'" :page-size="20"
         @export="exportLogs">
@@ -450,9 +450,9 @@ export default {
             return this.formatDescriptionWithLinks(stringValue);
         },
         applyQuickFilter(filterKey, filterValue) {
-            // Access the parent BaseReportTable component to set filters
-            const baseTable = this.$parent;
-            if (baseTable && baseTable.filters) {
+            // Access the BaseReportTable component through ref
+            const baseTable = this.$refs.baseTable;
+            if (baseTable) {
                 // Clear other filters first
                 baseTable.filters = {};
                 // Set the specific filter
@@ -462,8 +462,8 @@ export default {
             }
         },
         clearAllFilters() {
-            // Access the parent BaseReportTable component to clear filters
-            const baseTable = this.$parent;
+            // Access the BaseReportTable component through ref
+            const baseTable = this.$refs.baseTable;
             if (baseTable && baseTable.clearAllFilters) {
                 baseTable.clearAllFilters();
             }

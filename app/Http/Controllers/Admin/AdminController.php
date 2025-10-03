@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\BorrowRequest;
+use App\Models\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -214,6 +216,20 @@ class AdminController extends Controller
 
         $filename = "dashboard_export_{$type}_{$year}" . ($month ? "_{$month}" : "") . ".csv";
 
+        // Log the export action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'export_initiated',
+            'target_type' => 'system',
+            'target_id' => null,
+            'target_name' => 'Dashboard Export',
+            'description' => "CSV export initiated: {$type} data for {$year}" . ($month ? " month {$month}" : ""),
+            'module' => 'export',
+            'severity' => 'info',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
         if ($type === 'trends') {
             $data = $this->getBorrowingTrends($year, $month);
             $csvData = [];
@@ -244,6 +260,20 @@ class AdminController extends Controller
             }
             fclose($file);
         };
+
+        // Log successful export
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'export_completed',
+            'target_type' => 'system',
+            'target_id' => null,
+            'target_name' => 'Dashboard Export',
+            'description' => "CSV export completed: {$filename}",
+            'module' => 'export',
+            'severity' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
 
         return response()->stream($callback, 200, [
             'Content-Type' => 'text/csv',
