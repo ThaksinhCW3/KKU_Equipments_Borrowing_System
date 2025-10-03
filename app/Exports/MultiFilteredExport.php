@@ -29,6 +29,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             'equipments' => $this->filteredEquipments(),
             'categories' => $this->filteredCategories(),
             'requests' => $this->filteredRequests(),
+            'transactions' => $this->filteredTransactions(),
             default => collect(),
         };
     }
@@ -40,6 +41,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             'equipments' => ['ไอดี', 'หมายเลขคุรุภัณฑ์', 'ชื่ออุปกรณ์', 'หมวดหมู่', 'สถานะ', 'สร้างวันที่'],
             'categories' => ['ไอดี', 'รหัสหมวดหมู่', 'ชื่อ', 'สร้างวันที่'],
             'requests' => ['ไอดี', 'รหัสคำขอ', 'ไอดีผู้ยืม', 'ชื่อผู้ยืม', 'เลขไอดีอุปกรณ์', 'ชื่ออุปกรณ์', 'เริ่มวันที่', 'ถึงวันที่', 'สถานะ', 'สาเหตุการปฏิเสธ', 'สาเหตุการยกเลิก', 'สร้างวันที่'],
+            'transactions' => ['ไอดี', 'รหัสธุรกรรม', 'ประเภทธุรกรรม', 'ชื่อผู้ใช้', 'ชื่ออุปกรณ์', 'สถานะ', 'จำนวนเงิน', 'เริ่มวันที่', 'ถึงวันที่', 'สร้างวันที่'],
             default => [],
         };
     }
@@ -183,5 +185,124 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             $r->$r->cancel_reason ?? '-',
             optional($r->created_at)->format('Y-m-d'),
         ]);
+    }
+
+    protected function filteredTransactions()
+    {
+        // Generate transaction data from borrow requests (same logic as in ReportController)
+        $requests = BorrowRequest::with('user', 'equipment')->get();
+        
+        $transactions = collect();
+        
+        // Generate transactions from borrow requests
+        foreach ($requests as $request) {
+            // Borrow transaction
+            $transactions->push([
+                'id' => $request->id * 1000 + 1,
+                'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'B',
+                'transaction_type' => 'borrow',
+                'user' => $request->user,
+                'equipment' => $request->equipment,
+                'status' => $request->status === 'approved' ? 'completed' : 
+                           ($request->status === 'rejected' ? 'cancelled' : 'pending'),
+                'amount' => 0, // Free borrowing
+                'start_date' => $request->start_at,
+                'end_date' => $request->end_at,
+                'description' => 'การยืมอุปกรณ์: ' . ($request->equipment->name ?? 'N/A'),
+                'notes' => $request->request_reason,
+                'created_at' => $request->created_at,
+                'updated_at' => $request->updated_at
+            ]);
+            
+            // Return transaction (if status is check_in)
+            if ($request->status === 'check_in') {
+                $transactions->push([
+                    'id' => $request->id * 1000 + 2,
+                    'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'R',
+                    'transaction_type' => 'return',
+                    'user' => $request->user,
+                    'equipment' => $request->equipment,
+                    'status' => 'completed',
+                    'amount' => 0,
+                    'start_date' => $request->end_at,
+                    'end_date' => $request->end_at,
+                    'description' => 'การคืนอุปกรณ์: ' . ($request->equipment->name ?? 'N/A'),
+                    'notes' => 'คืนอุปกรณ์ตามกำหนด',
+                    'created_at' => $request->updated_at,
+                    'updated_at' => $request->updated_at
+                ]);
+            }
+            
+            // Penalty transaction (if late return)
+            if ($request->status === 'check_in' && $request->end_at && $request->updated_at) {
+                $endDate = \Carbon\Carbon::parse($request->end_at);
+                $returnDate = \Carbon\Carbon::parse($request->updated_at);
+                
+                if ($returnDate->gt($endDate)) {
+                    $daysLate = $returnDate->diffInDays($endDate);
+                    $penaltyAmount = $daysLate * 50; // 50 baht per day
+                    
+                    $transactions->push([
+                        'id' => $request->id * 1000 + 3,
+                        'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'P',
+                        'transaction_type' => 'penalty',
+                        'user' => $request->user,
+                        'equipment' => $request->equipment,
+                        'status' => 'completed',
+                        'amount' => $penaltyAmount,
+                        'start_date' => $request->end_at,
+                        'end_date' => $request->updated_at,
+                        'description' => 'ค่าปรับการคืนล่าช้า: ' . ($request->equipment->name ?? 'N/A') . ' (' . $daysLate . ' วัน)',
+                        'notes' => 'คืนล่าช้า ' . $daysLate . ' วัน',
+                        'created_at' => $request->updated_at,
+                        'updated_at' => $request->updated_at
+                    ]);
+                }
+            }
+        }
+        
+        // Apply filters
+        $filteredTransactions = $transactions->filter(function ($transaction) {
+            if ($this->request->transaction_type && $transaction['transaction_type'] !== $this->request->transaction_type) {
+                return false;
+            }
+            
+            if ($this->request->status && $transaction['status'] !== $this->request->status) {
+                return false;
+            }
+            
+            if ($this->request->user_name && !str_contains(strtolower($transaction['user']['name'] ?? ''), strtolower($this->request->user_name))) {
+                return false;
+            }
+            
+            if ($this->request->equipment_name && !str_contains(strtolower($transaction['equipment']['name'] ?? ''), strtolower($this->request->equipment_name))) {
+                return false;
+            }
+            
+            if ($this->request->date_from && $transaction['created_at'] < $this->request->date_from) {
+                return false;
+            }
+            
+            if ($this->request->date_to && $transaction['created_at'] > $this->request->date_to) {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        return $filteredTransactions->map(function ($transaction) {
+            return [
+                $transaction['id'],
+                $transaction['transaction_id'],
+                $transaction['transaction_type'],
+                $transaction['user']['name'] ?? 'N/A',
+                $transaction['equipment']['name'] ?? 'N/A',
+                $transaction['status'],
+                $transaction['amount'],
+                $transaction['start_date'] ? \Carbon\Carbon::parse($transaction['start_date'])->format('Y-m-d') : '-',
+                $transaction['end_date'] ? \Carbon\Carbon::parse($transaction['end_date'])->format('Y-m-d') : '-',
+                $transaction['created_at'] ? \Carbon\Carbon::parse($transaction['created_at'])->format('Y-m-d') : '-',
+            ];
+        });
     }
 }

@@ -52,7 +52,10 @@
                     Date: {{ sortDirection.toUpperCase() }}
                 </button>
                 <button v-if="userRole === 'admin'" @click="openCreateModal"
-                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
                     เพิ่มอุปกรณ์ใหม่
                 </button>
 
@@ -126,15 +129,33 @@
                     <td class="px-4 py-2">
                         {{ capitalize(equipment.status) }}
                     </td>
-                    <td class="px-4 py-2 space-x-2">
-                        <button v-if="userRole === 'admin'" @click="openModal(equipment)"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
-                            แก้ไขข้อมูล
-                        </button>
-                        <button v-if="userRole === 'admin'" @click="deleteEquipment(equipment)"
-                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-                            ลบรายการ
-                        </button>
+                    <td class="px-4 py-2">
+                        <div class="flex items-center space-x-2">
+                            <button v-if="userRole === 'admin'" @click="openModal(equipment)"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded flex items-center justify-center"
+                                :disabled="updatingEquipment === equipment.id"
+                                title="แก้ไขข้อมูล">
+                                <svg v-if="updatingEquipment === equipment.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button v-if="userRole === 'admin'" @click="deleteEquipment(equipment)"
+                                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded flex items-center justify-center"
+                                :disabled="deletingEquipment === equipment.id"
+                                title="ลบรายการ">
+                                <svg v-if="deletingEquipment === equipment.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -212,6 +233,8 @@ export default {
             createModal: {
                 isOpen: false,
             },
+            deletingEquipment: null, // Track which equipment is being deleted
+            updatingEquipment: null, // Track which equipment is being updated
         };
     },
     computed: {
@@ -332,6 +355,8 @@ export default {
             this.createModal.isOpen = false;
         },
         openModal(equipment) {
+            console.log('Equipment data:', equipment);
+            console.log('Equipment accessories:', equipment.accessories);
             this.selectedEquipment = { ...equipment };
             this.selectedCategoryId = equipment.category
                 ? equipment.category.id
@@ -343,10 +368,14 @@ export default {
             this.selectedImageFile = files && files[0] ? files[0] : null;
         },
         updateEquipment(payload) {
+            console.log('Update payload:', payload);
+            console.log('Update accessories:', payload.accessories);
+            this.updatingEquipment = payload.id;
             const formData = new FormData();
             formData.append("code", payload.code || "");
             formData.append("name", payload.name || "");
             formData.append("description", payload.description || "");
+            formData.append("accessories", payload.accessories || "");
             formData.append(
                 "categories_id",
                 String(payload.categories_id ?? "")
@@ -417,6 +446,9 @@ export default {
                 })
                 .catch((err) => {
                     this.notifyError(err.message || "ไม่สามารถอัปเดตได้");
+                })
+                .finally(() => {
+                    this.updatingEquipment = null;
                 });
         },
         deleteEquipment(equipment) {
@@ -435,6 +467,7 @@ export default {
                     confirmButtonColor: "#ef4444",
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        this.deletingEquipment = equipment.id;
                         fetch(`/admin/equipment/destroy/${equipment.id}`, {
                             method: "DELETE",
                             headers: {
@@ -469,6 +502,9 @@ export default {
                             })
                             .catch((err) => {
                                 this.notifyError(err.message || "ลบไม่สำเร็จ");
+                            })
+                            .finally(() => {
+                                this.deletingEquipment = null;
                             });
                     }
                 });

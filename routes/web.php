@@ -73,8 +73,7 @@ Route::middleware('auth')->group(function () {
 
         // Full reports
         Route::prefix('admin/report')->group(function () {
-            Route::get('/', [ReportController::class, 'index'])->name('admin.report.index');
-            Route::get('/vue/{type}', [ReportController::class, 'vueReport'])->name('admin.report.vue');
+            Route::get('/{type}', [ReportController::class, 'index'])->name('admin.report.index');
             Route::get('/export/{type}', [ReportExportController::class, 'export'])->name('admin.report.export');
         });
 
