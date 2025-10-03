@@ -219,6 +219,16 @@
                     </a> --}}
 
                 </div>
+                        <a href="{{ route('admin.verification.index') }}"
+            class="{{ request()->routeIs('admin.verification.*') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+
+            หน้าจัดการยืนยันตัวตน
+        </a>
             </div>
             {{-- <a href="{{ route('admin.user.index') }}"
                 class="{{ request()->routeIs('admin.user.*') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
