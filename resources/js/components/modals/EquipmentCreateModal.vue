@@ -1,41 +1,54 @@
 <template>
     <div
         v-if="isOpen"
-        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40 overflow-y-auto py-4"
         @keydown.esc.prevent="$emit('cancel')"
         tabindex="0"
         @click.self="$emit('cancel')"
         aria-modal="true"
         role="dialog"
     >
-        <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 p-6">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-2/3 md:w-1/2 lg:w-2/5 xl:w-1/3 p-6 max-h-[90vh] overflow-y-auto my-4 mx-auto">
             <h3 class="text-lg font-semibold mb-4">เพิ่มอุปกรณ์ใหม่</h3>
             <form @submit.prevent="onCreate" novalidate>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-1">หมายเลขครุภัณฑ์</label>
                     <input required type="text" v-model.trim="form.code"
-                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'border-red-500': !form.code || form.code.trim().length === 0 }" />
+                    <p v-if="!form.code || form.code.trim().length === 0" class="text-red-500 text-sm mt-1">กรุณากรอกหมายเลขครุภัณฑ์</p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-1">ชื่ออุปกรณ์</label>
                     <input required type="text" v-model.trim="form.name"
-                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'border-red-500': !form.name || form.name.trim().length === 0 }" />
+                    <p v-if="!form.name || form.name.trim().length === 0" class="text-red-500 text-sm mt-1">กรุณากรอกชื่ออุปกรณ์</p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-1">หมวดหมู่</label>
                     <select required v-model="form.categories_id"
-                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'border-red-500': !form.categories_id }">
                         <option value="" disabled>เลือกหมวดหมู่</option>
                         <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                             {{ cat.name }}
                         </option>
                     </select>
+                    <p v-if="!form.categories_id" class="text-red-500 text-sm mt-1">กรุณาเลือกหมวดหมู่</p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-1">รายละเอียด</label>
                     <textarea v-model.trim="form.description"
                         class="w-full h-24 border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                         placeholder="กรอกรายละเอียดอุปกรณ์"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-1">อุปกรณ์เสริม</label>
+                    <textarea v-model.trim="form.accessories"
+                        class="w-full h-20 border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        placeholder="กรอกรายการอุปกรณ์เสริม (เช่น สายไฟ, แบตเตอรี่, คู่มือ)&#10;สามารถแยกด้วยเครื่องหมายจุลภาค (,) หรือขึ้นบรรทัดใหม่"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">ตัวอย่าง: สายไฟ, แบตเตอรี่, คู่มือ หรือแยกแต่ละรายการในบรรทัดใหม่</p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-1">สถานะ</label>
@@ -143,6 +156,7 @@ export default {
                 code: "",
                 name: "",
                 description: "",
+                accessories: "",
                 categories_id: "",
                 status: "available"
             },
@@ -158,19 +172,31 @@ export default {
         isOpen(newVal) {
             if (newVal) {
                 // Resetting the form when the modal opens
-                this.form = { code: "", name: "", description: "", categories_id: "", status: "available" };
+                this.form = { code: "", name: "", description: "", accessories: "", categories_id: "", status: "available" };
                 this.imageFiles = [];
                 this.imagePreviewUrls = [];
                 this.imageError = "";
                 this.submitting = false;
                 this.processingImages = false;
                 this.selectedProfileImage = null;
+            } else {
+                // Reset submitting state when modal closes
+                this.submitting = false;
             }
         }
     },
     computed: {
         isValid() {
-            return !!(this.form.code && this.form.name && this.form.categories_id && this.form.status && this.imageFiles.length > 0 && !this.imageError);
+            return !!(
+                this.form.code && 
+                this.form.name && 
+                this.form.categories_id && 
+                this.form.status && 
+                this.imageFiles.length > 0 && 
+                !this.imageError &&
+                this.form.code.trim().length > 0 &&
+                this.form.name.trim().length > 0
+            );
         }
     },
     methods: {
@@ -275,11 +301,22 @@ export default {
         onCreate() {
             if (this.submitting || !this.isValid) return;
             this.submitting = true;
+            
+            // Auto-reset submitting state after 30 seconds as fallback
+            setTimeout(() => {
+                if (this.submitting) {
+                    this.submitting = false;
+                }
+            }, 30000);
+            
             this.$emit('create', {
                 ...this.form,
                 imageFiles: this.imageFiles,
                 selectedProfileImage: this.selectedProfileImage
             });
+        },
+        resetSubmitting() {
+            this.submitting = false;
         },
     }
 };

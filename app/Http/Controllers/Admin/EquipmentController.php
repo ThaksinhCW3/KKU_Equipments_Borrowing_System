@@ -30,13 +30,24 @@ class EquipmentController extends Controller
     {
         try {
             $data = $request->validate([
-                "code" => "nullable|string|unique:equipments,code|max:10",
+                "code" => "required|string|unique:equipments,code|max:10",
                 "name" => "required|string",
                 "description" => "nullable|string",
+                "accessories" => "nullable|string",
                 "categories_id" => "required|integer|exists:categories,id",
                 "status" => "required|in:available,retired,maintenance",
                 "images.*" => "image|mimes:jpg,jpeg,png,webp,gif|max:5120",
+                "selectedProfileImage" => "nullable|integer|min:0",
             ]);
+
+            // Convert accessories string to JSON array
+            if (!empty($data['accessories'])) {
+                // Split by common delimiters and clean up
+                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $data['accessories'])));
+                $data['accessories'] = json_encode($accessoriesArray);
+            } else {
+                $data['accessories'] = json_encode([]);
+            }
 
             $paths = [];
             if ($request->hasFile('images')) {
@@ -44,6 +55,15 @@ class EquipmentController extends Controller
                     $path = $file->store('equipments', 'public');
                     $paths[] = '/storage/' . $path;
                 }
+            }
+
+            // Handle profile image selection
+            $selectedProfileImage = $request->input('selectedProfileImage');
+            if ($selectedProfileImage !== null && isset($paths[$selectedProfileImage])) {
+                // Move selected image to front of array
+                $selectedPath = $paths[$selectedProfileImage];
+                unset($paths[$selectedProfileImage]);
+                array_unshift($paths, $selectedPath);
             }
 
             $data['photo_path'] = json_encode($paths);
@@ -77,6 +97,11 @@ class EquipmentController extends Controller
                 "errors" => $errors
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('Equipment creation failed: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 "status" => false,
                 "message" => "Server error: " . $e->getMessage()
@@ -93,6 +118,7 @@ class EquipmentController extends Controller
                 "code" => "nullable|string|max:10",
                 "name" => "required|string",
                 "description" => "nullable|string",
+                "accessories" => "nullable|string",
                 "categories_id" => "required|integer|exists:categories,id",
                 "status" => "required|in:available,retired,maintenance",
                 "images.*" => "image|mimes:jpg,jpeg,png,webp,gif|max:5120", 
@@ -100,6 +126,15 @@ class EquipmentController extends Controller
                 "images_to_delete.*" => "string", 
                 "selected_main_identifier" => "nullable|string", 
             ]);
+
+            // Convert accessories string to JSON array
+            if (!empty($validatedData['accessories'])) {
+                // Split by common delimiters and clean up
+                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $validatedData['accessories'])));
+                $validatedData['accessories'] = json_encode($accessoriesArray);
+            } else {
+                $validatedData['accessories'] = json_encode([]);
+            }
 
             $currentPhotos = json_decode($equipment->photo_path, true) ?? [];
 

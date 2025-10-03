@@ -14,7 +14,12 @@ class Equipment extends Model
         'description',
         'categories_id',
         'status',
-        'photo_path'
+        'photo_path',
+        'accessories'
+    ];
+
+    protected $casts = [
+        'accessories' => 'array',
     ];
 
 

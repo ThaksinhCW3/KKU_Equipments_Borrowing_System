@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BorrowRequest;
+use App\Models\BorrowRequestHistory;
 use App\Models\BorrowTransaction;
 use Illuminate\Http\Request;
 use App\Notifications\BorrowRequestApproved;
@@ -78,6 +79,14 @@ class BorrowRequestController extends Controller
             ->where('req_id', $req_id)
             ->firstOrFail();
 
+        // Save old data before making changes
+        $oldData = [
+            'status' => $borrowRequest->status,
+            'start_at' => $borrowRequest->start_at,
+            'end_at' => $borrowRequest->end_at,
+            'updated_at' => $borrowRequest->updated_at,
+        ];
+
         $validated = $req->validate([
             'start_at' => ['nullable','date'],
             'end_at' => ['nullable','date','after_or_equal:start_at'],
@@ -105,6 +114,27 @@ class BorrowRequestController extends Controller
 
         $borrowRequest->status = 'approved';
         $borrowRequest->save();
+
+        // Save new data after changes
+        $newData = [
+            'status' => $borrowRequest->status,
+            'start_at' => $borrowRequest->start_at,
+            'end_at' => $borrowRequest->end_at,
+            'updated_at' => $borrowRequest->updated_at,
+        ];
+
+        // Create history record
+        BorrowRequestHistory::create([
+            'borrow_request_id' => $borrowRequest->id,
+            'old_status' => $oldData['status'],
+            'new_status' => $newData['status'],
+            'old_data' => $oldData,
+            'new_data' => $newData,
+            'action' => 'approved',
+            'admin_id' => auth()->id(),
+            'notes' => 'Request approved by admin'
+        ]);
+
         $user = $borrowRequest->user;
         if ($user) {
             $user->notify(new BorrowRequestApproved($borrowRequest));
@@ -118,9 +148,36 @@ class BorrowRequestController extends Controller
     public function reject(Request $req, $req_id)
     {
         $request = BorrowRequest::where('req_id', $req_id)->firstOrFail();
+        
+        // Save old data before making changes
+        $oldData = [
+            'status' => $request->status,
+            'reject_reason' => $request->reject_reason,
+            'updated_at' => $request->updated_at,
+        ];
+
         $request->status = 'rejected';
         $request->reject_reason = $req->input('reason');
         $request->save();
+
+        // Save new data after changes
+        $newData = [
+            'status' => $request->status,
+            'reject_reason' => $request->reject_reason,
+            'updated_at' => $request->updated_at,
+        ];
+
+        // Create history record
+        BorrowRequestHistory::create([
+            'borrow_request_id' => $request->id,
+            'old_status' => $oldData['status'],
+            'new_status' => $newData['status'],
+            'old_data' => $oldData,
+            'new_data' => $newData,
+            'action' => 'rejected',
+            'admin_id' => auth()->id(),
+            'notes' => 'Request rejected by admin. Reason: ' . $request->reject_reason
+        ]);
 
         $user = $request->user;
         if ($user) {

@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,staff')->group(function () {
         // Admin dashboard
         Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+        Route::get('/admin/export', [AdminController::class, 'exportCsv'])->name('admin.dashboard.export');
 
         // Full reports
         Route::prefix('admin/report')->group(function () {
