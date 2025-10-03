@@ -57,6 +57,7 @@ export default {
                     options: [
                         { value: 'available', label: 'พร้อมใช้งาน' },
                         { value: 'unavailable', label: 'ไม่พร้อมใช้งาน' },
+                        { value: 'retired', label: 'รอคืน' },
                         { value: 'maintenance', label: 'ซ่อมบำรุง' },
                     ]
                 },
@@ -106,6 +107,7 @@ export default {
         getStatusBadgeClass(status) {
             const classes = {
                 'available': 'bg-green-100 text-green-800',
+                'unavailable': 'bg-red-100 text-red-800',
                 'maintenance': 'bg-yellow-100 text-yellow-800',
                 'retired': 'bg-red-100 text-red-800',
             };
@@ -114,6 +116,7 @@ export default {
         getStatusLabel(status) {
             const labels = {
                 'available': 'พร้อมใช้งาน',
+                'unavailable': 'ไม่พร้อมใช้งาน',
                 'maintenance': 'ซ่อมบำรุง',
                 'retired': 'รอคืน',
             };

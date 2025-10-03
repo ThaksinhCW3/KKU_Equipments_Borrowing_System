@@ -379,6 +379,7 @@ export default {
             // Format specific values for better readability
             const statusTranslations = {
                 'available': 'พร้อมใช้งาน',
+                'retired': 'รอคืน',
                 'unavailable': 'ไม่พร้อมใช้งาน',
                 'maintenance': 'ซ่อมบำรุง',
                 'pending': 'รอดำเนินการ',

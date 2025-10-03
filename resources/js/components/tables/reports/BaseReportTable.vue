@@ -16,7 +16,7 @@
                 <p class="text-sm text-gray-600 mt-1">{{ reportDescription }}</p>
             </div>
             <div class="flex gap-2">
-                <button @click="exportData"
+                <button @click="exportData" 
                     class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -43,7 +43,7 @@
 
             <!-- Advanced Filters -->
             <div class="flex flex-wrap gap-2 items-center relative" ref="filtersWrap">
-                <button @click="filtersOpen = !filtersOpen"
+                <button @click="filtersOpen = !filtersOpen" 
                     class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -83,12 +83,12 @@
                         <!-- Dynamic Filter Fields -->
                         <div v-for="filter in availableFilters" :key="filter.key" class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
-
+                            
                             <!-- Text Input -->
                             <input v-if="filter.type === 'text'" v-model="filters[filter.key]"
                                 :placeholder="filter.placeholder"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-
+                            
                             <!-- Select Dropdown -->
                             <select v-else-if="filter.type === 'select'" v-model="filters[filter.key]"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -97,30 +97,36 @@
                                     {{ option.label }}
                                 </option>
                             </select>
-
+                            
                             <!-- Date Input -->
                             <input v-else-if="filter.type === 'date'" v-model="filters[filter.key]" type="date"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-
+                            
                             <!-- Date Range -->
                             <div v-else-if="filter.type === 'daterange'" class="space-y-2">
-                                <input v-model="filters[filter.key + '_from']" type="date"
-                                    :placeholder="filter.fromPlaceholder"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                <input v-model="filters[filter.key + '_to']" type="date"
-                                    :placeholder="filter.toPlaceholder"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">จากวันที่</label>
+                                    <input v-model="filters[filter.key + '_from']" type="date"
+                                        :placeholder="filter.fromPlaceholder"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">ถึงวันที่</label>
+                                    <input v-model="filters[filter.key + '_to']" type="date"
+                                        :placeholder="filter.toPlaceholder"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Filter Actions -->
                     <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200">
-                        <button @click="clearAllFilters"
+                        <button @click="clearAllFilters" 
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                             ล้างทั้งหมด
                         </button>
-                        <button @click="applyFilters"
+                        <button @click="applyFilters" 
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                             ใช้ตัวกรอง
                         </button>
@@ -134,16 +140,16 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th v-for="column in columns" :key="column.key"
+                        <th v-for="column in columns" :key="column.key" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <div class="flex items-center justify-between">
                                 <span>{{ column.label }}</span>
                                 <div class="flex flex-col ml-2">
                                     <button @click="sortData(column.key, 'asc')" :class="[
-                                        'p-1 rounded hover:bg-gray-200 transition-colors',
-                                        sortKey === column.key && sortDirection === 'asc'
-                                            ? 'text-blue-600 bg-blue-100'
-                                            : 'text-gray-400 hover:text-gray-600'
+                                            'p-1 rounded hover:bg-gray-200 transition-colors',
+                                            sortKey === column.key && sortDirection === 'asc' 
+                                                ? 'text-blue-600 bg-blue-100' 
+                                                : 'text-gray-400 hover:text-gray-600'
                                     ]" :title="`Sort ${column.label} ascending`">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -151,10 +157,10 @@
                                         </svg>
                                     </button>
                                     <button @click="sortData(column.key, 'desc')" :class="[
-                                        'p-1 rounded hover:bg-gray-200 transition-colors',
-                                        sortKey === column.key && sortDirection === 'desc'
-                                            ? 'text-blue-600 bg-blue-100'
-                                            : 'text-gray-400 hover:text-gray-600'
+                                            'p-1 rounded hover:bg-gray-200 transition-colors',
+                                            sortKey === column.key && sortDirection === 'desc' 
+                                                ? 'text-blue-600 bg-blue-100' 
+                                                : 'text-gray-400 hover:text-gray-600'
                                     ]" :title="`Sort ${column.label} descending`">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -167,9 +173,9 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="(item, index) in paginatedData" :key="getItemKey(item, index)"
+                    <tr v-for="(item, index) in paginatedData" :key="getItemKey(item, index)" 
                         class="hover:bg-gray-50 transition-colors duration-150">
-                        <td v-for="column in columns" :key="column.key"
+                        <td v-for="column in columns" :key="column.key" 
                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <slot :name="`cell-${column.key}`" :item="item" :value="getNestedValue(item, column.key)">
                                 <span v-if="column.type === 'badge'" :class="getBadgeClass(item, column.key)"
@@ -240,11 +246,11 @@
                             </svg>
                         </button>
                         <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" :class="[
-                            'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                            page === currentPage
-                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        ]">
+                                'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                                page === currentPage
+                                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            ]">
                             {{ page }}
                         </button>
                         <button @click="nextPage" :disabled="currentPage === totalPages"
@@ -315,7 +321,7 @@ export default {
         },
         filteredData() {
             let filtered = [...(this.totalData || [])]
-
+            
             console.log('BaseReportTable - Filtering data:', {
                 totalData: (this.totalData || []).length,
                 searchQuery: this.searchQuery,
@@ -381,7 +387,7 @@ export default {
                     }
                 } else {
                     const filterValue = this.filters[filter.key];
-                    if (filterValue) {
+                if (filterValue) {
                         console.log(`Applying filter ${filter.key}:`, filterValue, 'type:', filter.type);
 
                         if (filter.type === 'date') {
@@ -407,33 +413,32 @@ export default {
                                 console.log(`Date comparison: ${itemDateOnly} === ${filterDateOnly} -> ${matches}`);
                                 return matches;
                             });
-                        } else if (filter.type === 'select') {
-                            // For select filters, use exact matching
-                            filtered = filtered.filter(item => {
-                                const itemValue = this.getNestedValue(item, filter.key)
-                                const matches = itemValue && itemValue.toString() === filterValue.toString()
-                                console.log(`Select filter ${filter.key}:`, itemValue, '===', filterValue, '->', matches)
-                                return matches
-                            })
-                        } else {
-                            // For text filters, use contains matching
-                            filtered = filtered.filter(item => {
-                                const itemValue = this.getNestedValue(item, filter.key)
-                                return itemValue && itemValue.toString().toLowerCase().includes(filterValue.toLowerCase())
-                            })
-                        }
-                        console.log(`After filter ${filter.key}:`, filtered.length)
+                    } else if (filter.type === 'select') {
+                        // For select filters, use exact matching
+                        filtered = filtered.filter(item => {
+                            const itemValue = this.getNestedValue(item, filter.key)
+                            const matches = itemValue && itemValue.toString() === filterValue.toString()
+                            console.log(`Select filter ${filter.key}:`, itemValue, '===', filterValue, '->', matches)
+                            return matches
+                        })
+                    } else {
+                        // For text filters, use contains matching
+                        filtered = filtered.filter(item => {
+                            const itemValue = this.getNestedValue(item, filter.key)
+                            return itemValue && itemValue.toString().toLowerCase().includes(filterValue.toLowerCase())
+                        })
+                    }
+                    console.log(`After filter ${filter.key}:`, filtered.length)
                     }
                 }
             })
 
             // Apply sorting
-            // Apply sorting
             if (this.sortKey) {
                 filtered.sort((a, b) => {
                     let aValue = this.getNestedValue(a, this.sortKey)
                     let bValue = this.getNestedValue(b, this.sortKey)
-
+                    
                     // Handle null/undefined - push to end
                     if (aValue === null || aValue === undefined) {
                         return this.sortDirection === 'asc' ? 1 : -1
@@ -473,11 +478,11 @@ export default {
                         aValue = aValue.toString().toLowerCase()
                         bValue = bValue.toString().toLowerCase()
                     }
-
+                    
                     let result = 0
                     if (aValue < bValue) result = -1
                     else if (aValue > bValue) result = 1
-
+                    
                     return this.sortDirection === 'asc' ? result : -result
                 })
             }
@@ -496,7 +501,7 @@ export default {
             const pages = []
             const start = Math.max(1, this.currentPage - 2)
             const end = Math.min(this.totalPages, this.currentPage + 2)
-
+            
             for (let i = start; i <= end; i++) {
                 pages.push(i)
             }
@@ -686,7 +691,7 @@ export default {
             console.log('First item created_at:', this.totalData[0].created_at);
             console.log('Type of created_at:', typeof this.totalData[0].created_at);
         }
-
+        
         // Initialize filters
         this.availableFilters.forEach(filter => {
             this.filters[filter.key] = ''
