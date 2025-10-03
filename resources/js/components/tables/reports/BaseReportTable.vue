@@ -188,7 +188,7 @@
                             </slot>
                         </td>
                     </tr>
-                    <tr v-if="filteredData.length === 0">
+                    <tr v-if="(filteredData || []).length === 0">
                         <td :colspan="columns.length" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center">
                                 <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor"
@@ -314,10 +314,10 @@ export default {
             return this.data || []
         },
         filteredData() {
-            let filtered = [...this.totalData]
+            let filtered = [...(this.totalData || [])]
 
             console.log('BaseReportTable - Filtering data:', {
-                totalData: this.totalData.length,
+                totalData: (this.totalData || []).length,
                 searchQuery: this.searchQuery,
                 filters: this.filters
             })
@@ -336,14 +336,11 @@ export default {
 
             // Apply filters
             this.availableFilters.forEach(filter => {
-                const filterValue = this.filters[filter.key]
-                if (filterValue) {
-                    console.log(`Applying filter ${filter.key}:`, filterValue, 'type:', filter.type)
+                if (filter.type === 'daterange') {
+                    const fromValue = this.filters[filter.key + '_from'];
+                    const toValue = this.filters[filter.key + '_to'];
 
-                    if (filter.type === 'daterange') {
-                        const fromValue = this.filters[filter.key + '_from'];
-                        const toValue = this.filters[filter.key + '_to'];
-
+                    if (fromValue || toValue) {
                         console.log(`Date range filter: from=${fromValue}, to=${toValue}`);
 
                         filtered = filtered.filter(item => {
@@ -380,70 +377,106 @@ export default {
                             console.log(`Item passed date range filter`);
                             return true;
                         });
-                    } else if (filter.type === 'date') {
-                        console.log(`Single date filter: ${filterValue}`);
-                        filtered = filtered.filter(item => {
-                            const itemValue = this.getNestedValue(item, filter.key);
-                            const itemDate = this.parseThaiDate(itemValue);
-                            const filterDate = new Date(filterValue);
-
-                            console.log(`Item value: ${itemValue} -> parsed: ${itemDate ? itemDate.toISOString() : 'null'}`);
-                            console.log(`Filter date: ${filterDate.toISOString()}`);
-
-                            if (!itemDate || isNaN(itemDate.getTime()) || isNaN(filterDate.getTime())) {
-                                console.log(`Invalid date for item: ${itemValue}`);
-                                return false;
-                            }
-
-                            // Compare only date part
-                            const itemDateOnly = itemDate.toISOString().slice(0, 10);
-                            const filterDateOnly = filterDate.toISOString().slice(0, 10);
-                            const matches = itemDateOnly === filterDateOnly;
-                            
-                            console.log(`Date comparison: ${itemDateOnly} === ${filterDateOnly} -> ${matches}`);
-                            return matches;
-                        });
-                    } else if (filter.type === 'select') {
-                        // For select filters, use exact matching
-                        filtered = filtered.filter(item => {
-                            const itemValue = this.getNestedValue(item, filter.key)
-                            const matches = itemValue && itemValue.toString() === filterValue.toString()
-                            console.log(`Select filter ${filter.key}:`, itemValue, '===', filterValue, '->', matches)
-                            return matches
-                        })
-                    } else {
-                        // For text filters, use contains matching
-                        filtered = filtered.filter(item => {
-                            const itemValue = this.getNestedValue(item, filter.key)
-                            return itemValue && itemValue.toString().toLowerCase().includes(filterValue.toLowerCase())
-                        })
+                        console.log(`After date range filter:`, filtered.length);
                     }
-                    console.log(`After filter ${filter.key}:`, filtered.length)
+                } else {
+                    const filterValue = this.filters[filter.key];
+                    if (filterValue) {
+                        console.log(`Applying filter ${filter.key}:`, filterValue, 'type:', filter.type);
+
+                        if (filter.type === 'date') {
+                            console.log(`Single date filter: ${filterValue}`);
+                            filtered = filtered.filter(item => {
+                                const itemValue = this.getNestedValue(item, filter.key);
+                                const itemDate = this.parseThaiDate(itemValue);
+                                const filterDate = new Date(filterValue);
+
+                                console.log(`Item value: ${itemValue} -> parsed: ${itemDate ? itemDate.toISOString() : 'null'}`);
+                                console.log(`Filter date: ${filterDate.toISOString()}`);
+
+                                if (!itemDate || isNaN(itemDate.getTime()) || isNaN(filterDate.getTime())) {
+                                    console.log(`Invalid date for item: ${itemValue}`);
+                                    return false;
+                                }
+
+                                // Compare only date part
+                                const itemDateOnly = itemDate.toISOString().slice(0, 10);
+                                const filterDateOnly = filterDate.toISOString().slice(0, 10);
+                                const matches = itemDateOnly === filterDateOnly;
+                                
+                                console.log(`Date comparison: ${itemDateOnly} === ${filterDateOnly} -> ${matches}`);
+                                return matches;
+                            });
+                        } else if (filter.type === 'select') {
+                            // For select filters, use exact matching
+                            filtered = filtered.filter(item => {
+                                const itemValue = this.getNestedValue(item, filter.key)
+                                const matches = itemValue && itemValue.toString() === filterValue.toString()
+                                console.log(`Select filter ${filter.key}:`, itemValue, '===', filterValue, '->', matches)
+                                return matches
+                            })
+                        } else {
+                            // For text filters, use contains matching
+                            filtered = filtered.filter(item => {
+                                const itemValue = this.getNestedValue(item, filter.key)
+                                return itemValue && itemValue.toString().toLowerCase().includes(filterValue.toLowerCase())
+                            })
+                        }
+                        console.log(`After filter ${filter.key}:`, filtered.length)
+                    }
                 }
             })
 
+            // Apply sorting
             // Apply sorting
             if (this.sortKey) {
                 filtered.sort((a, b) => {
                     let aValue = this.getNestedValue(a, this.sortKey)
                     let bValue = this.getNestedValue(b, this.sortKey)
 
-                    // Handle null/undefined values
-                    if (aValue === null || aValue === undefined) aValue = ''
-                    if (bValue === null || bValue === undefined) bValue = ''
+                    // Handle null/undefined - push to end
+                    if (aValue === null || aValue === undefined) {
+                        return this.sortDirection === 'asc' ? 1 : -1
+                    }
+                    if (bValue === null || bValue === undefined) {
+                        return this.sortDirection === 'asc' ? -1 : 1
+                    }
 
-                    // Convert to strings for comparison if not numbers
-                    if (typeof aValue !== 'number' && typeof bValue !== 'number') {
+                    // If it's a date-like value, parse both
+                    if (this.sortKey.includes('date') || this.sortKey.includes('created_at') || this.sortKey.includes('updated_at')) {
+                        const aDate = this.parseThaiDate(aValue)
+                        const bDate = this.parseThaiDate(bValue)
+
+                        // Check if both dates are valid
+                        const aValid = aDate instanceof Date && !isNaN(aDate.getTime())
+                        const bValid = bDate instanceof Date && !isNaN(bDate.getTime())
+
+                        if (aValid && bValid) {
+                            const result = aDate.getTime() - bDate.getTime()
+                            return this.sortDirection === 'asc' ? result : -result
+                        }
+
+                        // If one date is invalid, push it to the end
+                        if (!aValid && bValid) return this.sortDirection === 'asc' ? 1 : -1
+                        if (aValid && !bValid) return this.sortDirection === 'asc' ? -1 : 1
+
+                        // Both invalid, keep original order
+                        return 0
+                    }
+
+                    // Fallback: numbers first
+                    if (!isNaN(aValue) && !isNaN(bValue)) {
+                        aValue = Number(aValue)
+                        bValue = Number(bValue)
+                    } else {
+                        // Strings fallback
                         aValue = aValue.toString().toLowerCase()
                         bValue = bValue.toString().toLowerCase()
                     }
 
                     let result = 0
-                    if (aValue < bValue) {
-                        result = -1
-                    } else if (aValue > bValue) {
-                        result = 1
-                    }
+                    if (aValue < bValue) result = -1
+                    else if (aValue > bValue) result = 1
 
                     return this.sortDirection === 'asc' ? result : -result
                 })
@@ -454,10 +487,10 @@ export default {
         paginatedData() {
             const start = (this.currentPage - 1) * this.pageSize
             const end = start + this.pageSize
-            return this.filteredData.slice(start, end)
+            return (this.filteredData || []).slice(start, end)
         },
         totalPages() {
-            return Math.ceil(this.filteredData.length / this.pageSize)
+            return Math.ceil((this.filteredData || []).length / this.pageSize)
         },
         visiblePages() {
             const pages = []
@@ -646,7 +679,7 @@ export default {
         console.log('BaseReportTable mounted with data:', this.totalData);
         console.log('Columns:', this.columns);
         console.log('Available filters:', this.availableFilters);
-        
+
         // Debug: Log the first item's created_at value
         if (this.totalData && this.totalData.length > 0) {
             console.log('First item in BaseReportTable:', this.totalData[0]);

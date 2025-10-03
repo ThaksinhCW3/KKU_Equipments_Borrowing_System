@@ -1,14 +1,8 @@
 <template>
-    <BaseReportTable
-        :report-title="'รายงานหมวดหมู่อุปกรณ์'"
-        :report-description="'จัดการและติดตามหมวดหมู่อุปกรณ์ทั้งหมดในระบบ'"
-        :data="categories"
-        :columns="columns"
-        :available-filters="availableFilters"
-        :search-placeholder="'ค้นหาด้วยชื่อหมวดหมู่หรือรหัสหมวดหมู่...'"
-        :page-size="20"
-        @export="exportCategories"
-    >
+    <BaseReportTable :report-title="'รายงานหมวดหมู่อุปกรณ์'"
+        :report-description="'จัดการและติดตามหมวดหมู่อุปกรณ์ทั้งหมดในระบบ'" :data="categories" :columns="columns"
+        :available-filters="availableFilters" :search-placeholder="'ค้นหาด้วยชื่อหมวดหมู่หรือรหัสหมวดหมู่...'"
+        :page-size="20" @export="exportCategories">
         <!-- Custom cell templates -->
         <template #cell-equipments_count="{ item }">
             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
