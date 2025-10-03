@@ -41,6 +41,21 @@
                     </div>
                 </div>
 
+                <div class="mt-6">
+                    <h3 class="font-semibold text-gray-700 mb-2">เหตุผลในการยืม</h3>
+                    <div class="bg-gray-50 rounded p-4">
+                        @if($requests->request_reason)
+                            <p class="text-sm mb-2">
+                                <span class="text-gray-500">เหตุผล:</span> 
+                                <span class="font-medium">{{ $requests->request_reason }}</span>
+                            </p>
+                            
+                        @else
+                            <p class="text-sm text-gray-500">ไม่ระบุเหตุผล</p>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                     <div class="bg-gray-50 rounded p-4">
                         <p class="text-gray-500 text-sm">วันที่เริ่ม</p>
@@ -60,6 +75,20 @@
                             }
                         @endphp
                         <p class="font-semibold {{ $days <= 0 ? 'text-red-700' : '' }}">{{ $days }} วัน</p>
+                    </div>
+                </div>
+
+                <!-- Pickup Time Information for Admin -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 class="font-semibold text-blue-900 mb-2"> ข้อมูลเวลารับอุปกรณ์</h3>
+                    <div class="text-sm text-blue-800">
+                        <p class="mb-2">หลังจากอนุมัติแล้ว ผู้ยืมสามารถมารับอุปกรณ์ได้ในเวลา:</p>
+                        <div class="bg-white p-3 rounded border border-blue-200">
+                            <p class="font-medium">เช้า: 09:00-10:00 น.</p>
+                            <p class="font-medium">บ่าย: 14:00-15:00 น.</p>
+                            <p class="text-xs text-blue-600 mt-1">(เฉพาะวันจันทร์-ศุกร์)</p>
+                            <p class="text-xs text-blue-700 mt-2 font-medium">* รองรับการยืม-คืนในวันเดียวกัน</p>
+                        </div>
                     </div>
                 </div>
 

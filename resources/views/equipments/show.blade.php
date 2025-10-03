@@ -139,6 +139,7 @@
             <div class="w-full lg:w-1/2 flex flex-col justify-start gap-4 p-4 sm:p-5 border border-gray-200 rounded-lg shadow-sm">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 break-words">{{ $equipment->name }}</h1>
                 <p class="text-gray-500 text-lg break-words">{{ $equipment->category->name }}</p>
+                <p class="text-gray-500 text-lg break-words">{{ $equipment->code }}</p>
                 <div class="text-gray-600 text-base leading-relaxed">
                     <div x-data="{ expanded: false }" class="block md:hidden">
                         <span x-show="!expanded" x-transition class="break-words">{{ \Illuminate\Support\Str::limit($equipment->description, 100, '...') }}</span>
@@ -150,17 +151,67 @@
                     <div class="hidden md:block"><p class="break-words">{{ $equipment->description }}</p></div>
                 </div>
                 <div class="mt-4 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                    <p class="font-semibold text-lg mb-4">เลือกวันที่รับ-ส่ง :</p>
+                                    <!-- Pickup Time Information -->
+                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start space-x-2">
+                        <div class="text-yellow-600 mt-0.5">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-sm text-yellow-800">
+                            <p class="font-medium mb-1"> เวลารับอุปกรณ์</p>
+                            <p class="text-xs leading-relaxed">
+                                หลังจากได้รับการอนุมัติ กรุณามารับอุปกรณ์ภายในเวลาที่กำหนด<br>
+                                <span class="font-medium">เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="font-semibold text-lg">เลือกวันที่รับ-ส่ง :</p>
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                             จันทร์-ศุกร์เท่านั้น
+                        </span>
+                    </div>
                     <form action="{{ route('borrower.borrow_request', $equipment) }}" method="POST" id="borrowForm">
                         @csrf
                         <input type="hidden" name="equipments_id" value="{{ $equipment->id }}">
+                        
+                        <!-- Request Reason Dropdown -->
+                        <div class="mb-4">
+                            <label for="reason_type" class="block text-sm font-medium text-gray-700 mb-2">เหตุผลในการยืม</label>
+                            <select id="reason_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" @if ($hasBorrowed) disabled @endif required>
+                                <option value="">-- เลือกเหตุผล --</option>
+                                <option value="assignment">งานมอบหมาย/การบ้าน</option>
+                                <option value="personal">ใช้ส่วนตัว</option>
+                                <option value="others">อื่นๆ</option>
+                            </select>
+                        </div>
+
+                        <!-- Request Details Input (Conditional) -->
+                        <div id="request-details" class="hidden mb-4">
+                            <label for="request_details" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span id="details-label">รายละเอียด</span>
+                            </label>
+                            <input type="text" id="request_details" name="request_details" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ" @if ($hasBorrowed) disabled @endif>
+                            <input type="hidden" id="request_reason" name="request_reason" value="">
+                        </div>
+
+
+                        <!-- Date Selection -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div><label for="start_at" class="block text-sm font-medium text-gray-700">วันที่รับ</label><input type="text" id="start_at" name="start_at" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" @if ($hasBorrowed) disabled @endif readonly onclick="toggleCalendar('start')"></div>
                             <div><label for="end_at" class="block text-sm font-medium text-gray-700">วันที่ส่ง</label><input type="text" id="end_at" name="end_at" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" @if ($hasBorrowed) disabled @endif readonly onclick="toggleCalendar('end')"></div>
                         </div>
                         <div id="message" class="text-sm text-red-500 mb-4 h-4"></div>
+                    
                         @if ($hasBorrowed)
                             <a href="{{ route('borrower.equipments.myreq') }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-600 transition">ไปยังหน้าคำขอของฉัน</a>
+                        @elseif (!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
+                            <a href="{{ route('verification.index') }}" class="block w-full text-center bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
+                                 ยืนยันตัวตนก่อนยืมอุปกรณ์
+                            </a>
                         @elseif ($equipment->status === 'maintenance')
                             <button type="button" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>อุปกรณ์อยู่ระหว่างซ่อมบำรุง</button>
                         @elseif ($equipment->status !== 'available')
@@ -211,17 +262,29 @@
                 const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const isPast = date < today;
                 const isBorrowed = this.borrowedDates.some(b => date >= b.start && date <= b.end);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6; // Sunday = 0, Saturday = 6
                 let cls = "h-10 w-10 flex items-center justify-center text-sm mx-auto rounded-full ";
                 let clickHandler = `onclick="selectDate('${dateStr}')"`;
                 let title = '';
+                
                 if (isBorrowed) {
                     cls += "bg-red-200 text-red-600 cursor-not-allowed opacity-70 line-through";
                     clickHandler = ''; title = 'วันที่นี้ถูกจองแล้ว';
+                } else if (isWeekend) {
+                    cls += "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60";
+                    clickHandler = ''; title = 'ยืมและคืนได้เฉพาะวันจันทร์-ศุกร์';
                 } else if (isPast) {
                     cls += "text-gray-400 cursor-not-allowed opacity-60";
                     clickHandler = ''; title = 'ไม่สามารถเลือกวันที่ในอดีตได้';
-                } else { cls += "cursor-pointer hover:bg-blue-100 transition"; }
-                 if(date.getTime() === today.getTime()){ cls += " bg-blue-600 text-white font-bold" }
+                } else { 
+                    cls += "cursor-pointer hover:bg-blue-100 transition"; 
+                }
+                
+                // Highlight today only if it's not a weekend
+                if(date.getTime() === today.getTime() && !isWeekend){ 
+                    cls += " bg-blue-600 text-white font-bold" 
+                }
+                
                 html += `<div class="py-1"><div class="${cls}" data-date="${dateStr}" ${clickHandler} title="${title}">${d}</div></div>`;
             }
             html += "</div></div>"; this.container.innerHTML = html;
@@ -245,6 +308,20 @@
     function selectDate(dateStr) {
         if (currentInput) {
             const d = new Date(dateStr + 'T00:00:00');
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6; // Sunday = 0, Saturday = 6
+            
+            // Prevent weekend selection
+            if (isWeekend) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ไม่สามารถเลือกวันหยุดได้',
+                    text: 'ยืมและคืนอุปกรณ์ได้เฉพาะวันจันทร์-ศุกร์',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+                return;
+            }
+            
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
@@ -276,8 +353,15 @@
         const startDate = new Date(`${s_parts[2]}-${s_parts[1]}-${s_parts[0]}`);
         const endDate = new Date(`${e_parts[2]}-${e_parts[1]}-${e_parts[0]}`);
         
-        if (endDate <= startDate) {
-            msg.textContent = 'วันส่งควรอยู่หลังวันรับ';
+        // Check for weekends
+        const startIsWeekend = startDate.getDay() === 0 || startDate.getDay() === 6;
+        const endIsWeekend = endDate.getDay() === 0 || endDate.getDay() === 6;
+        
+        if (startIsWeekend || endIsWeekend) {
+            msg.textContent = 'ยืมและคืนอุปกรณ์ได้เฉพาะวันจันทร์-ศุกร์';
+            button.disabled = true;
+        } else if (endDate < startDate) {
+            msg.textContent = 'วันส่งไม่สามารถอยู่ก่อนวันรับได้';
             button.disabled = true;
         } else {
             msg.textContent = '';
@@ -285,7 +369,127 @@
         }
     }
 
+
+    // Handle reason type dropdown and show details input
+    function toggleRequestDetails() {
+        const reasonType = document.getElementById('reason_type');
+        const requestDetails = document.getElementById('request-details');
+        const detailsLabel = document.getElementById('details-label');
+        const detailsInput = document.getElementById('request_details');
+        const hiddenInput = document.getElementById('request_reason');
+        
+        if (reasonType && requestDetails) {
+            if (reasonType.value && reasonType.value !== '') {
+                requestDetails.classList.remove('hidden');
+                detailsInput.required = true;
+                
+                // Update label and placeholder based on selection
+                if (reasonType.value === 'assignment') {
+                    detailsLabel.textContent = 'วิชา/รายวิชา';
+                    detailsInput.placeholder = 'เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ';
+                } else if (reasonType.value === 'personal') {
+                    detailsLabel.textContent = 'หัวข้อ/เรื่อง';
+                    detailsInput.placeholder = 'เช่น ถ่ายรูปท่องเที่ยว, งานอดิเรก, การเรียนรู้';
+                } else if (reasonType.value === 'others') {
+                    detailsLabel.textContent = 'รายละเอียด';
+                    detailsInput.placeholder = 'เช่น กิจกรรมพิเศษ, โครงการส่วนตัว';
+                }
+            } else {
+                requestDetails.classList.add('hidden');
+                detailsInput.required = false;
+                detailsInput.value = '';
+                hiddenInput.value = '';
+            }
+        }
+    }
+
+    // Combine reason type and details into request_reason
+    function updateRequestReason() {
+        const reasonType = document.getElementById('reason_type');
+        const detailsInput = document.getElementById('request_details');
+        const hiddenInput = document.getElementById('request_reason');
+        
+        if (reasonType && detailsInput && hiddenInput) {
+            const type = reasonType.value;
+            const details = detailsInput.value.trim();
+            
+            if (type && details) {
+                hiddenInput.value = `${type} ${details}`;
+            } else {
+                hiddenInput.value = '';
+            }
+        }
+    }
+
+    // Enhanced form validation
+    function validateForm() {
+        const reasonType = document.getElementById('reason_type');
+        const detailsInput = document.getElementById('request_details');
+        const startDate = document.getElementById('start_at');
+        const endDate = document.getElementById('end_at');
+        const button = document.getElementById('borrowButton');
+        const msg = document.getElementById('message');
+        
+        if (!button) return;
+
+        let isValid = true;
+        let errorMessage = '';
+
+        // Check reason type
+        if (!reasonType.value) {
+            isValid = false;
+            errorMessage = 'กรุณาเลือกเหตุผลในการยืม';
+        }
+        // Check details input
+        else if (!detailsInput.value.trim()) {
+            isValid = false;
+            errorMessage = 'กรุณาระบุรายละเอียด';
+        }
+        // Check dates
+        else if (!startDate.value || !endDate.value) {
+            isValid = false;
+            errorMessage = 'กรุณาเลือกวันที่รับและส่ง';
+        }
+        // Check date validity
+        else if (startDate.value && endDate.value) {
+            const s_parts = startDate.value.split('/');
+            const e_parts = endDate.value.split('/');
+            const startDateObj = new Date(`${s_parts[2]}-${s_parts[1]}-${s_parts[0]}`);
+            const endDateObj = new Date(`${e_parts[2]}-${e_parts[1]}-${e_parts[0]}`);
+            
+            if (endDateObj <= startDateObj) {
+                isValid = false;
+                errorMessage = 'วันส่งควรอยู่หลังวันรับ';
+            }
+        }
+
+        button.disabled = !isValid;
+        if (msg) {
+            msg.textContent = errorMessage;
+        }
+        
+        return isValid;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Add event listener for reason type dropdown
+        const reasonTypeSelect = document.getElementById('reason_type');
+        if (reasonTypeSelect) {
+            reasonTypeSelect.addEventListener('change', function() {
+                toggleRequestDetails();
+                validateForm();
+            });
+        }
+
+        // Add event listener for details input
+        const detailsInput = document.getElementById('request_details');
+        if (detailsInput) {
+            detailsInput.addEventListener('input', function() {
+                updateRequestReason();
+                validateForm();
+            });
+        }
+
         const borrowForm = document.getElementById('borrowForm');
         if (borrowForm) {
             borrowForm.addEventListener('submit', function(e) {
@@ -295,6 +499,13 @@
                         title: 'คุณต้องเข้าสู่ระบบ', text: 'กด ตกลง เพื่อไปยังหน้าล็อกอิน', icon: 'warning',
                         showCancelButton: true, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
                     }).then((result) => { if (result.isConfirmed) { window.location.href = "{{ route('login') }}"; } });
+                @else
+                    // Update request_reason before submission
+                    updateRequestReason();
+                    if (!validateForm()) {
+                        e.preventDefault();
+                        return false;
+                    }
                 @endif
             });
         }

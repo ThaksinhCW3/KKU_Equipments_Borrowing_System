@@ -16,6 +16,7 @@ class BorrowRequest extends Model
         'start_at',
         'end_at',
         'status',
+        'request_reason',
         'reject_reason',
         'cancel_reason',
         'uid',

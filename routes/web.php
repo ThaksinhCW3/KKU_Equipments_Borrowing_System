@@ -6,11 +6,13 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BorrowRequestController;
 use App\Http\Controllers\Admin\ReportExportController;
+use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Borrowers\BorrowerCtrl;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -35,6 +37,11 @@ Route::middleware('auth')->group(function () {
         // fixed path (prefix already includes /borrower)
         Route::patch('/requests/{id}/cancel', [BorrowerCtrl::class, 'cancel'])->name('borrower.requests.cancel');
     });
+
+    // Verification routes
+    Route::get('/profile/verification', [VerificationController::class, 'index'])->name('verification.index');
+    Route::post('/verification', [VerificationController::class, 'store'])->name('verification.store');
+    Route::put('/verification', [VerificationController::class, 'update'])->name('verification.update');
 
     // Admin-only routes
     Route::middleware('role:admin')->group(function () {
@@ -77,6 +84,14 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{req_id}', [BorrowRequestController::class, 'update'])->name('admin.requests.update');
             Route::match(['post', 'patch'], '/{req_id}/approve', [BorrowRequestController::class, 'approve'])->name('admin.requests.approve');
             Route::post('/{req_id}/reject', [BorrowRequestController::class, 'reject'])->name('admin.requests.reject');
+        });
+
+        // Verification management
+        Route::prefix('admin/verification')->group(function () {
+            Route::get('/', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
+            Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
+            Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
+            Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
         });
 
         // Category and Equipment index pages

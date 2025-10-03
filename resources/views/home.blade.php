@@ -43,7 +43,18 @@
                                 {{ $equipment->description }}
                             </p>
 
-                            {{-- <span class="text-sm sm:text-lg font-semibold text-green-600">Free</span> --}}
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs text-gray-500">
+                                    <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full mr-1">
+                                        Available: {{ $equipment->available_quantity }}
+                                    </span>
+                                    @if($equipment->total_quantity > 1)
+                                        <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                            Total: {{ $equipment->total_quantity }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </a>

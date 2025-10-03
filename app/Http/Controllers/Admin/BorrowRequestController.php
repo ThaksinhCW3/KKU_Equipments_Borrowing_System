@@ -83,10 +83,23 @@ class BorrowRequestController extends Controller
             'end_at' => ['nullable','date','after_or_equal:start_at'],
         ]);
 
-        if (array_key_exists('start_at', $validated)) {
+        // Validate business days for admin-approved dates
+        if (array_key_exists('start_at', $validated) && $validated['start_at']) {
+            $startDate = \Carbon\Carbon::parse($validated['start_at']);
+            if ($startDate->isWeekend()) {
+                return redirect()->back()
+                    ->withErrors(['start_at' => 'วันเริ่มต้นต้องเป็นวันจันทร์-ศุกร์เท่านั้น'])
+                    ->withInput();
+            }
             $borrowRequest->start_at = $validated['start_at'];
         }
-        if (array_key_exists('end_at', $validated)) {
+        if (array_key_exists('end_at', $validated) && $validated['end_at']) {
+            $endDate = \Carbon\Carbon::parse($validated['end_at']);
+            if ($endDate->isWeekend()) {
+                return redirect()->back()
+                    ->withErrors(['end_at' => 'วันสิ้นสุดต้องเป็นวันจันทร์-ศุกร์เท่านั้น'])
+                    ->withInput();
+            }
             $borrowRequest->end_at = $validated['end_at'];
         }
 

@@ -36,7 +36,30 @@ class HomeController extends Controller
         $equipmentsCacheKey = "equipments:page:{$page}:{$queryString}";
 
         $equipments = Cache::remember($equipmentsCacheKey, now()->addMinutes(5), function () use ($query) {
-            return $query->paginate(15)->withQueryString();
+            // Group by equipment name and get only one representative item per type
+            $groupedEquipments = $query->get()->groupBy('name')->map(function ($equipmentGroup) {
+                // Get the first available item, or first item if none available
+                $availableItem = $equipmentGroup->where('status', 'available')->first();
+                return $availableItem ?: $equipmentGroup->first();
+            })->values();
+
+            // Convert to paginated collection manually
+            $perPage = 15;
+            $currentPage = request()->get('page', 1);
+            $offset = ($currentPage - 1) * $perPage;
+            $items = $groupedEquipments->slice($offset, $perPage)->values();
+
+            // Create a LengthAwarePaginator instance
+            return new \Illuminate\Pagination\LengthAwarePaginator(
+                $items,
+                $groupedEquipments->count(),
+                $perPage,
+                $currentPage,
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'page',
+                ]
+            );
         });
 
         $categories = Cache::remember('categories:all', now()->addMinutes(10), function () {

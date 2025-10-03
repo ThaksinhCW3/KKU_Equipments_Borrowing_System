@@ -108,6 +108,12 @@
                                 </svg>
                                 <span>{{ Auth::user()->name }}</span>
                             </div>
+                            @if(!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
+                                <a href="{{ route('verification.index') }}" 
+                                   class="inline-flex items-center px-3 py-1.5 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-md transition">
+                                     ยืนยันตัวตน
+                                </a>
+                            @endif
                             <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                 @csrf
                                 <button type="submit"

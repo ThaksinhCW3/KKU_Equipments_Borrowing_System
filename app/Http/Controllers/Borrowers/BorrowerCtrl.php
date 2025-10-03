@@ -96,9 +96,34 @@ class BorrowerCtrl extends Controller
     ]);
         $request->validate([
             'start_at' => 'required|date|after_or_equal:today',
-            'end_at' => 'required|date|after:start_at',
+            'end_at' => 'required|date|after_or_equal:start_at',
             'equipments_id' => 'required|exists:equipments,id',
+            'request_reason' => 'required|string|max:255',
         ]);
+
+        // Validate business days only (Monday-Friday)
+        $startDate = \Carbon\Carbon::parse($request->start_at);
+        $endDate = \Carbon\Carbon::parse($request->end_at);
+        
+        if ($startDate->isWeekend()) {
+            return redirect()->back()
+                ->withErrors(['start_at' => 'วันเริ่มต้นต้องเป็นวันจันทร์-ศุกร์เท่านั้น'])
+                ->withInput();
+        }
+        
+        if ($endDate->isWeekend()) {
+            return redirect()->back()
+                ->withErrors(['end_at' => 'วันสิ้นสุดต้องเป็นวันจันทร์-ศุกร์เท่านั้น'])
+                ->withInput();
+        }
+        // Check if user is verified
+        $user = Auth::user();
+        if (!$user->verificationRequest || $user->verificationRequest->status !== 'approved') {
+            return redirect()->back()
+                ->with('error', 'กรุณายืนยันตัวตนก่อนยืมอุปกรณ์')
+                ->with('verification_required', true);
+        }
+
         $equipment = Equipment::findOrFail($request->equipments_id);
         if (in_array($equipment->status, ['maintenance'])) {
             return redirect()->back()
@@ -130,6 +155,8 @@ class BorrowerCtrl extends Controller
         $borrowRequest->start_at = $start;
         $borrowRequest->end_at = $end;
         $borrowRequest->status = 'pending';
+        $borrowRequest->request_reason = $request->request_reason;
+        
         $borrowRequest->save();
 
         $admins = User::where('role', 'admin')->get();
