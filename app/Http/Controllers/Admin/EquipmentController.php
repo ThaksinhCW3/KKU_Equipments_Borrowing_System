@@ -16,7 +16,17 @@ class EquipmentController extends Controller
     public function index()
     {
         $equipments = Cache::remember('equipments_with_category', 600, function () {
-            return Equipment::with('category')->get();
+            return Equipment::with('category')->get()->map(function ($equipment) {
+                // Ensure accessories is properly cast to array
+                if ($equipment->accessories) {
+                    if (is_string($equipment->accessories)) {
+                        $equipment->accessories = json_decode($equipment->accessories, true) ?: [];
+                    }
+                } else {
+                    $equipment->accessories = [];
+                }
+                return $equipment;
+            });
         });
 
         $categories = Cache::remember('all_categories', 600, function () {
@@ -128,13 +138,20 @@ class EquipmentController extends Controller
             ]);
 
             // Convert accessories string to JSON array
-            if (!empty($validatedData['accessories'])) {
+            \Log::info('Update request accessories:', ['accessories' => $request->input('accessories')]);
+            \Log::info('Validated accessories:', ['accessories' => $validatedData['accessories'] ?? 'null']);
+            
+            $accessoriesValue = $validatedData['accessories'] ?? '';
+            if (!empty($accessoriesValue)) {
                 // Split by common delimiters and clean up
-                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $validatedData['accessories'])));
+                $accessoriesArray = array_filter(array_map('trim', preg_split('/[,;\n\r]+/', $accessoriesValue)));
                 $validatedData['accessories'] = json_encode($accessoriesArray);
+                \Log::info('Processed accessories array:', ['accessories' => $accessoriesArray]);
             } else {
                 $validatedData['accessories'] = json_encode([]);
             }
+            
+            \Log::info('Final accessories JSON:', ['accessories' => $validatedData['accessories']]);
 
             $currentPhotos = json_decode($equipment->photo_path, true) ?? [];
 
@@ -189,11 +206,14 @@ class EquipmentController extends Controller
             $equipment->update($updatePayload);
 
             Cache::forget('equipments_with_category');
+            
+            $updatedEquipment = $equipment->fresh()->load('category');
+            \Log::info('Updated equipment data:', ['equipment' => $updatedEquipment->toArray()]);
 
             return response()->json([
                 "status" => true,
                 "message" => "Equipment updated successfully",
-                "data" => $equipment->fresh()->load('category')
+                "data" => $updatedEquipment
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([

@@ -125,8 +125,12 @@
 
         <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
           <button type="button" @click="$emit('cancel')" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-60" :disabled="submitting">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60" :disabled="submitting || processingImages || !canSave">
-            <span v-if="submitting">Saving...</span><span v-else>Save Changes</span>
+          <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 flex items-center justify-center" :disabled="submitting || processingImages || !canSave">
+            <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span v-if="submitting">กำลังบันทึก...</span><span v-else>บันทึกการเปลี่ยนแปลง</span>
           </button>
         </div>
       </form>
@@ -175,15 +179,30 @@ export default {
       this.form.categories_id = this.equipment.category?.id || null;
       
       // Handle accessories - convert from JSON array to string for editing
+      console.log('Equipment accessories:', this.equipment.accessories);
       if (this.equipment.accessories) {
         if (Array.isArray(this.equipment.accessories)) {
           this.form.accessories = this.equipment.accessories.join(', ');
+        } else if (typeof this.equipment.accessories === 'string') {
+          // Handle case where accessories is a JSON string
+          try {
+            const parsed = JSON.parse(this.equipment.accessories);
+            if (Array.isArray(parsed)) {
+              this.form.accessories = parsed.join(', ');
+            } else {
+              this.form.accessories = this.equipment.accessories;
+            }
+          } catch (e) {
+            // If it's not valid JSON, treat as plain string
+            this.form.accessories = this.equipment.accessories;
+          }
         } else {
           this.form.accessories = this.equipment.accessories;
         }
       } else {
         this.form.accessories = '';
       }
+      console.log('Form accessories:', this.form.accessories);
       
       this.existingImages = [];
       this.selectedMainIdentifier = null; // CHANGED
@@ -293,12 +312,18 @@ export default {
     onSave() {
       if (this.submitting || !this.canSave) return;
       this.submitting = true;
-      this.$emit("save", {
+      
+      const saveData = {
         ...this.form,
         newImageFiles: this.newImageFiles,
         imagesToDelete: this.imagesToDelete, 
         selectedMainIdentifier: this.selectedMainIdentifier, 
-      });
+      };
+      
+      console.log('Edit modal save data:', saveData);
+      console.log('Edit modal form accessories:', this.form.accessories);
+      
+      this.$emit("save", saveData);
     },
   },
 };
