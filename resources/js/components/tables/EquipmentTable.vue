@@ -631,6 +631,22 @@ export default {
                 this.filtersOpen = false;
         };
         document.addEventListener("click", this._onClickOutside);
+        
+        // Check for URL parameters to filter by category
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get('category_id');
+        const categoryName = urlParams.get('category');
+        
+        if (categoryId) {
+            this.filterCategoryId = categoryId;
+            // Open filters to show the active filter
+            this.filtersOpen = true;
+        }
+        
+        if (categoryName) {
+            // Update page title to show filtered category
+            document.title = `อุปกรณ์ - ${decodeURIComponent(categoryName)}`;
+        }
     },
     beforeUnmount() {
         document.removeEventListener("click", this._onClickOutside);

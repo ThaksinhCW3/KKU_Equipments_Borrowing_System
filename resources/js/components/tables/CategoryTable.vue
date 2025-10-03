@@ -49,28 +49,51 @@
       <tbody>
         <tr v-for="category in filteredCategories" :key="category.id" class="border-b">
           <td class="px-4 py-2">{{ category.cate_id }}</td>
-          <td class="px-4 py-2">{{ category.name }}</td>
+          <td class="px-4 py-2">
+            <button @click="viewCategoryEquipments(category)" 
+              class="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
+              {{ category.name }}
+            </button>
+          </td>
           <td class="px-4 py-2">{{ category.equipments_count }}</td>
-          <td class="px-4 py-2 space-x-2">
-            <button v-if="userRole === 'admin'" @click="openModal(category)"
-              class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
-              แก้ไขข้อมูล
-            </button>
-            <button v-if="userRole === 'admin'" @click="deleteCategory(category.id)"
-              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-              ลบรายการ
-            </button>
+          <td class="px-4 py-2">
+            <div class="flex items-center space-x-2">
+              <button v-if="userRole === 'admin'" @click="openModal(category)"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded flex items-center justify-center"
+                :disabled="updatingCategory === category.id"
+                title="แก้ไขข้อมูล">
+                <svg v-if="updatingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button v-if="userRole === 'admin'" @click="deleteCategory(category.id)"
+                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded flex items-center justify-center"
+                :disabled="deletingCategory === category.id"
+                title="ลบรายการ">
+                <svg v-if="deletingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Edit Modal -->
-    <CategoryEditModal :isOpen="isOpen" :category="selectedCategory" @close="isOpen = false"
+    <CategoryEditModal ref="editModal" :isOpen="isOpen" :category="selectedCategory" @close="isOpen = false"
       @save="updateCategoryFromModal" />
 
     <!-- Create Modal -->
-    <CategoryCreateModal :isOpen="createModalOpen" @close="createModalOpen = false" @create="handleCreateCategory" />
+    <CategoryCreateModal ref="createModal" :isOpen="createModalOpen" @close="createModalOpen = false" @create="handleCreateCategory" />
   </div>
 </template>
 
@@ -93,6 +116,8 @@ export default {
       selectedCategory: null,
       categoryTypes: [],
       sortDirection: "asc",
+      updatingCategory: null,
+      deletingCategory: null,
     };
   },
   computed: {
@@ -147,7 +172,12 @@ export default {
       this.selectedCategory = { ...category };
       this.isOpen = true;
     },
+    viewCategoryEquipments(category) {
+      // Redirect to equipment page with category filter
+      window.location.href = `/admin/equipment?category=${encodeURIComponent(category.name)}&category_id=${category.id}`;
+    },
     updateCategoryFromModal(updatedCategory) {
+      this.updatingCategory = updatedCategory.id;
       fetch(`/admin/category/update/${updatedCategory.id}`, {
         method: "PUT",
         headers: {
@@ -167,7 +197,11 @@ export default {
             Swal.fire('ผิดพลาด', 'ไม่สามารถแก้ไขหมวดหมู่ได้', 'error');
           }
         })
-        .catch(() => Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่', 'error'));
+        .catch(() => Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่', 'error'))
+        .finally(() => {
+          this.updatingCategory = null;
+          this.$refs.editModal.resetSubmitting();
+        });
     },
     deleteCategory(id) {
       Swal.fire({
@@ -181,12 +215,17 @@ export default {
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
+          this.deletingCategory = id;
           fetch(`/admin/category/destroy/${id}`, {
             method: "DELETE",
             headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
           }).then(() => {
             this.categories = this.categories.filter(c => c.id !== id);
             Swal.fire('ลบแล้ว!', 'หมวดหมู่ถูกลบเรียบร้อย', 'success');
+          }).catch(() => {
+            Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการลบหมวดหมู่', 'error');
+          }).finally(() => {
+            this.deletingCategory = null;
           });
         }
       });
@@ -217,6 +256,9 @@ export default {
         .catch(err => {
           console.error(err);
           Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการสร้างหมวดหมู่', 'error');
+        })
+        .finally(() => {
+          this.$refs.createModal.resetSubmitting();
         });
     }
   },
