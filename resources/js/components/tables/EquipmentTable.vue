@@ -165,7 +165,7 @@
             :statuses="statuses" @cancel="isOpen = false" @save="updateEquipment"
             @image-change="selectedImageFile = $event" />
 
-        <EquipmentCreateModal :isOpen="createModal.isOpen" :categories="categories" :statuses="statuses"
+        <EquipmentCreateModal ref="createModal" :isOpen="createModal.isOpen" :categories="categories" :statuses="statuses"
             @cancel="closeCreateModal" @create="createEquipment" />
 
         <PhotoModal :isOpen="photoModal.isOpen" :url="photoModal.url" @close="closePhotoModal" />
@@ -508,6 +508,7 @@ export default {
             formData.append("code", payload.code || "");
             formData.append("name", payload.name || "");
             formData.append("description", payload.description || "");
+            formData.append("accessories", payload.accessories || "");
             formData.append("categories_id", payload.categories_id || "");
             formData.append("status", payload.status || "available");
 
@@ -571,6 +572,10 @@ export default {
                 })
                 .catch((err) => {
                     this.notifyError(err.message || "ไม่สามารถเพิ่มข้อมูลได้");
+                    // Reset the submitting state in the modal
+                    if (this.$refs.createModal && this.$refs.createModal.resetSubmitting) {
+                        this.$refs.createModal.resetSubmitting();
+                    }
                 });
         },
         openPhotoModal(url) {
