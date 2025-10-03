@@ -1,8 +1,34 @@
 <template>
     <BaseReportTable :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
         :data="logs" :columns="columns" :available-filters="availableFilters"
-        :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, หรือรายละเอียด...'" :page-size="20"
+        :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, เป้าหมาย, หรือรายละเอียด...'" :page-size="20"
         @export="exportLogs">
+        
+        <!-- Quick Filter Buttons -->
+        <template #quick-filters>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button @click="applyQuickFilter('action', 'create')" 
+                    class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full hover:bg-green-200">
+                    สร้าง
+                </button>
+                <button @click="applyQuickFilter('action', 'update')" 
+                    class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full hover:bg-blue-200">
+                    แก้ไข
+                </button>
+                <button @click="applyQuickFilter('action', 'delete')" 
+                    class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full hover:bg-red-200">
+                    ลบ
+                </button>
+                <button @click="applyQuickFilter('target_type', 'equipment')" 
+                    class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full hover:bg-indigo-200">
+                    อุปกรณ์
+                </button>
+                <button @click="clearAllFilters" 
+                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">
+                    ล้างทั้งหมด
+                </button>
+            </div>
+        </template>
         <!-- Custom cell templates -->
         <template #cell-action="{ item }">
             <span :class="getActionBadgeClass(item.action)"
@@ -15,6 +41,13 @@
             <span :class="getSeverityBadgeClass(item.severity)"
                 class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
                 {{ item.severity || 'info' }}
+            </span>
+        </template>
+
+        <template #cell-target_type="{ item }">
+            <span :class="getTargetTypeBadgeClass(item.target_type)"
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                {{ getTargetTypeLabel(item.target_type) }}
             </span>
         </template>
 
@@ -175,8 +208,9 @@ export default {
                 { key: 'id', label: 'รหัส', type: 'number' },
                 { key: 'admin.name', label: 'ผู้ใช้' },
                 { key: 'action', label: 'การดำเนินการ', type: 'badge' },
-                { key: 'module', label: 'โมดูล' },
+                { key: 'target_type', label: 'ประเภทเป้าหมาย' },
                 { key: 'target_name', label: 'เป้าหมาย' },
+                { key: 'module', label: 'โมดูล' },
                 { key: 'severity', label: 'ระดับความสำคัญ', type: 'badge' },
                 { key: 'description', label: 'รายละเอียด' },
                 { key: 'created_at', label: 'วันที่', type: 'date' },
@@ -196,37 +230,20 @@ export default {
                         { value: 'logout', label: 'ออกจากระบบ' },
                         { value: 'approve', label: 'อนุมัติ' },
                         { value: 'reject', label: 'ปฏิเสธ' },
-                        { value: 'cancel', label: 'ยกเลิก' },
-                        { value: 'export_initiated', label: 'เริ่มส่งออก' },
-                        { value: 'export_completed', label: 'ส่งออกเสร็จสิ้น' },
-                        { value: 'export_failed', label: 'ส่งออกล้มเหลว' }
+                        { value: 'cancel', label: 'ยกเลิก' }
                     ]
                 },
                 {
-                    key: 'module',
-                    label: 'โมดูล',
+                    key: 'target_type',
+                    label: 'ประเภทเป้าหมาย',
                     type: 'select',
-                    placeholder: 'เลือกโมดูล',
+                    placeholder: 'เลือกประเภทเป้าหมาย',
                     options: [
                         { value: 'equipment', label: 'อุปกรณ์' },
-                        { value: 'user_management', label: 'จัดการผู้ใช้' },
+                        { value: 'category', label: 'หมวดหมู่' },
+                        { value: 'user', label: 'ผู้ใช้' },
                         { value: 'borrow_request', label: 'คำขอยืม' },
-                        { value: 'authentication', label: 'การยืนยันตัวตน' },
-                        { value: 'export', label: 'การส่งออกข้อมูล' },
                         { value: 'system', label: 'ระบบ' }
-                    ]
-                },
-                {
-                    key: 'severity',
-                    label: 'ระดับความสำคัญ',
-                    type: 'select',
-                    placeholder: 'เลือกระดับความสำคัญ',
-                    options: [
-                        { value: 'info', label: 'ข้อมูล' },
-                        { value: 'warning', label: 'คำเตือน' },
-                        { value: 'error', label: 'ข้อผิดพลาด' },
-                        { value: 'critical', label: 'วิกฤต' },
-                        { value: 'success', label: 'สำเร็จ' }
                     ]
                 },
                 {
@@ -274,6 +291,28 @@ export default {
                 'success': 'bg-green-100 text-green-800',
             };
             return classes[severity] || 'bg-gray-100 text-gray-800';
+        },
+        getTargetTypeBadgeClass(targetType) {
+            const classes = {
+                'equipment': 'bg-blue-100 text-blue-800',
+                'category': 'bg-green-100 text-green-800',
+                'user': 'bg-purple-100 text-purple-800',
+                'borrow_request': 'bg-orange-100 text-orange-800',
+                'verification_request': 'bg-indigo-100 text-indigo-800',
+                'system': 'bg-gray-100 text-gray-800',
+            };
+            return classes[targetType] || 'bg-gray-100 text-gray-800';
+        },
+        getTargetTypeLabel(targetType) {
+            const labels = {
+                'equipment': 'อุปกรณ์',
+                'category': 'หมวดหมู่',
+                'user': 'ผู้ใช้',
+                'borrow_request': 'คำขอยืม',
+                'verification_request': 'คำขอการยืนยัน',
+                'system': 'ระบบ',
+            };
+            return labels[targetType] || targetType || '-';
         },
         showLogDetails(log) {
             this.selectedLog = log;
@@ -409,6 +448,25 @@ export default {
 
             // Add clickable links for request IDs
             return this.formatDescriptionWithLinks(stringValue);
+        },
+        applyQuickFilter(filterKey, filterValue) {
+            // Access the parent BaseReportTable component to set filters
+            const baseTable = this.$parent;
+            if (baseTable && baseTable.filters) {
+                // Clear other filters first
+                baseTable.filters = {};
+                // Set the specific filter
+                baseTable.filters[filterKey] = filterValue;
+                // Apply the filters
+                baseTable.applyFilters();
+            }
+        },
+        clearAllFilters() {
+            // Access the parent BaseReportTable component to clear filters
+            const baseTable = this.$parent;
+            if (baseTable && baseTable.clearAllFilters) {
+                baseTable.clearAllFilters();
+            }
         }
     },
     mounted() {

@@ -30,6 +30,9 @@
 
         <!-- Search and Filter Section -->
         <div class="mb-6">
+            <!-- Quick Filters Slot -->
+            <slot name="quick-filters"></slot>
+            
             <!-- Search Bar -->
             <div class="relative mb-4">
                 <input type="text" v-model="searchQuery" :placeholder="searchPlaceholder"
@@ -332,10 +335,25 @@ export default {
             if (this.searchQuery) {
                 const query = this.searchQuery.toLowerCase()
                 filtered = filtered.filter(item => {
-                    return this.columns.some(column => {
+                    // Search in all visible columns
+                    const columnMatch = this.columns.some(column => {
                         const value = this.getNestedValue(item, column.key)
                         return value && value.toString().toLowerCase().includes(query)
                     })
+                    
+                    // Search in description field (common for logs)
+                    const descriptionMatch = item.description && 
+                        item.description.toLowerCase().includes(query)
+                    
+                    // Search in admin name (common for logs)
+                    const adminMatch = item.admin && item.admin.name && 
+                        item.admin.name.toLowerCase().includes(query)
+                    
+                    // Search in target name (common for logs)
+                    const targetMatch = item.target_name && 
+                        item.target_name.toLowerCase().includes(query)
+                    
+                    return columnMatch || descriptionMatch || adminMatch || targetMatch
                 })
                 console.log('After search filter:', filtered.length)
             }
