@@ -62,8 +62,15 @@
 
         <!-- Category Chart -->
         <div class="lg:col-span-5 bg-white rounded-lg border p-4">
-            <div class="text-sm font-medium">อุปกรณ์ที่พร้อมใช้งานตามหมวดหมู่</div>
-            <canvas id="categoryBar" class="mt-4"></canvas>
+            <div class="text-sm font-medium mb-4">อุปกรณ์ที่พร้อมใช้งานตามหมวดหมู่</div>
+            <div style="height: 300px; width: 100%;">
+                <canvas id="categoryBar"></canvas>
+                @if($categoryCounts->isEmpty())
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        ไม่มีข้อมูลหมวดหมู่
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Analytics Section -->
@@ -137,7 +144,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // ---------- Category Chart ----------
             const barEl = document.getElementById('categoryBar');
-            if (barEl) {
+            if (barEl && @json($categoryCounts->count()) > 0) {
                 new Chart(barEl, {
                     type: 'bar',
                     data: {
@@ -151,7 +158,8 @@
                         }]
                     },
                     options: { 
-                        responsive: true, 
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: { 
                             legend: { 
                                 display: true,
