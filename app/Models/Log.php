@@ -10,7 +10,7 @@ class Log extends Model
     protected $table = 'logs';
     
     protected $fillable = [
-        'users_id',
+        'admin_id',
         'action',
         'ip_address',
         'module',
@@ -39,7 +39,7 @@ class Log extends Model
     
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'users_id');
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function admin(): BelongsTo
@@ -92,7 +92,7 @@ class Log extends Model
      */
     public function scopeByUser($query, $userId)
     {
-        return $query->where('users_id', $userId);
+        return $query->where('admin_id', $userId);
     }
 
     /**

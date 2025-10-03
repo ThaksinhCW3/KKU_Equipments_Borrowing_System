@@ -62,8 +62,10 @@ class EquipmentController extends Controller
             $paths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
-                    $path = $file->store('equipments', 'public');
-                    $paths[] = '/storage/' . $path;
+                    // Save directly to public/storage/equipments/
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('storage/equipments'), $filename);
+                    $paths[] = '/storage/equipments/' . $filename;
                 }
             }
 
@@ -159,18 +161,24 @@ class EquipmentController extends Controller
                 $imagesToDelete = $request->input('images_to_delete');
                 $currentPhotos = array_values(array_diff($currentPhotos, $imagesToDelete));
                 foreach ($imagesToDelete as $imageUrl) {
-                    $path = str_replace('/storage/', '', $imageUrl);
-                    Storage::disk('public')->delete($path);
+                    // Delete from public/storage/equipments/
+                    $filename = basename($imageUrl);
+                    $filePath = public_path('storage/equipments/' . $filename);
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                    }
                 }
             }
 
             $newlyUploadedPhotos = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
-                    $path = $file->store('equipments', 'public');
+                    // Save directly to public/storage/equipments/
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('storage/equipments'), $filename);
                     $newlyUploadedPhotos[] = [
                         'original_name' => $file->getClientOriginalName(),
-                        'path' => '/storage/' . $path,
+                        'path' => '/storage/equipments/' . $filename,
                     ];
                 }
             }
