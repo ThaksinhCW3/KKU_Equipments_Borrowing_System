@@ -31,8 +31,8 @@ class BorrowRequestApproved extends Notification implements ShouldQueue
                     $days = max($signed, 0);
 
                     $rangeMsg = "คุณสามารถยืมได้ {$days} วัน "
-                        . $this->borrowRequest->start_at->format('Y-m-d')
-                        . ' ถึง ' . $this->borrowRequest->end_at->format('Y-m-d');
+                        . $this->borrowRequest->start_at->format('d-m-Y')
+                        . ' ถึง ' . $this->borrowRequest->end_at->format('d-m-Y');
                 } else {
                     $rangeMsg = "ยังไม่ได้เลือกวันที่เริ่มและสิ้นสุด";
                 }
@@ -55,8 +55,8 @@ class BorrowRequestApproved extends Notification implements ShouldQueue
     {
         $extra = [];
         if ($this->borrowRequest->start_at && $this->borrowRequest->end_at) {
-            $extra['start_at'] = $this->borrowRequest->start_at->format('Y-m-d');
-            $extra['end_at'] = $this->borrowRequest->end_at->format('Y-m-d');
+            $extra['start_at'] = $this->borrowRequest->start_at->format('d-m-Y');
+            $extra['end_at'] = $this->borrowRequest->end_at->format('d-m-Y');
             $extra['days'] = $this->borrowRequest->end_at->diffInDays($this->borrowRequest->start_at) + 1;
             $extra['message_detail'] = "คุณสามารถยืมได้ {$extra['days']} วัน {$extra['start_at']} ถึง {$extra['end_at']}";
         }

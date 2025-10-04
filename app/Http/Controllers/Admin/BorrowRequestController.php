@@ -20,7 +20,6 @@ class BorrowRequestController extends Controller
     public function index()
     {
         $requests = BorrowRequest::with('user', 'equipment')
-            ->whereNotIn('status', ['check_in', 'rejected'])
             ->latest()
             ->get()
             ->map(function ($r) {
@@ -31,9 +30,9 @@ class BorrowRequestController extends Controller
                     'user_name' => $r->user->name ?? 'N/A',
                     'equipment_name' => $r->equipment->name ?? 'N/A',
                     'equipment_photo' => $r->equipment->photo_path ?? null,
-                    'start_at' => $r->start_at ? $r->start_at->format('Y-m-d') : '-',
-                    'end_at' => $r->end_at ? $r->end_at->format('Y-m-d') : '-',
-                    'date' => $r->created_at->format('Y-m-d'),
+                    'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
+                    'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
+                    'date' => $r->created_at->format('d-m-Y'),
                     'status' => ucfirst($r->status),
                     'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
                 ];
@@ -60,9 +59,9 @@ class BorrowRequestController extends Controller
                     'user_name' => $r->user->name ?? 'N/A',
                     'equipment_name' => $r->equipment->name ?? 'N/A',
                     'equipment_photo' => $r->equipment->photo_path ?? null,
-                    'start_at' => $r->start_at ? $r->start_at->format('Y-m-d') : '-',
-                    'end_at' => $r->end_at ? $r->end_at->format('Y-m-d') : '-',
-                    'date' => $r->created_at->format('Y-m-d'),
+                    'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
+                    'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
+                    'date' => $r->created_at->format('d-m-Y'),
                     'status' => ucfirst($r->status),
                     'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
                 ];
@@ -147,7 +146,8 @@ class BorrowRequestController extends Controller
 
         $this->clearDashboardCache($borrowRequest);
 
-        return redirect()->back()->with('success', 'Request approved. Allowed dates saved.');
+        return redirect()->route('admin.requests.show', $borrowRequest->req_id)
+            ->with('success', 'Request approved. Allowed dates saved.');
     }
 
     public function reject(Request $req, $req_id)
@@ -201,67 +201,84 @@ class BorrowRequestController extends Controller
 
         $this->clearDashboardCache($request);
 
-        return redirect()->route('admin.requests.index')->with('success', 'Request rejected successfully.');
+        return redirect()->route('admin.requests.index')
+            ->with('success', 'Request rejected successfully.');
     }
 
-    public function update(Request $req, $req_id)
-    {
-        $borrowRequest = BorrowRequest::with('transaction')
-            ->where('req_id', $req_id)
-            ->firstOrFail();
+public function update(Request $req, $req_id)
+{
+    // ✅ 1. Load the borrow request with its related transaction
+    $borrowRequest = BorrowRequest::with('transaction')
+        ->where('req_id', $req_id)
+        ->firstOrFail();
 
-        $validated = $req->validate([
-            'checked_out_at' => ['nullable','date_format:Y-m-d\TH:i'],
-            'checked_in_at' => ['nullable','date_format:Y-m-d\TH:i','after_or_equal:checked_out_at'],
-            'penalty_amount' => ['nullable','numeric','min:0'],
-            'notes' => ['nullable','string','max:1000'],
-        ]);
-        if ($validated['checked_out_at'] && $borrowRequest->start_at && $borrowRequest->end_at) {
-            $checkedOutAt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['checked_out_at']);
-            $startAt = Carbon::parse($borrowRequest->start_at);
-            $endAt = Carbon::parse($borrowRequest->end_at);
-            
-            if ($checkedOutAt->lt($startAt) || $checkedOutAt->gt($endAt)) {
-                return back()->withErrors([
-                    'checked_out_at' => 'วันที่มาเเอาของต้องอยู่ในช่วงวันที่เริ่ม (' . $startAt->format('Y-m-d') . ') ถึงวันที่สิ้นสุดที่อนุญาต (' . $endAt->format('Y-m-d') . ')'
-                ])->withInput();
-            }
-        }
+    // ✅ 2. Validate penalty and notes (no need to validate date/time anymore)
+    $validated = $req->validate([
+        'penalty_amount' => ['nullable', 'numeric', 'min:0'],
+        'notes' => ['nullable', 'string', 'max:1000'],
+    ]);
 
-        if (!in_array($borrowRequest->status, ['approved', 'check_out'])) {
-            return back()->withErrors(['status' => 'ต้องอนุมัติหรือเช็คเอาท์แล้วจึงจะสามารถบันทึกเวลาเช็คอินได้'])->withInput();
-        }
-
-        $transaction = $borrowRequest->transaction ?? new BorrowTransaction();
-        $transaction->borrow_requests_id = $borrowRequest->id;
-
-        $checkedOut = $validated['checked_out_at'] ?? null;
-        $checkedIn = $validated['checked_in_at'] ?? null;
-
-        $transaction->checked_out_at = $checkedOut ? Carbon::createFromFormat('Y-m-d\TH:i', $checkedOut) : $transaction->checked_out_at;
-        $transaction->checked_in_at = $checkedIn ? Carbon::createFromFormat('Y-m-d\TH:i', $checkedIn) : $transaction->checked_in_at;
-
-        if (array_key_exists('penalty_amount', $validated)) {
-            $transaction->penalty_amount = $validated['penalty_amount'];
-        }
-        if (array_key_exists('notes', $validated)) {
-            $transaction->notes = $validated['notes'];
-        }
-
-        $transaction->save();
-
-        $hasCheckedIn = !is_null($transaction->checked_in_at);
-        $hasCheckedOut = !is_null($transaction->checked_out_at);
-
-        if ($hasCheckedIn) {
-            $borrowRequest->status = 'check_in';
-            $borrowRequest->save();
-        } elseif ($hasCheckedOut) {
-            $borrowRequest->status = 'check_out';
-            $borrowRequest->save();
-        }
-        $this->clearDashboardCache($borrowRequest);
-
-        return redirect()->route('admin.requests.index')->with('success', 'บันทึกเวลาเช็คเอาท์/เช็คอินเรียบร้อย');
+    // ✅ 3. Prevent updating if not in allowed status
+    if (!in_array($borrowRequest->status, ['approved', 'check_out'])) {
+        return back()->withErrors([
+            'status' => 'ต้องอยู่ในสถานะ "อนุมัติ" หรือ "เช็คเอาท์" เท่านั้นจึงจะสามารถบันทึกได้'
+        ])->withInput();
     }
+
+    // ✅ 4. Get existing transaction or create a new one
+    $transaction = $borrowRequest->transaction ?? new BorrowTransaction();
+    $transaction->borrow_requests_id = $borrowRequest->id;
+
+    // ✅ 5. Automatically set current timestamp
+    if ($borrowRequest->status === 'approved') {
+        // When the item is being picked up
+        $transaction->checked_out_at = Carbon::now();
+        $borrowRequest->status = 'check_out';
+        
+        // Send notification to user
+        $user = $borrowRequest->user;
+        if ($user) {
+            $user->notify(new \App\Notifications\EquipmentCheckedOut($borrowRequest));
+        }
+    } elseif ($borrowRequest->status === 'check_out') {
+        // When the item is being returned
+        $transaction->checked_in_at = Carbon::now();
+        $borrowRequest->status = 'check_in';
+        
+        // Make equipment available again
+        $equipment = $borrowRequest->equipment;
+        if ($equipment) {
+            $equipment->status = 'available';
+            $equipment->save();
+        }
+        
+        // Send notification to user
+        $user = $borrowRequest->user;
+        if ($user) {
+            $user->notify(new \App\Notifications\EquipmentCheckedIn($borrowRequest));
+        }
+    }
+
+    // ✅ 6. Save penalty and notes (if provided)
+    if (array_key_exists('penalty_amount', $validated)) {
+        $transaction->penalty_amount = $validated['penalty_amount'];
+    }
+
+    if (array_key_exists('notes', $validated)) {
+        $transaction->notes = $validated['notes'];
+    }
+
+    // ✅ 7. Save both models
+    $transaction->save();
+    $borrowRequest->save();
+
+    // ✅ 8. Clear dashboard cache (your existing helper)
+    $this->clearDashboardCache($borrowRequest);
+
+    // ✅ 9. Redirect with success message
+    return redirect()
+        ->route('admin.requests.index')
+        ->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
+}
+
 }

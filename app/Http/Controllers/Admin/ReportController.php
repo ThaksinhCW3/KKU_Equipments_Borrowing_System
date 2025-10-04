@@ -63,7 +63,7 @@ class ReportController extends Controller
                 'req_id' => $req->req_id,
                 'user_name' => $req->user->name ?? 'N/A',
                 'equipment_name' => $req->equipment->name ?? 'N/A',
-                'date' => $req->created_at->format('Y-m-d'),
+                'date' => $req->created_at->format('d-m-Y'),
                 'status' => ucfirst($req->status),
                 'reason' => $req->reject_reason ?? $req->cancel_reason ?? '-',
             ]);

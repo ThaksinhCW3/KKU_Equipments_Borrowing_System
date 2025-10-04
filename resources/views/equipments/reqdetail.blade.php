@@ -184,8 +184,8 @@
 
                         <div class="mb-4">
                             <h3 class="font-semibold text-gray-700">ระยะเวลายืม</h3>
-                            <p class="text-sm text-gray-600">เริ่มต้น: {{ $req->start_at->format('d/m/Y') }}</p>
-                            <p class="text-sm text-gray-600">สิ้นสุด: {{ $req->end_at->format('d/m/Y') }}</p>
+                            <p class="text-sm text-gray-600">เริ่มต้น: {{ $req->start_at->format('d-m-Y') }}</p>
+                            <p class="text-sm text-gray-600">สิ้นสุด: {{ $req->end_at->format('d-m-Y') }}</p>
                         </div>
 
                         <!-- Check Out/In Status -->

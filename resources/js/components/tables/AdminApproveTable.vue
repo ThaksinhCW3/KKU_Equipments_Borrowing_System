@@ -60,7 +60,11 @@
             <td class="px-4 py-2">{{ request.equipment_name }}</td>
             <td class="px-4 py-2">{{ request.start_at }}</td>
             <td class="px-4 py-2">{{ request.end_at }}</td>
-            <td class="px-4 py-2">{{ capitalize(request.status) }}</td>
+            <td class="px-4 py-2">
+              <span :class="getStatusClass(request.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                {{ getStatusText(request.status) }}
+              </span>
+            </td>
             <td class="px-4 py-2">
               <button @click="openDetails(request)" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
                 ดูรายละเอียด
@@ -111,14 +115,10 @@ export default {
     };
   },
   computed: {
-    // NEW: Base list of requests to show (filters out rejected/check_in)
+    // MODIFIED: Show all requests including rejected and check_in
     displayableRequests() {
       if (!this.requests) return [];
-      return this.requests.filter(
-        (r) =>
-          r.status.toLowerCase() !== "rejected" &&
-          r.status.toLowerCase() !== "check_in"
-      );
+      return this.requests; // Show all requests
     },
     // NEW: Generates the summary for the status badges
     statusSummary() {
@@ -141,7 +141,7 @@ export default {
       Object.keys(counts).filter(key => key !== 'all').forEach(status => {
         summary.push({
           key: status,
-          label: this.capitalize(status),
+          label: this.getStatusText(status),
           count: counts[status],
           class: this.getStatusClass(status)
         });
@@ -214,11 +214,14 @@ export default {
     toggleSort() {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     },
-    // NEW: Assigns colors to status badges
+    // MODIFIED: Assigns colors to status badges for all statuses
     getStatusClass(status) {
       switch (status.toLowerCase()) {
         case 'pending': return 'bg-yellow-100 text-yellow-800';
         case 'approved': return 'bg-green-100 text-green-800';
+        case 'check_out': return 'bg-blue-100 text-blue-800';
+        case 'check_in': return 'bg-purple-100 text-purple-800';
+        case 'rejected': return 'bg-red-100 text-red-800';
         case 'in use': return 'bg-blue-100 text-blue-800';
         default: return 'bg-gray-100 text-gray-800';
       }
@@ -226,6 +229,18 @@ export default {
     capitalize(str) {
       if (!str) return '';
       return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
+    },
+    // NEW: Get Thai text for status
+    getStatusText(status) {
+      switch (status.toLowerCase()) {
+        case 'pending': return 'รอดำเนินการ';
+        case 'approved': return 'อนุมัติแล้ว';
+        case 'check_out': return 'มารับของแล้ว';
+        case 'check_in': return 'มาคืนของแล้ว';
+        case 'rejected': return 'ปฏิเสธ';
+        case 'in use': return 'กำลังใช้งาน';
+        default: return this.capitalize(status);
+      }
     },
     goToPage(p) {
       this.currentPage = p;

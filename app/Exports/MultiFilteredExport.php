@@ -76,7 +76,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             $u->email,
             $u->phonenumber,
             ucfirst($u->role),
-            optional($u->created_at)->format('Y-m-d'),
+            optional($u->created_at)->format('d-m-Y'),
         ]);
     }
 
@@ -111,7 +111,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             $eq->name,
             $eq->category->name ?? 'N/A',
             ucfirst($eq->status),
-            optional($eq->created_at)->format('Y-m-d'),
+            optional($eq->created_at)->format('d-m-Y'),
         ]);
     }
     protected function filteredCategories()
@@ -137,8 +137,8 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             $c->cate_id,
             $c->name,
             $c->equipments_count,
-            optional($c->created_at)->format('Y-m-d'),
-            optional($c->updated_at)->format('Y-m-d'),
+            optional($c->created_at)->format('d-m-Y'),
+            optional($c->updated_at)->format('d-m-Y'),
         ]);
     }
     protected function filteredRequests()
@@ -178,12 +178,12 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             $r->user->name,
             $r->equipment->code,
             $r->equipment->name,
-            $r->start_at ? $r->start_at->format('Y-m-d') : '-',
-            $r->end_at ? $r->end_at->format('Y-m-d') : '-',
+            $r->start_at ? $r->start_at->format('d-m-Y') : '-',
+            $r->end_at ? $r->end_at->format('d-m-Y') : '-',
             $r->status,
             $r->reject_reason ?? '-',
             $r->$r->cancel_reason ?? '-',
-            optional($r->created_at)->format('Y-m-d'),
+            optional($r->created_at)->format('d-m-Y'),
         ]);
     }
 
@@ -299,9 +299,9 @@ class MultiFilteredExport implements FromCollection, WithHeadings
                 $transaction['equipment']['name'] ?? 'N/A',
                 $transaction['status'],
                 $transaction['amount'],
-                $transaction['start_date'] ? \Carbon\Carbon::parse($transaction['start_date'])->format('Y-m-d') : '-',
-                $transaction['end_date'] ? \Carbon\Carbon::parse($transaction['end_date'])->format('Y-m-d') : '-',
-                $transaction['created_at'] ? \Carbon\Carbon::parse($transaction['created_at'])->format('Y-m-d') : '-',
+                $transaction['start_date'] ? \Carbon\Carbon::parse($transaction['start_date'])->format('d-m-Y') : '-',
+                $transaction['end_date'] ? \Carbon\Carbon::parse($transaction['end_date'])->format('d-m-Y') : '-',
+                $transaction['created_at'] ? \Carbon\Carbon::parse($transaction['created_at'])->format('d-m-Y') : '-',
             ];
         });
     }

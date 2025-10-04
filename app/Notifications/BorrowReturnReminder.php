@@ -27,7 +27,7 @@ class BorrowReturnReminder extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        $endDate = optional($this->borrowRequest->end_at)->format('Y-m-d');
+        $endDate = optional($this->borrowRequest->end_at)->format('d-m-Y');
         $equipment = $this->borrowRequest->equipment->name ?? '-';
 
         $subject = $this->whenType === 'due_tomorrow'
@@ -63,7 +63,7 @@ class BorrowReturnReminder extends Notification implements ShouldQueue
             'equipment'  => $this->borrowRequest->equipment->name ?? '-',
             'type'       => 'borrow_return_reminder',
             'when'       => $this->whenType,
-            'end_at'     => optional($this->borrowRequest->end_at)->format('Y-m-d'),
+            'end_at'     => optional($this->borrowRequest->end_at)->format('d-m-Y'),
             'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
         ];

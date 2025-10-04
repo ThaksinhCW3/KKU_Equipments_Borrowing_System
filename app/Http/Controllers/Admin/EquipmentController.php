@@ -224,6 +224,11 @@ class EquipmentController extends Controller
 
             $equipment->update($updatePayload);
 
+            // Check if status changed and notify users with pending requests
+            if (isset($updatePayload['status']) && $updatePayload['status'] !== $oldValues['status']) {
+                $this->notifyUsersOnStatusChange($equipment, $oldValues['status'], $updatePayload['status']);
+            }
+
             Cache::forget('equipments_with_category');
             
             $updatedEquipment = $equipment->fresh()->load('category');
@@ -291,5 +296,28 @@ class EquipmentController extends Controller
             "status" => true,
             "message" => "Equipment deleted successfully"
         ]);
+    }
+
+    /**
+     * Notify users with pending requests when equipment status changes
+     */
+    private function notifyUsersOnStatusChange($equipment, $oldStatus, $newStatus)
+    {
+        // Only notify if status changes to maintenance or unavailable
+        if (!in_array($newStatus, ['maintenance', 'unavailable'])) {
+            return;
+        }
+
+        // Get users with pending requests for this equipment
+        $pendingRequests = \App\Models\BorrowRequest::with('user')
+            ->where('equipment_id', $equipment->id)
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($pendingRequests as $request) {
+            if ($request->user) {
+                $request->user->notify(new \App\Notifications\EquipmentStatusChanged($equipment, $oldStatus, $newStatus));
+            }
+        }
     }
 }

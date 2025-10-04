@@ -8,7 +8,12 @@
         @if($equipments->count() > 0)
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-6 lg:gap-5 my-5">
                 @foreach ($equipments as $equipment)
-                    <a href="{{ route('equipments.show', $equipment->code) }}" class="block">
+                    <a href="{{ route('equipments.show', $equipment->code) }}" 
+                       class="block equipment-card" 
+                       data-equipment-code="{{ $equipment->code }}"
+                       @if(auth()->user() && (!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved'))
+                           onclick="showVerificationWarning(event, '{{ $equipment->code }}')"
+                       @endif>
                         <div
                             class="bg-white rounded-lg sm:rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden group border border-gray-150">
                             <div class="relative">
@@ -132,3 +137,29 @@
         <x-pagination />
     </div>
 </x-app-layout>
+
+<script>
+function showVerificationWarning(event, equipmentCode) {
+    event.preventDefault();
+    
+    Swal.fire({
+        title: 'ยืนยันตัวตนก่อนยืมอุปกรณ์',
+        text: 'คุณต้องยืนยันตัวตนก่อนที่จะสามารถยืมอุปกรณ์ได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ไปยืนยันตัวตน',
+        cancelButtonText: 'ดูรายละเอียด',
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to verification page
+            window.location.href = "{{ route('verification.index') }}";
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // Continue to equipment page
+            window.location.href = "{{ url('equipments') }}/" + equipmentCode;
+        }
+    });
+}
+</script>

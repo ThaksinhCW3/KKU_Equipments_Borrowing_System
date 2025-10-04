@@ -62,7 +62,7 @@ class EquipmentCheckedOut extends Notification implements ShouldQueue
             'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => [
-                'end_date' => $this->borrowRequest->end_at?->format('Y-m-d'),
+                'end_date' => $this->borrowRequest->end_at?->format('d-m-Y'),
                 'equipment_name' => $this->borrowRequest->equipment->name,
                 'care_instructions' => [
                     'คืนตรงเวลา',

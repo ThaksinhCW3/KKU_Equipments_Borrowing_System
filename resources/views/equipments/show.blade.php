@@ -188,7 +188,7 @@
                                             <div class="text-sm text-blue-800">
                                                 <p class="text-xs leading-relaxed">
                                                     อุปกรณ์{{ $equipment->name }} จะว่างเร็วที่สุดในวันที่<br>
-                                                    <span class="font-medium text-blue-900">{{ \Carbon\Carbon::parse($earliestReturn)->format('d/m/Y') }}</span>
+                                                    <span class="font-medium text-blue-900">{{ \Carbon\Carbon::parse($earliestReturn)->format('d-m-Y') }}</span>
                                                     @php
                                                         $daysUntilAvailable = \Carbon\Carbon::parse($earliestReturn)->diffInDays(now());
                                                     @endphp
@@ -270,7 +270,7 @@
                     
                         @if ($hasBorrowed)
                             <a href="{{ route('borrower.equipments.myreq') }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-600 transition">ไปยังหน้าคำขอของฉัน</a>
-                        @elseif (!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
+                        @elseif (!auth()->user() || !auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
                             <a href="{{ route('verification.index') }}" class="block w-full text-center bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
                                  ยืนยันตัวตนก่อนยืมอุปกรณ์
                             </a>
@@ -514,9 +514,9 @@
             const startDateObj = new Date(`${s_parts[2]}-${s_parts[1]}-${s_parts[0]}`);
             const endDateObj = new Date(`${e_parts[2]}-${e_parts[1]}-${e_parts[0]}`);
             
-            if (endDateObj <= startDateObj) {
+            if (endDateObj < startDateObj) {
                 isValid = false;
-                errorMessage = 'วันส่งควรอยู่หลังวันรับ';
+                errorMessage = 'วันส่งไม่สามารถอยู่ก่อนวันรับได้';
             }
         }
 
