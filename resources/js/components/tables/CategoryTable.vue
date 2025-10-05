@@ -222,7 +222,9 @@ export default {
       this.openModal(category, 'edit');
     },
     
-    viewCategoryEquipments(category) {
+    async viewCategoryEquipments(category) {
+      // Fetch equipment data before opening modal
+      await this.fetchEquipments();
       this.openModal(category, 'view');
     },
     

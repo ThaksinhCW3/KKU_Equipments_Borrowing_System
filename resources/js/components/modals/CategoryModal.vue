@@ -5,7 +5,7 @@
     
     <!-- Modal -->
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col min-h-0">
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <div class="flex items-center space-x-3">
@@ -35,7 +35,7 @@
         </div>
 
         <!-- Content -->
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div class="p-6 overflow-y-auto flex-1 min-h-0">
           <!-- View Mode -->
           <div v-if="mode === 'view' && category" class="space-y-6">
             <!-- Basic Information -->
@@ -317,10 +317,13 @@ export default {
       
       // First try to filter from allEquipments prop
       if (this.allEquipments && this.allEquipments.length > 0) {
-        this.categoryEquipments = this.allEquipments.filter(equipment => 
-          equipment.categories_id == this.category.id || 
-          equipment.category?.id == this.category.id
-        );
+        this.categoryEquipments = this.allEquipments.filter(equipment => {
+          const matches = equipment.categories_id == this.category.id || 
+                         equipment.category?.id == this.category.id ||
+                         equipment.categories_id === this.category.id ||
+                         equipment.category?.id === this.category.id;
+          return matches;
+        });
         return;
       }
       
@@ -340,7 +343,7 @@ export default {
             return;
           }
         } catch (error) {
-          console.log(`Failed to fetch from ${endpoint}:`, error);
+          // Silently handle fetch errors
         }
       }
       
