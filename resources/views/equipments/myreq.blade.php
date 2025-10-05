@@ -149,7 +149,7 @@
                                             @if($req->transaction->checked_out_at)
                                                 <p class="text-sm text-green-600">
                                                     <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                                    รับอุปกรณ์: {{ $req->transaction->checked_out_at->format('d/m/Y H:i') }}
+                                                    รับอุปกรณ์: {{ $req->transaction->checked_out_at->format('d/m/Y') }}
                                                 </p>
                                             @else
                                                 <p class="text-sm text-gray-500">
@@ -161,7 +161,7 @@
                                             @if($req->transaction->checked_in_at)
                                                 <p class="text-sm text-blue-600">
                                                     <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                                    คืนอุปกรณ์: {{ $req->transaction->checked_in_at->format('d/m/Y H:i') }}
+                                                    คืนอุปกรณ์: {{ $req->transaction->checked_in_at->format('d/m/Y') }}
                                                 </p>
                                             @elseif($req->transaction->checked_out_at)
                                                 <p class="text-sm text-orange-600">

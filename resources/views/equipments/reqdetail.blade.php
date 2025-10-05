@@ -51,10 +51,8 @@
                                         <div>
                                             <h3 class="text-sm font-medium text-green-800">คำขอของคุณได้รับการอนุมัติแล้ว!</h3>
                                             <p class="text-sm text-green-700 mt-1">
-                                                กรุณามารับอุปกรณ์ภายในวันที่ <strong>{{ $req->pickup_deadline->format('d/m/Y H:i') }}</strong>
-                                                @if($req->pickup_deadline->diffInHours(now()) <= 24)
-                                                    <span class="text-orange-600 font-semibold">(เหลือเวลาอีก {{ $req->pickup_deadline->diffInHours(now()) }} ชั่วโมง)</span>
-                                                @endif
+                                                กรุณามารับอุปกรณ์ภายในวันที่ <strong>{{ $req->pickup_deadline->format('d/m/Y') }}</strong>
+    
                                             </p>
                                         </div>
                                     </div>
@@ -195,7 +193,7 @@
                                 @if($req->transaction->checked_out_at)
                                     <p class="text-sm text-green-600">
                                         <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                        รับอุปกรณ์: {{ $req->transaction->checked_out_at->format('d/m/Y H:i') }}
+                                        รับอุปกรณ์: {{ $req->transaction->checked_out_at->format('d/m/Y') }}
                                     </p>
                                 @else
                                     <p class="text-sm text-gray-500">
@@ -207,7 +205,7 @@
                                 @if($req->transaction->checked_in_at)
                                     <p class="text-sm text-blue-600">
                                         <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                        คืนอุปกรณ์: {{ $req->transaction->checked_in_at->format('d/m/Y H:i') }}
+                                        คืนอุปกรณ์: {{ $req->transaction->checked_in_at->format('d/m/Y') }}
                                     </p>
                                 @elseif($req->transaction->checked_out_at)
                                     <p class="text-sm text-orange-600">

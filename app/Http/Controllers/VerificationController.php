@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VerificationRequest;
 use App\Models\User;
+use App\Notifications\VerificationRequestCreated;
 use App\Notifications\VerificationRequestSubmitted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,9 +53,10 @@ class VerificationController extends Controller
         ]);
 
         // Send notification to all admins
+        $verificationRequest->load('user');
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            $admin->notify(new VerificationRequestSubmitted($user));
+            $admin->notify(new VerificationRequestCreated($verificationRequest));
         }
 
         return redirect()->back()->with('success', 'ส่งคำขอการยืนยันตัวตนเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลระบบ');

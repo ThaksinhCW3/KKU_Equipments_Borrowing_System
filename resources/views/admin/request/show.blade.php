@@ -38,7 +38,7 @@
                         @endif
                     </span>
                 </div>
-                <p class="text-gray-500 mt-1">สร้างเมื่อ {{ $requests->created_at->format('d-m-Y H:i') }}</p>
+                <p class="text-gray-500 mt-1">สร้างเมื่อ {{ $requests->created_at->format('d-m-Y') }}</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div>
@@ -130,14 +130,14 @@
                             <!-- Created Date -->
                             <div class="">
                                 <span class="text-gray-500">วันที่สร้างคำขอ:</span>
-                                <span class="font-medium">{{ $requests->created_at->format('d-m-Y H:i') }}</span>
+                                <span class="font-medium">{{ $requests->created_at->format('d-m-Y') }}</span>
                             </div>
 
                             <!-- Approved Date -->
                             @if ($requests->status !== 'pending' && $requests->status !== 'rejected')
                                 <div class="">
                                     <span class="text-gray-500">วันที่อนุมัติ:</span>
-                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y H:i') }}</span>
+                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
                                 </div>
                             @endif
 
@@ -145,7 +145,7 @@
                             @if ($requests->status === 'rejected')
                                 <div class="">
                                     <span class="text-gray-500">วันที่ปฏิเสธ:</span>
-                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y H:i') }}</span>
+                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
                                 </div>
                                 @if ($requests->reject_reason)
                                     <div class="flex items-start justify-between">
@@ -161,7 +161,7 @@
                                     <div class="">
                                         <span class="text-gray-500">วันที่มารับของ:</span>
                                         <span
-                                            class="font-medium">{{ $requests->transaction->checked_out_at->format('d-m-Y H:i') }}</span>
+                                            class="font-medium">{{ $requests->transaction->checked_out_at->format('d-m-Y') }}</span>
                                     </div>
                                 @endif
                             @endif
@@ -172,7 +172,7 @@
                                     <div class="">
                                         <span class="text-gray-500">วันที่มาคืนของ:</span>
                                         <span
-                                            class="font-medium">{{ $requests->transaction->checked_in_at->format('d-m-Y H:i') }}</span>
+                                            class="font-medium">{{ $requests->transaction->checked_in_at->format('d-m-Y') }}</span>
                                     </div>
                                 @endif
                             @endif

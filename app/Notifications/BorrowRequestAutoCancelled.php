@@ -32,8 +32,8 @@ class BorrowRequestAutoCancelled extends Notification implements ShouldQueue
             ->line("เลขที่คำขอ: #{$this->borrowRequest->req_id}")
             ->line("**คำขอยืมของคุณถูกยกเลิกอัตโนมัติ**")
             ->line("เหตุผล: ไม่มารับอุปกรณ์ภายใน 3 วัน")
-            ->line("วันที่อนุมัติ: {$this->borrowRequest->updated_at->format('d/m/Y H:i')}")
-            ->line("หมดเขตการรับ: {$this->borrowRequest->pickup_deadline->format('d/m/Y H:i')}")
+            ->line("วันที่อนุมัติ: {$this->borrowRequest->updated_at->format('d/m/Y')}")
+            ->line("หมดเขตการรับ: {$this->borrowRequest->pickup_deadline->format('d/m/Y')}")
             ->line("หากต้องการยืมอุปกรณ์อีกครั้ง กรุณาส่งคำขอใหม่")
             ->action('ส่งคำขอใหม่', route('home'))
             ->line('ขอบคุณที่ใช้บริการของเรา');
@@ -51,8 +51,8 @@ class BorrowRequestAutoCancelled extends Notification implements ShouldQueue
             'created_at' => now()->toDateTimeString(),
             'extra' => [
                 'reason' => 'ไม่มารับอุปกรณ์ภายใน 3 วัน',
-                'approved_at' => $this->borrowRequest->updated_at->format('Y-m-d H:i:s'),
-                'pickup_deadline' => $this->borrowRequest->pickup_deadline->format('Y-m-d H:i:s'),
+                'approved_at' => $this->borrowRequest->updated_at->format('Y-m-d:s'),
+                'pickup_deadline' => $this->borrowRequest->pickup_deadline->format('Y-m-d:s'),
             ],
         ];
     }

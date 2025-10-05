@@ -155,3 +155,50 @@ Artisan::command('requests:auto-reject', function () {
 
     $this->info("Auto-reject process completed. {$expiredPendingRequests->count()} requests rejected.");
 })->purpose('Auto reject pending requests that have been pending for more than 3 days');
+
+// Auto reject pending verification requests that have been pending for more than 3 days
+Artisan::command('verification:auto-reject', function () {
+    $this->info('Starting auto-reject process for verification requests...');
+
+    // Find pending verification requests that have been pending for more than 3 days
+    $expiredPendingRequests = \App\Models\VerificationRequest::with(['user'])
+        ->where('status', 'pending')
+        ->where('created_at', '<', now()->subDays(3))
+        ->get();
+
+    if ($expiredPendingRequests->isEmpty()) {
+        $this->info('No expired pending verification requests found.');
+        return;
+    }
+
+    $this->info("Found {$expiredPendingRequests->count()} expired pending verification requests.");
+
+    foreach ($expiredPendingRequests as $request) {
+        // Update request status
+        $request->status = 'rejected';
+        $request->reject_note = 'ไม่มีการดำเนินการจากผู้ดูแลภายใน 3 วัน';
+        $request->processed_by = 1; // System user
+        $request->process_at = now();
+        $request->save();
+
+        // Send notification to user
+        if ($request->user) {
+            $request->load('processedBy');
+            $request->user->notify(new \App\Notifications\VerificationRequestAutoRejected($request));
+        }
+
+        // Send notification to all admins
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $request->load('processedBy');
+            $admin->notify(new \App\Notifications\VerificationRequestAutoRejected($request));
+        }
+
+        // Clear cache
+        \Illuminate\Support\Facades\Cache::flush();
+
+        $this->line("Rejected verification request: #{$request->id} - {$request->user->name}");
+    }
+
+    $this->info("Auto-reject process completed. {$expiredPendingRequests->count()} verification requests rejected.");
+})->purpose('Auto reject pending verification requests that have been pending for more than 3 days');

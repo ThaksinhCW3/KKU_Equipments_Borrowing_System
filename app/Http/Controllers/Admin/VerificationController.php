@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\VerificationRequest;
 use App\Models\User;
-use App\Notifications\VerificationRequestProcessed;
+use App\Notifications\VerificationRequestApproved;
+use App\Notifications\VerificationRequestRejected;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -91,7 +92,8 @@ class VerificationController extends Controller
         \Illuminate\Support\Facades\Cache::flush();
 
         // Send notification to user
-        $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'approved'));
+        $verificationRequest->load('processedBy');
+        $verificationRequest->user->notify(new VerificationRequestApproved($verificationRequest));
 
         return redirect()->back()->with('success', 'อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว');
     }
@@ -115,7 +117,8 @@ class VerificationController extends Controller
         \Illuminate\Support\Facades\Cache::flush();
 
         // Send notification to user
-        $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'rejected'));
+        $verificationRequest->load('processedBy');
+        $verificationRequest->user->notify(new VerificationRequestRejected($verificationRequest));
 
         return redirect()->back()->with('success', 'ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว');
     }

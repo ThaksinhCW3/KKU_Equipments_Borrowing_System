@@ -64,7 +64,7 @@ class BorrowReturnReminder extends Notification implements ShouldQueue
             'type'       => 'borrow_return_reminder',
             'when'       => $this->whenType,
             'end_at'     => optional($this->borrowRequest->end_at)->format('d-m-Y'),
-            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
         ];
     }

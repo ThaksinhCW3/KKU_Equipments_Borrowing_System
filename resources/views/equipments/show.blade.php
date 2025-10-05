@@ -249,7 +249,7 @@
                             <textarea 
                                 id="request_details" 
                                 name="request_reason_detail" 
-                                maxlength="500"
+                                maxlength="250"
                                 rows="3"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 oninput="updateCharCount('request_details', 'request_details_count')" 
@@ -257,7 +257,7 @@
                                 @if ($hasBorrowed) disabled @endif
                             ></textarea>
                             <div class="text-right text-xs text-gray-500 mt-1">
-                                <span id="request_details_count">0</span>/500
+                                <span id="request_details_count">0</span>/250
                             </div>
 
                             <input type="hidden" id="request_reason" name="request_reason" value="">

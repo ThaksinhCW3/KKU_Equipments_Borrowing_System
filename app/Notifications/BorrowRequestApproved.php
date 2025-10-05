@@ -46,7 +46,7 @@ class BorrowRequestApproved extends Notification implements ShouldQueue
                 return $mail->line($rangeMsg);
             })
             ->action('ดูรายละเอียด', url('/borrower/reqdetail', $this->borrowRequest->req_id))
-            ->line('⏰ กรุณามารับอุปกรณ์ตามเวลาที่กำหนด:')
+            ->line(' กรุณามารับอุปกรณ์ตามเวลาที่กำหนด:')
             ->line('เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น.')
             ->line('(เฉพาะวันจันทร์-ศุกร์)');
     }
@@ -66,7 +66,7 @@ class BorrowRequestApproved extends Notification implements ShouldQueue
             'message'    => 'คำขอยืมของคุณได้รับการอนุมัติแล้ว',
             'status' => 'approved',
             'type'       => 'borrow_request_approved',
-            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => $extra,
             'pickup_times' => 'เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น. (เฉพาะวันจันทร์-ศุกร์)',
