@@ -156,7 +156,7 @@ export default {
       userRole: el?.dataset?.role || "",
       equipments: JSON.parse(el?.dataset?.equipments || "[]"),
       categories: JSON.parse(el?.dataset?.categories || "[]"),
-      statuses: ["available", "retired", "maintenance"],
+      statuses: ["available", "unavailable", "retired", "maintenance"],
       loading: false,
       selectedEquipment: {},
       modal: {
@@ -167,7 +167,7 @@ export default {
       updatingEquipment: null,
       columns: [
         { key: 'photo', label: 'รูป' },
-        { key: 'code', label: 'ID' },
+        { key: 'code', label: 'เลขหมายครุภัณฑ์' },
         { key: 'name', label: 'ชื่ออุปกรณ์' },
         { key: 'description', label: 'รายละเอียด' },
         { key: 'category.name', label: 'หมวดหมู่' },
@@ -227,13 +227,13 @@ export default {
         case "available":
           return "bg-green-100 text-green-800";
         case "unavailable":
-          return "bg-gray-200 text-gray-600";
+          return "bg-red-200 text-red-600";
         case "retired":
-          return "bg-red-100 text-red-800";
+          return "bg-purple-200 text-purple-600";
         case "maintenance":
           return "bg-yellow-100 text-yellow-800";
         default:
-          return "bg-gray-100 text-gray-800";
+          return "bg-gray-200 text-gray-600";
       }
     },
     

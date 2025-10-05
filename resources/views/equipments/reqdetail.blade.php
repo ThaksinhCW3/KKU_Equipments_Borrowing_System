@@ -277,18 +277,6 @@
             @endif
     </div>
 
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'ยกเลิกสำเร็จ!',
-                text: '{{ session('success') }}',
-                timer: 2500,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
-
     @if (session('error'))
         <script>
             Swal.fire({

@@ -408,7 +408,9 @@ export default {
       photoModal: {
         isOpen: false,
         url: ''
-      }
+      },
+      validationErrors: {},
+      showValidationErrors: false
     }
   },
   computed: {
@@ -444,6 +446,16 @@ export default {
     },
     canSave() {
       return !!(this.form && this.form.code && this.form.name && this.form.categories_id && this.form.status && !this.imageError);
+    },
+    hasValidationError(field) {
+      return this.showValidationErrors && this.validationErrors[field];
+    },
+    getFieldClass(field) {
+      const baseClass = "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2";
+      if (this.hasValidationError(field)) {
+        return `${baseClass} border-red-500 focus:ring-red-500`;
+      }
+      return `${baseClass} border-gray-300 focus:ring-blue-500`;
     }
   },
   watch: {

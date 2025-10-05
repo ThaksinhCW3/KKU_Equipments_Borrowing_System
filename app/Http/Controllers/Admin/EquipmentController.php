@@ -56,7 +56,7 @@ class EquipmentController extends Controller
                 "description" => "nullable|string",
                 "accessories" => "nullable|string",
                 "categories_id" => "required|integer|exists:categories,id",
-                "status" => "required|in:available,retired,maintenance",
+                "status" => "required|in:available,unavailable,retired,maintenance",
                 "images.*" => "image|mimes:jpg,jpeg,png,webp,gif|max:5120",
                 "selectedProfileImage" => "nullable|integer|min:0",
             ]);
@@ -141,12 +141,12 @@ class EquipmentController extends Controller
             $equipment = Equipment::findOrFail($id);
 
             $validatedData = $request->validate([
-                "code" => "nullable|string|max:10",
+                "code" => "nullable|string|max:10|unique:equipments,code," . $id,
                 "name" => "required|string",
                 "description" => "nullable|string",
                 "accessories" => "nullable|string",
                 "categories_id" => "required|integer|exists:categories,id",
-                "status" => "required|in:available,retired,maintenance",
+                "status" => "required|in:available,unavailable,retired,maintenance",
                 "images.*" => "image|mimes:jpg,jpeg,png,webp,gif|max:5120", 
                 "images_to_delete" => "nullable|array",
                 "images_to_delete.*" => "string", 
@@ -272,9 +272,14 @@ class EquipmentController extends Controller
                 "data" => $updatedEquipment
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Equipment update validation failed:', [
+                'request_data' => $request->all(),
+                'validation_errors' => $e->errors(),
+                'equipment_id' => $id
+            ]);
             return response()->json([
                 "status" => false,
-                "message" => "Validation error",
+                "message" => "Validation error: " . implode(', ', collect($e->errors())->flatten()->toArray()),
                 "errors" => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
