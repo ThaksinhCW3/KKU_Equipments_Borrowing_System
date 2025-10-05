@@ -1,7 +1,7 @@
 <template>
     <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-        <a href="/admin" class="hover:text-gray-700">แดชบอร์ด</a>
+        <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
         <span>/</span>
         <span class="font-semibold text-gray-900">หน้าจัดการอุปกรณ์</span>
     </nav>
@@ -118,13 +118,26 @@
                             class="w-8 h-8 object-cover rounded cursor-pointer"
                             @click="openPhotoModal(getFirstPhoto(equipment))" />
                     </td>
-                    <td class="px-4 py-2">{{ equipment.code }}</td>
-                    <td class="px-4 py-2">{{ equipment.name }}</td>
+                    <td class="px-4 py-2">
+                        <span class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="viewEquipmentDetails(equipment)">
+                            {{ equipment.code }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2">
+                        <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewEquipmentDetails(equipment)">
+                            {{ equipment.name }}
+                        </span>
+                    </td>
                     <td class="px-4 py-2 max-w-[200px] truncate">
                         {{ equipment.description }}
                     </td>
                     <td class="px-4 py-2">
-                        {{ equipment.category?.name || "N/A" }}
+                        <span v-if="equipment.category" 
+                              class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                              @click="filterByCategory(equipment.category)">
+                            {{ equipment.category.name }}
+                        </span>
+                        <span v-else>N/A</span>
                     </td>
                     <td class="px-4 py-2">
                         {{ capitalize(equipment.status) }}
@@ -621,6 +634,16 @@ export default {
         closePhotoModal() {
             this.photoModal.url = "";
             this.photoModal.isOpen = false;
+        },
+        viewEquipmentDetails(equipment) {
+            // For now, we'll just open the edit modal to view details
+            // In the future, you could create a dedicated view modal
+            this.openModal(equipment);
+        },
+        filterByCategory(category) {
+            // Filter equipment by this category
+            this.filterCategoryId = String(category.id);
+            this.filtersOpen = false;
         },
     },
     mounted() {

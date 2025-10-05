@@ -37,6 +37,27 @@
             <span v-if="item.cancel_reason" class="text-orange-600">{{ item.cancel_reason }}</span>
             <span v-else class="text-gray-400">ไม่มี</span>
         </template>
+
+        <template #cell-req_id="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewRequestDetails(item)">
+                {{ item.req_id }}
+            </span>
+        </template>
+
+        <template #cell-user_name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewUserRequests(item.user_name)">
+                {{ item.user_name }}
+            </span>
+        </template>
+
+        <template #cell-equipment_name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewEquipmentDetails(item.equipment_name)">
+                {{ item.equipment_name }}
+            </span>
+        </template>
     </BaseReportTable>
 </template>
 
@@ -152,6 +173,18 @@ export default {
             });
 
             window.location.href = `/admin/report/export/requests?${params.toString()}`;
+        },
+        viewRequestDetails(request) {
+            // Redirect to request details page
+            window.location.href = `/admin/requests/${request.req_id}`;
+        },
+        viewUserRequests(userName) {
+            // Redirect to user report page filtered by this user
+            window.location.href = `/admin/report/user?search=${encodeURIComponent(userName)}`;
+        },
+        viewEquipmentDetails(equipmentName) {
+            // Redirect to equipment page filtered by this equipment
+            window.location.href = `/admin/equipment?search=${encodeURIComponent(equipmentName)}`;
         }
     },
     mounted() {

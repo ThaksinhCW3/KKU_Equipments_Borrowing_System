@@ -2,7 +2,7 @@
     <BaseReportTable ref="baseTable" :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
         :data="logs" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, เป้าหมาย, หรือรายละเอียด...'" :page-size="20"
-        @export="exportLogs">
+        @export="exportLogs" @filter-change="onFilterChange">
         
         <!-- Quick Filter Buttons -->
         <template #quick-filters>
@@ -32,7 +32,9 @@
         <!-- Custom cell templates -->
         <template #cell-action="{ item }">
             <span :class="getActionBadgeClass(item.action)"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                @click="filterByAction(item.action)"
+                :title="`คลิกเพื่อกรองตามการดำเนินการ: ${item.action}`">
                 {{ item.action || '-' }}
             </span>
         </template>
@@ -46,9 +48,31 @@
 
         <template #cell-target_type="{ item }">
             <span :class="getTargetTypeBadgeClass(item.target_type)"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                @click="filterByTargetType(item.target_type)"
+                :title="`คลิกเพื่อกรองตามประเภท: ${getTargetTypeLabel(item.target_type)}`">
                 {{ getTargetTypeLabel(item.target_type) }}
             </span>
+        </template>
+
+        <template #cell-target_name="{ item }">
+            <span v-if="item.target_name"
+                  class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
+                  @click="viewTargetDetails(item)"
+                  :title="`คลิกเพื่อดูรายละเอียด: ${item.target_name}`">
+                {{ item.target_name }}
+            </span>
+            <span v-else class="text-gray-400">-</span>
+        </template>
+
+        <template #cell-admin_id="{ item }">
+            <span v-if="item.admin_id"
+                  class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
+                  @click="viewAdminDetails(item.admin_id)"
+                  :title="`คลิกเพื่อดูรายละเอียดผู้ดูแล: ${item.admin_id}`">
+                {{ item.admin_id }}
+            </span>
+            <span v-else class="text-gray-400">-</span>
         </template>
 
         <template #cell-description="{ item }">
@@ -111,7 +135,13 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ชื่อเป้าหมาย</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.target_name || '-' }}</p>
+                    <span v-if="selectedLog.target_name"
+                          class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
+                          @click="viewTargetDetails(selectedLog)"
+                          :title="`คลิกเพื่อดูรายละเอียด: ${selectedLog.target_name}`">
+                        {{ selectedLog.target_name }}
+                    </span>
+                    <span v-else class="text-gray-400">-</span>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ระดับความสำคัญ</label>
@@ -127,18 +157,6 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">User Agent</label>
                     <p class="mt-1 text-sm text-gray-900 break-all">{{ selectedLog.user_agent || '-' }}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Session ID</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.session_id || '-' }}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Request Method</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.request_method || '-' }}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Request URL</label>
-                    <p class="mt-1 text-sm text-gray-900 break-all">{{ selectedLog.request_url || '-' }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">วันที่สร้าง</label>
@@ -204,6 +222,37 @@ export default {
         return {
             logs: [],
             selectedLog: null,
+            // Define relationships between actions and target types (based on actual data)
+            actionTargetTypeMap: {
+                // Equipment actions
+                'create': ['equipment', 'borrow_request'], // Create can be equipment OR borrow_request
+                'update': ['equipment'],
+                'delete': ['equipment'],
+                
+                // Borrow request actions
+                'approve': ['borrow_request'],
+                'reject': ['borrow_request'],
+                'cancel': ['borrow_request'],
+                'check_out': ['borrow_request'],
+                'check_in': ['borrow_request'],
+                
+                // User actions (login/logout are always user, not system)
+                'login': ['user'],
+                'logout': ['user'],
+                
+                // System actions (if they exist)
+                'export_initiated': ['system'],
+                'export_completed': ['system'],
+                'export_failed': ['system']
+            },
+            // Define relationships between target types and actions (based on actual data)
+            targetTypeActionMap: {
+                'equipment': ['create', 'update', 'delete'],
+                'category': ['create', 'update', 'delete'], // Category actions may exist
+                'user': ['login', 'logout'],
+                'borrow_request': ['create', 'approve', 'reject', 'cancel', 'check_out', 'check_in'],
+                'system': ['export_initiated', 'export_completed', 'export_failed']
+            },
             columns: [
                 { key: 'id', label: 'รหัส', type: 'number' },
                 { key: 'admin.name', label: 'ผู้ใช้' },
@@ -222,29 +271,16 @@ export default {
                     label: 'การดำเนินการ',
                     type: 'select',
                     placeholder: 'เลือกการดำเนินการ',
-                    options: [
-                        { value: 'create', label: 'สร้าง' },
-                        { value: 'update', label: 'แก้ไข' },
-                        { value: 'delete', label: 'ลบ' },
-                        { value: 'login', label: 'เข้าสู่ระบบ' },
-                        { value: 'logout', label: 'ออกจากระบบ' },
-                        { value: 'approve', label: 'อนุมัติ' },
-                        { value: 'reject', label: 'ปฏิเสธ' },
-                        { value: 'cancel', label: 'ยกเลิก' }
-                    ]
+                    dynamicOptions: true,
+                    getOptions: () => this.filteredActionOptions
                 },
                 {
                     key: 'target_type',
                     label: 'ประเภทเป้าหมาย',
                     type: 'select',
                     placeholder: 'เลือกประเภทเป้าหมาย',
-                    options: [
-                        { value: 'equipment', label: 'อุปกรณ์' },
-                        { value: 'category', label: 'หมวดหมู่' },
-                        { value: 'user', label: 'ผู้ใช้' },
-                        { value: 'borrow_request', label: 'คำขอยืม' },
-                        { value: 'system', label: 'ระบบ' }
-                    ]
+                    dynamicOptions: true,
+                    getOptions: () => this.filteredTargetTypeOptions
                 },
                 {
                     key: 'created_at',
@@ -255,6 +291,35 @@ export default {
                 }
             ]
         };
+    },
+    computed: {
+        // Get filtered target type options based on selected action
+        filteredTargetTypeOptions() {
+            const baseTable = this.$refs.baseTable;
+            if (!baseTable || !baseTable.filters) return this.getTargetTypeOptions();
+            
+            const selectedAction = baseTable.filters.action;
+            if (!selectedAction) return this.getTargetTypeOptions();
+            
+            const allowedTargetTypes = this.actionTargetTypeMap[selectedAction] || [];
+            return this.getTargetTypeOptions().filter(option => 
+                allowedTargetTypes.includes(option.value)
+            );
+        },
+        
+        // Get filtered action options based on selected target type
+        filteredActionOptions() {
+            const baseTable = this.$refs.baseTable;
+            if (!baseTable || !baseTable.filters) return this.getActionOptions();
+            
+            const selectedTargetType = baseTable.filters.target_type;
+            if (!selectedTargetType) return this.getActionOptions();
+            
+            const allowedActions = this.targetTypeActionMap[selectedTargetType] || [];
+            return this.getActionOptions().filter(option => 
+                allowedActions.includes(option.value)
+            );
+        }
     },
     methods: {
         async fetchLogs() {
@@ -276,6 +341,8 @@ export default {
                 'approve': 'bg-green-100 text-green-800',
                 'reject': 'bg-red-100 text-red-800',
                 'cancel': 'bg-yellow-100 text-yellow-800',
+                'check_out': 'bg-blue-100 text-blue-800',
+                'check_in': 'bg-green-100 text-green-800',
                 'export_initiated': 'bg-indigo-100 text-indigo-800',
                 'export_completed': 'bg-green-100 text-green-800',
                 'export_failed': 'bg-red-100 text-red-800',
@@ -466,6 +533,104 @@ export default {
             const baseTable = this.$refs.baseTable;
             if (baseTable && baseTable.clearAllFilters) {
                 baseTable.clearAllFilters();
+            }
+        },
+        filterByAction(action) {
+            // Access the BaseReportTable component through ref
+            const baseTable = this.$refs.baseTable;
+            if (baseTable && baseTable.setFilter) {
+                baseTable.setFilter('action', action);
+            }
+        },
+        filterByTargetType(targetType) {
+            // Access the BaseReportTable component through ref
+            const baseTable = this.$refs.baseTable;
+            if (baseTable && baseTable.setFilter) {
+                baseTable.setFilter('target_type', targetType);
+            }
+        },
+        viewTargetDetails(logItem) {
+            // Navigate to relevant pages based on target type
+            switch (logItem.target_type) {
+                case 'equipment':
+                    // Navigate to equipment page with search filter
+                    window.location.href = `/admin/equipment?search=${encodeURIComponent(logItem.target_name)}`;
+                    break;
+                case 'category':
+                    // Navigate to equipment page filtered by category
+                    window.location.href = `/admin/equipment?category=${encodeURIComponent(logItem.target_name)}`;
+                    break;
+                case 'borrow_request':
+                    // Navigate to request details
+                    window.location.href = `/admin/requests/${logItem.target_name}`;
+                    break;
+                case 'user':
+                    // Navigate to user report with search filter
+                    window.location.href = `/admin/report/user?search=${encodeURIComponent(logItem.target_name)}`;
+                    break;
+                default:
+                    // For other types, show details in modal or do nothing
+                    this.showLogDetails(logItem);
+                    break;
+            }
+        },
+        viewAdminDetails(adminId) {
+            // Navigate to user report with search filter for the admin
+            window.location.href = `/admin/report/user?search=${encodeURIComponent(adminId)}`;
+        },
+        getActionOptions() {
+            return [
+                { value: 'create', label: 'สร้าง' },
+                { value: 'update', label: 'แก้ไข' },
+                { value: 'delete', label: 'ลบ' },
+                { value: 'login', label: 'เข้าสู่ระบบ' },
+                { value: 'logout', label: 'ออกจากระบบ' },
+                { value: 'approve', label: 'อนุมัติ' },
+                { value: 'reject', label: 'ปฏิเสธ' },
+                { value: 'cancel', label: 'ยกเลิก' },
+                { value: 'check_out', label: 'เช็คเอาท์' },
+                { value: 'check_in', label: 'เช็คอิน' },
+                { value: 'export_initiated', label: 'เริ่มส่งออก' },
+                { value: 'export_completed', label: 'ส่งออกเสร็จ' },
+                { value: 'export_failed', label: 'ส่งออกล้มเหลว' }
+            ];
+        },
+        getTargetTypeOptions() {
+            return [
+                { value: 'equipment', label: 'อุปกรณ์' },
+                { value: 'category', label: 'หมวดหมู่' },
+                { value: 'user', label: 'ผู้ใช้' },
+                { value: 'borrow_request', label: 'คำขอยืม' },
+                { value: 'system', label: 'ระบบ' }
+            ];
+        },
+        // Handle filter changes to update dependent filters
+        onFilterChange(filterKey, filterValue) {
+            const baseTable = this.$refs.baseTable;
+            if (!baseTable) return;
+            
+            // If action changed, reset target_type if it's not compatible
+            if (filterKey === 'action' && filterValue) {
+                const allowedTargetTypes = this.actionTargetTypeMap[filterValue] || [];
+                const currentTargetType = baseTable.filters.target_type;
+                
+                if (currentTargetType && !allowedTargetTypes.includes(currentTargetType)) {
+                    // Clear incompatible target_type
+                    baseTable.filters.target_type = '';
+                    baseTable.applyFilters();
+                }
+            }
+            
+            // If target_type changed, reset action if it's not compatible
+            if (filterKey === 'target_type' && filterValue) {
+                const allowedActions = this.targetTypeActionMap[filterValue] || [];
+                const currentAction = baseTable.filters.action;
+                
+                if (currentAction && !allowedActions.includes(currentAction)) {
+                    // Clear incompatible action
+                    baseTable.filters.action = '';
+                    baseTable.applyFilters();
+                }
             }
         }
     },

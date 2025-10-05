@@ -136,7 +136,9 @@ class BorrowRequestController extends Controller
             'module' => 'borrow_request',
             'severity' => 'info',
             'old_values' => $oldData,
-            'new_values' => $newData
+            'new_values' => $newData,
+            'ip_address' => $req->ip(),
+            'user_agent' => $req->userAgent(),
         ]);
 
         $user = $borrowRequest->user;
@@ -191,7 +193,9 @@ class BorrowRequestController extends Controller
             'module' => 'borrow_request',
             'severity' => 'warning',
             'old_values' => $oldData,
-            'new_values' => $newData
+            'new_values' => $newData,
+            'ip_address' => $req->ip(),
+            'user_agent' => $req->userAgent(),
         ]);
 
         $user = $request->user;
@@ -235,6 +239,20 @@ public function update(Request $req, $req_id)
         $transaction->checked_out_at = Carbon::now();
         $borrowRequest->status = 'check_out';
         
+        // Log the check-out action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'check_out',
+            'target_type' => 'borrow_request',
+            'target_id' => $borrowRequest->id,
+            'target_name' => $borrowRequest->req_id,
+            'description' => "Equipment checked out: {$borrowRequest->req_id} - Equipment: " . ($borrowRequest->equipment->name ?? 'N/A'),
+            'module' => 'borrow_request',
+            'severity' => 'info',
+            'ip_address' => $req->ip(),
+            'user_agent' => $req->userAgent(),
+        ]);
+        
         // Send notification to user
         $user = $borrowRequest->user;
         if ($user) {
@@ -244,6 +262,20 @@ public function update(Request $req, $req_id)
         // When the item is being returned
         $transaction->checked_in_at = Carbon::now();
         $borrowRequest->status = 'check_in';
+        
+        // Log the check-in action
+        Log::create([
+            'admin_id' => Auth::id() ?? 1,
+            'action' => 'check_in',
+            'target_type' => 'borrow_request',
+            'target_id' => $borrowRequest->id,
+            'target_name' => $borrowRequest->req_id,
+            'description' => "Equipment checked in: {$borrowRequest->req_id} - Equipment: " . ($borrowRequest->equipment->name ?? 'N/A'),
+            'module' => 'borrow_request',
+            'severity' => 'info',
+            'ip_address' => $req->ip(),
+            'user_agent' => $req->userAgent(),
+        ]);
         
         // Make equipment available again
         $equipment = $borrowRequest->equipment;

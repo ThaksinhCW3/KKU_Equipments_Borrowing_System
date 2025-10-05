@@ -1,7 +1,7 @@
 <template>
       <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-        <a href="/admin" class="hover:text-gray-700">แดชบอร์ด</a>
+        <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
         <span>/</span>
         <span class="font-semibold text-gray-900">หน้าจัดการคำขอ</span>
     </nav>
@@ -54,10 +54,22 @@
         </thead>
         <tbody>
           <tr v-for="request in paginatedRequests" :key="request.id" class="border-b">
-            <td class="px-4 py-2">{{ request.req_id }}</td>
+            <td class="px-4 py-2">
+                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewRequestDetails(request)">
+                    {{ request.req_id }}
+                </span>
+            </td>
             <td class="px-4 py-2">{{ request.uid }}</td>
-            <td class="px-4 py-2">{{ request.user_name }}</td>
-            <td class="px-4 py-2">{{ request.equipment_name }}</td>
+            <td class="px-4 py-2">
+                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewUserProfile(request)">
+                    {{ request.user_name }}
+                </span>
+            </td>
+            <td class="px-4 py-2">
+                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewEquipmentDetails(request)">
+                    {{ request.equipment_name }}
+                </span>
+            </td>
             <td class="px-4 py-2">{{ request.start_at }}</td>
             <td class="px-4 py-2">{{ request.end_at }}</td>
             <td class="px-4 py-2">
@@ -253,6 +265,18 @@ export default {
     },
     openDetails(request) {
       window.location.href = `/admin/requests/${request.req_id}`;
+    },
+    viewRequestDetails(request) {
+      // Same as openDetails - redirect to request details page
+      window.location.href = `/admin/requests/${request.req_id}`;
+    },
+    viewUserProfile(request) {
+      // Redirect to user report page filtered by this user
+      window.location.href = `/admin/report/user?search=${encodeURIComponent(request.user_name)}`;
+    },
+    viewEquipmentDetails(request) {
+      // Search for the equipment in the equipment page
+      window.location.href = `/admin/equipment?search=${encodeURIComponent(request.equipment_name)}`;
     },
   },
   watch: {

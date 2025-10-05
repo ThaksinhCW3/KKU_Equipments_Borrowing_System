@@ -17,6 +17,20 @@
         <template #cell-updated_at="{ item }">
             {{ formatDate(item.updated_at) }}
         </template>
+
+        <template #cell-name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewCategoryEquipments(item)">
+                {{ item.name }}
+            </span>
+        </template>
+
+        <template #cell-cate_id="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewCategoryEquipments(item)">
+                {{ item.cate_id }}
+            </span>
+        </template>
     </BaseReportTable>
 </template>
 
@@ -84,6 +98,10 @@ export default {
             });
 
             window.location.href = `/admin/report/export/categories?${params.toString()}`;
+        },
+        viewCategoryEquipments(category) {
+            // Redirect to equipment management page filtered by this category
+            window.location.href = `/admin/equipment?category=${encodeURIComponent(category.name)}&category_id=${category.id}`;
         }
     },
     mounted() {

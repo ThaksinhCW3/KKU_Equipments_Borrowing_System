@@ -3,22 +3,22 @@
 
         <!-- KPI Cards -->
         <div class="lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white rounded-lg border p-4">
-                <div class="text-2xl font-semibold mt-1">{{ $borrowStatus['TotalRequests'] }}</div>
+            <a href="{{ route('admin.requests.index') }}" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div class="text-2xl font-semibold mt-1 text-blue-600">{{ $borrowStatus['TotalRequests'] }}</div>
                 <div class="text-xs text-gray-500">คำขอทั้งหมด</div>
-            </div>
-            <div class="bg-white rounded-lg border p-4">
-                <div class="text-2xl font-semibold mt-1">{{ $borrowStatus['checkinReq'] }}</div>
+            </a>
+            <a href="{{ route('admin.requests.index') }}?status=check_in" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div class="text-2xl font-semibold mt-1 text-green-600">{{ $borrowStatus['checkinReq'] }}</div>
                 <div class="text-xs text-gray-500">การยืมที่สำเร็จ</div>
-            </div>
-            <div class="bg-white rounded-lg border p-4">
-                <div class="text-2xl font-semibold mt-1">{{ $borrowStatus['Pending'] }}</div>
+            </a>
+            <a href="{{ route('admin.requests.index') }}?status=pending" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div class="text-2xl font-semibold mt-1 text-yellow-600">{{ $borrowStatus['Pending'] }}</div>
                 <div class="text-xs text-gray-500">คำขอที่รอดำเนินการ</div>
-            </div>
-            <div class="bg-white rounded-lg border p-4">
-                <div class="text-2xl font-semibold mt-1">{{ $borrowStatus['Rejected'] }}</div>
+            </a>
+            <a href="{{ route('admin.requests.index') }}?status=rejected" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div class="text-2xl font-semibold mt-1 text-red-600">{{ $borrowStatus['Rejected'] }}</div>
                 <div class="text-xs text-gray-500">คำขอที่ถูกปฏิเสธ</div>
-            </div>
+            </a>
         </div>
 
         <!-- Year + Month Filter -->
@@ -117,16 +117,16 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">อุปกรณ์ยอดนิยม</h3>
             <div class="space-y-3">
                 @forelse($popularEquipment as $index => $equipment)
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <a href="{{ route('admin.equipment.index') }}?search={{ urlencode($equipment['equipment_name']) }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                         <div class="flex-1">
-                            <div class="font-medium text-sm">{{ $equipment['equipment_name'] }}</div>
+                            <div class="font-medium text-sm text-blue-600 hover:text-blue-800">{{ $equipment['equipment_name'] }}</div>
                             <div class="text-xs text-gray-500">{{ $equipment['equipment_code'] }} • {{ $equipment['category'] }}</div>
                         </div>
                         <div class="text-right">
                             <div class="text-lg font-bold text-blue-600">{{ $equipment['borrow_count'] }}</div>
                             <div class="text-xs text-gray-500">ครั้ง</div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="text-center text-gray-500 py-8">ไม่มีข้อมูลการยืม</div>
                 @endforelse

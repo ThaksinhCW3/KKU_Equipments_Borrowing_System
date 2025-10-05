@@ -17,8 +17,26 @@
         </template>
 
         <template #cell-category="{ item }">
-            <span v-if="item.category?.name" class="text-gray-900">{{ item.category.name }}</span>
+            <span v-if="item.category?.name" 
+                  class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewEquipmentByCategory(item.category)">
+                {{ item.category.name }}
+            </span>
             <span v-else class="text-gray-400">ไม่มีหมวดหมู่</span>
+        </template>
+
+        <template #cell-name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewEquipmentDetails(item)">
+                {{ item.name }}
+            </span>
+        </template>
+
+        <template #cell-code="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewEquipmentDetails(item)">
+                {{ item.code }}
+            </span>
         </template>
 
         <template #cell-created_at="{ item }">
@@ -141,6 +159,14 @@ export default {
             });
 
             window.location.href = `/admin/report/export/equipments?${params.toString()}`;
+        },
+        viewEquipmentDetails(equipment) {
+            // Redirect to equipment management page with search for this equipment
+            window.location.href = `/admin/equipment?search=${encodeURIComponent(equipment.name)}`;
+        },
+        viewEquipmentByCategory(category) {
+            // Redirect to equipment management page filtered by this category
+            window.location.href = `/admin/equipment?category=${encodeURIComponent(category.name)}&category_id=${category.id}`;
         }
     },
     mounted() {

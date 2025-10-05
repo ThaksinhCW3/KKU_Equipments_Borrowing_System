@@ -94,9 +94,10 @@
                             
                             <!-- Select Dropdown -->
                             <select v-else-if="filter.type === 'select'" v-model="filters[filter.key]"
+                                @change="onFilterChange(filter.key, $event.target.value)"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">{{ filter.placeholder }}</option>
-                                <option v-for="option in filter.options" :key="option.value" :value="option.value">
+                                <option v-for="option in getFilterOptions(filter)" :key="option.value" :value="option.value">
                                     {{ option.label }}
                                 </option>
                             </select>
@@ -583,6 +584,23 @@ export default {
             this.filters = {}
             this.searchQuery = ''
             this.currentPage = 1
+        },
+        getFilterOptions(filter) {
+            // Support dynamic options
+            if (filter.dynamicOptions && filter.getOptions) {
+                return filter.getOptions();
+            }
+            // Fallback to static options
+            return filter.options || [];
+        },
+        onFilterChange(filterKey, filterValue) {
+            // Emit event to parent component for handling dependent filters
+            this.$emit('filter-change', filterKey, filterValue);
+            
+            // Apply filters after a short delay to allow dependent filters to update
+            setTimeout(() => {
+                this.applyFilters();
+            }, 100);
         },
         previousPage() {
             if (this.currentPage > 1) {

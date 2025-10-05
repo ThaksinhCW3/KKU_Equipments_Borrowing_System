@@ -14,6 +14,7 @@ use App\Notifications\BorrowRequestCancelled;
 
 use App\Models\Equipment;
 use App\Models\Category;
+use App\Models\Log;
 use Carbon\Carbon;
 
 class BorrowerCtrl extends Controller
@@ -109,6 +110,20 @@ class BorrowerCtrl extends Controller
         $req->status = 'cancelled';
         $req->cancel_reason = $reasons;
         $req->save();
+
+        // Log the borrow request cancellation
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'cancel',
+            'target_type' => 'borrow_request',
+            'target_id' => $req->id,
+            'target_name' => $req->req_id,
+            'description' => "Cancelled borrow request: {$req->req_id} - Reason: {$reasons}",
+            'module' => 'borrow_request',
+            'severity' => 'warning',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         // Make equipment available again
         $equipment = $req->equipment;
@@ -209,6 +224,20 @@ class BorrowerCtrl extends Controller
         $borrowRequest->request_reason_detail = $request->request_reason_detail;
         
         $borrowRequest->save();
+
+        // Log the borrow request creation
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'create',
+            'target_type' => 'borrow_request',
+            'target_id' => $borrowRequest->id,
+            'target_name' => $borrowRequest->req_id,
+            'description' => "Created borrow request: {$borrowRequest->req_id} for equipment {$equipment->name}",
+            'module' => 'borrow_request',
+            'severity' => 'info',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         // Make equipment unavailable
         $equipment->status = 'unavailable';
