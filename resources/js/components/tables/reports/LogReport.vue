@@ -1,4 +1,48 @@
 <template>
+    <!-- Show message when filtering by user with no logs -->
+    <div v-if="isFilteredByUser && logs.length === 0" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+            <svg class="w-8 h-8 text-blue-400 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <h3 class="text-lg font-medium text-blue-800">ไม่พบบันทึกการใช้งาน</h3>
+                <p class="text-blue-600 mt-1">
+                    ไม่พบบันทึกการใช้งานสำหรับผู้ใช้ <strong>{{ currentFilteredUser }}</strong> 
+                    หรือผู้ใช้รายนี้ยังไม่มีการดำเนินการใดๆ ในระบบ
+                </p>
+                <button @click="clearUserFilter" 
+                    class="mt-3 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    ดูบันทึกทั้งหมด
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Show button when filtering by user with logs -->
+    <div v-if="isFilteredByUser && logs.length > 0" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="text-sm font-medium text-green-800">กำลังแสดงบันทึกสำหรับผู้ใช้</h3>
+                    <p class="text-green-600 text-sm">
+                        <strong>{{ currentFilteredUser }}</strong> ({{ logs.length }} รายการ)
+                    </p>
+                </div>
+            </div>
+            <button @click="clearUserFilter" 
+                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                กลับไปดูบันทึกทั้งหมด
+            </button>
+        </div>
+    </div>
+
     <BaseReportTable ref="baseTable" :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
         :data="logs" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, เป้าหมาย, หรือรายละเอียด...'" :page-size="20"
@@ -18,6 +62,14 @@
                 <button @click="applyQuickFilter('action', 'delete')" 
                     class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full hover:bg-red-200">
                     ลบ
+                </button>
+                <button @click="applyQuickFilter('action', 'check_in')" 
+                    class="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-800 text-sm rounded-full hover:bg-emerald-200">
+                    เช็คอิน
+                </button>
+                <button @click="applyQuickFilter('action', 'check_out')" 
+                    class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full hover:bg-orange-200">
+                    เช็คเอาท์
                 </button>
                 <button @click="applyQuickFilter('target_type', 'equipment')" 
                     class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full hover:bg-indigo-200">
@@ -69,7 +121,7 @@
         <template #cell-admin.name="{ item }">
             <span v-if="item.admin && item.admin.name"
                   class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
-                  @click="viewAdminDetails(item.admin_id)"
+                  @click="viewAdminDetails(item.admin.name)"
                   :title="`คลิกเพื่อดูรายละเอียดผู้ดูแล: ${item.admin.name}`">
                 {{ item.admin.name }}
             </span>
@@ -127,7 +179,15 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ผู้ใช้</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.admin?.name || 'N/A' }}</p>
+                    <p class="mt-1 text-sm text-gray-900">
+                        <span v-if="selectedLog.admin?.name"
+                              class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
+                              @click="filterLogsByUser(selectedLog.admin.name)"
+                              :title="`กรองตามผู้ใช้: ${selectedLog.admin.name}`">
+                            {{ selectedLog.admin.name }}
+                        </span>
+                        <span v-else class="text-gray-400">N/A</span>
+                    </p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">การดำเนินการ</label>
@@ -232,7 +292,9 @@ export default {
     data() {
         return {
             logs: [],
+            pendingAdminFilter: null,
             selectedLog: null,
+            currentFilteredUser: null,
             // Define relationships between actions and target types (based on actual data)
             actionTargetTypeMap: {
                 // Equipment actions
@@ -330,6 +392,11 @@ export default {
             return this.getActionOptions().filter(option => 
                 allowedActions.includes(option.value)
             );
+        },
+        
+        // Check if currently filtered by a specific user
+        isFilteredByUser() {
+            return this.currentFilteredUser !== null;
         }
     },
     methods: {
@@ -352,7 +419,6 @@ export default {
                 });
                 
                 const url = `/api/logs${params.toString() ? '?' + params.toString() : ''}`;
-                console.log('Fetching logs with URL:', url);
                 
                 const response = await api.get(url);
                 this.logs = response.data.data || response.data || [];
@@ -483,14 +549,28 @@ export default {
         formatDescriptionWithLinks(description) {
             if (!description) return '-';
 
+            let formatted = description;
+
             // Regular expression to match request IDs like REQVAEL52MSWI
             const reqIdPattern = /\b(REQ[A-Z0-9]{10,})\b/g;
-
-            return description.replace(reqIdPattern, (match) => {
+            formatted = formatted.replace(reqIdPattern, (match) => {
                 return `<a href="/admin/requests/${match}" 
                     class="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer" 
                     title="ดูรายละเอียดคำขอ ${match}">${match}</a>`;
             });
+
+            // Regular expression to match user names in parentheses like (John Doe) or (john@email.com)
+            const userPattern = /\(([^)]+@[^)]+)\)|\(([A-Za-z\u0E00-\u0E7F\s]+)\)/g;
+            formatted = formatted.replace(userPattern, (match, email, name) => {
+                const userText = email || name;
+                const encodedUser = encodeURIComponent(userText.trim());
+                return `(<a href="javascript:void(0)" 
+                    class="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer" 
+                    title="กรองตามผู้ใช้: ${userText}"
+                    onclick="window.filterLogsByUser('${encodedUser}')">${userText}</a>)`;
+            });
+
+            return formatted;
         },
         formatFieldValueWithLinks(value) {
             if (value === null || value === undefined) {
@@ -604,9 +684,10 @@ export default {
                     break;
             }
         },
-        viewAdminDetails(adminId) {
+        viewAdminDetails(adminIdentifier) {
             // Navigate to user report with search filter for the admin
-            window.location.href = `/admin/report/user?search=${encodeURIComponent(adminId)}`;
+            console.log('viewAdminDetails - redirecting with:', adminIdentifier);
+            window.location.href = `/admin/report/user?search=${encodeURIComponent(adminIdentifier)}`;
         },
         getActionOptions() {
             return [
@@ -675,10 +756,87 @@ export default {
             if (!baseTable) return;
             
             await this.fetchLogs(baseTable.filters);
+        },
+        
+        // Filter logs by specific user
+        filterLogsByUser(userText) {
+            const baseTable = this.$refs.baseTable;
+            if (baseTable) {
+                // Clear other filters first
+                baseTable.filters = {};
+                // Set the admin filter to search for the user
+                baseTable.filters.admin = userText;
+                // Apply the filters
+                baseTable.applyFilters();
+                // Also fetch from API if needed
+                this.fetchLogsFromAPI();
+            }
+        },
+        checkForUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminFilter = urlParams.get('admin');
+            
+            if (adminFilter) {
+                // Set the filter directly in the logs data to be used when fetching
+                this.pendingAdminFilter = adminFilter;
+                this.currentFilteredUser = adminFilter;
+            }
+        },
+        
+        async applyPendingFilters() {
+            if (this.pendingAdminFilter) {
+                const baseTable = this.$refs.baseTable;
+                
+                if (baseTable) {
+                    // Clear other filters first
+                    baseTable.filters = {};
+                    // Set the admin filter
+                    baseTable.filters.admin = this.pendingAdminFilter;
+                    // Clear the pending filter
+                    this.pendingAdminFilter = null;
+                }
+            }
+        },
+        
+        clearUserFilter() {
+            // Clear the current filtered user
+            this.currentFilteredUser = null;
+            
+            // Clear the URL parameter
+            const url = new URL(window.location);
+            url.searchParams.delete('admin');
+            window.history.replaceState({}, '', url);
+            
+            // Clear filters in BaseReportTable
+            const baseTable = this.$refs.baseTable;
+            if (baseTable) {
+                baseTable.filters = {};
+                baseTable.applyFilters();
+            }
+            
+            // Fetch all logs
+            this.fetchLogs();
         }
     },
-    mounted() {
-        this.fetchLogs();
+    async mounted() {
+        // Check URL parameters first
+        this.checkForUrlParameters();
+        
+        // Wait for the component to be fully rendered
+        await this.$nextTick();
+        
+        // Apply any pending filters
+        await this.applyPendingFilters();
+        
+        // Then fetch logs with any applied filters
+        const baseTable = this.$refs.baseTable;
+        const filters = baseTable ? baseTable.filters : {};
+        await this.fetchLogs(filters);
+        
+        // Expose the filter method globally so it can be called from onclick handlers
+        window.filterLogsByUser = (userText) => {
+            this.filterLogsByUser(userText);
+        };
     },
 };
 </script>

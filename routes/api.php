@@ -23,7 +23,15 @@ Route::get('/users', function () {
 // Logs API route
 Route::get('/logs', function (Request $request) {
     $logs = \App\Models\Log::with('admin')
-        ->when($request->admin, fn($q) => $q->whereHas('admin', fn($a) => $a->where('name', 'like', "%{$request->admin}%")))
+        ->when($request->admin, function($q) use ($request) {
+            // Try exact match first, then partial match
+            $adminName = $request->admin;
+            return $q->whereHas('admin', function($a) use ($adminName) {
+                $a->where('name', $adminName)
+                  ->orWhere('email', $adminName)
+                  ->orWhere('uid', $adminName);
+            });
+        })
         ->when($request->action, fn($q) => $q->where('action', $request->action))
         ->when($request->target_type, fn($q) => $q->where('target_type', $request->target_type))
         ->when($request->module, fn($q) => $q->where('module', $request->module))

@@ -585,6 +585,11 @@ export default {
             this.searchQuery = ''
             this.currentPage = 1
         },
+        setFilter(filterKey, filterValue) {
+            this.filters[filterKey] = filterValue
+            this.currentPage = 1
+            this.applyFilters()
+        },
         getFilterOptions(filter) {
             // Support dynamic options
             if (filter.dynamicOptions && filter.getOptions) {
