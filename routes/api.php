@@ -20,6 +20,7 @@ Route::get('/users', function () {
 });
 
 
+
 // Logs API route
 Route::get('/logs', function (Request $request) {
     $logs = \App\Models\Log::with('admin')
@@ -83,108 +84,41 @@ route::get('/requests', function () {
 
 // Transactions API route
 Route::get('/transactions', function (Request $request) {
-    // For now, we'll create mock transaction data based on borrow requests
-    // In a real application, you would have a dedicated Transaction model
-    $requests = BorrowRequest::with('user', 'equipment')->get();
-    
-    $transactions = collect();
-    
-    // Generate transactions from borrow requests
-    foreach ($requests as $request) {
-        // Borrow transaction
-        $transactions->push([
-            'id' => $request->id * 1000 + 1,
-            'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'B',
-            'transaction_type' => 'borrow',
-            'user' => $request->user,
-            'equipment' => $request->equipment,
-            'status' => $request->status === 'approved' ? 'completed' : 
-                       ($request->status === 'rejected' ? 'cancelled' : 'pending'),
-            'amount' => 0, // Free borrowing
-            'start_date' => $request->start_at,
-            'end_date' => $request->end_at,
-            'description' => 'การยืมอุปกรณ์: ' . ($request->equipment->name ?? 'N/A'),
-            'notes' => $request->request_reason,
-            'created_at' => $request->created_at,
-            'updated_at' => $request->updated_at
-        ]);
+    try {
+        $transactions = \App\Models\BorrowTransaction::with(['borrowRequest.user', 'borrowRequest.equipment'])
+            ->get();
         
-        // Return transaction (if status is check_in)
-        if ($request->status === 'check_in') {
-            $transactions->push([
-                'id' => $request->id * 1000 + 2,
-                'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'R',
-                'transaction_type' => 'return',
-                'user' => $request->user,
-                'equipment' => $request->equipment,
-                'status' => 'completed',
-                'amount' => 0,
-                'start_date' => $request->end_at,
+        $mappedTransactions = $transactions->map(function ($transaction) {
+            $request = $transaction->borrowRequest;
+            return [
+                'id' => $transaction->id,
+                'transaction_id' => $request->req_id ?? 'N/A',
+                'transaction_type' => 'borrow', // All are borrow transactions
+                'user' => [
+                    'name' => $request->user->name ?? 'N/A',
+                    'email' => $request->user->email ?? 'N/A'
+                ],
+                'equipment' => [
+                    'name' => $request->equipment->name ?? 'N/A',
+                    'code' => $request->equipment->code ?? 'N/A'
+                ],
+                'status' => $request->status ?? 'pending',
+                'amount' => $transaction->penalty_amount ?? 0,
+                'start_date' => $request->start_at,
                 'end_date' => $request->end_at,
-                'description' => 'การคืนอุปกรณ์: ' . ($request->equipment->name ?? 'N/A'),
-                'notes' => 'คืนอุปกรณ์ตามกำหนด',
-                'created_at' => $request->updated_at,
-                'updated_at' => $request->updated_at
-            ]);
-        }
+                'checked_out_at' => $transaction->checked_out_at,
+                'checked_in_at' => $transaction->checked_in_at,
+                'description' => $request->request_reason ?? 'การยืมอุปกรณ์',
+                'notes' => $transaction->notes,
+                'created_at' => $transaction->created_at,
+                'updated_at' => $transaction->updated_at
+            ];
+        });
         
-        // Penalty transaction (if late return)
-        if ($request->status === 'check_in' && $request->end_at && $request->updated_at) {
-            $endDate = \Carbon\Carbon::parse($request->end_at);
-            $returnDate = \Carbon\Carbon::parse($request->updated_at);
-            
-            if ($returnDate->gt($endDate)) {
-                $daysLate = $returnDate->diffInDays($endDate);
-                $penaltyAmount = $daysLate * 50; // 50 baht per day
-                
-                $transactions->push([
-                    'id' => $request->id * 1000 + 3,
-                    'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'P',
-                    'transaction_type' => 'penalty',
-                    'user' => $request->user,
-                    'equipment' => $request->equipment,
-                    'status' => 'completed',
-                    'amount' => $penaltyAmount,
-                    'start_date' => $request->end_at,
-                    'end_date' => $request->updated_at,
-                    'description' => 'ค่าปรับการคืนล่าช้า: ' . ($request->equipment->name ?? 'N/A') . ' (' . $daysLate . ' วัน)',
-                    'notes' => 'คืนล่าช้า ' . $daysLate . ' วัน',
-                    'created_at' => $request->updated_at,
-                    'updated_at' => $request->updated_at
-                ]);
-            }
-        }
+        return response()->json($mappedTransactions->toArray());
+    } catch (\Exception $e) {
+        \Log::error('Transaction API Error:', ['error' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
-    
-    // Apply filters
-    $filteredTransactions = $transactions->filter(function ($transaction) use ($request) {
-        if ($request->transaction_type && $transaction['transaction_type'] !== $request->transaction_type) {
-            return false;
-        }
-        
-        if ($request->status && $transaction['status'] !== $request->status) {
-            return false;
-        }
-        
-        if ($request->user_name && !str_contains(strtolower($transaction['user']['name'] ?? ''), strtolower($request->user_name))) {
-            return false;
-        }
-        
-        if ($request->equipment_name && !str_contains(strtolower($transaction['equipment']['name'] ?? ''), strtolower($request->equipment_name))) {
-            return false;
-        }
-        
-        if ($request->date_from && $transaction['created_at'] < $request->date_from) {
-            return false;
-        }
-        
-        if ($request->date_to && $transaction['created_at'] > $request->date_to) {
-            return false;
-        }
-        
-        return true;
-    });
-    
-    return response()->json($filteredTransactions->values()->all());
 });
 

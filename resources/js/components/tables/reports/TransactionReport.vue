@@ -58,7 +58,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">รหัสธุรกรรม</label>
+                    <label class="block text-sm font-medium text-gray-700">รหัสคำขอ</label>
                     <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.transaction_id }}</p>
                 </div>
                 <div>
@@ -84,7 +84,7 @@
                     </span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">จำนวนเงิน</label>
+                    <label class="block text-sm font-medium text-gray-700">ค่าปรับ</label>
                     <p class="mt-1 text-sm font-medium" :class="getAmountClass(selectedTransaction.transaction_type)">
                         {{ formatAmount(selectedTransaction.amount) }}
                     </p>
@@ -96,6 +96,14 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">วันที่สิ้นสุด</label>
                     <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.end_date) }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">วันที่เช็คเอาท์</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_out_at) }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">วันที่เช็คอิน</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_in_at) }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">วันที่สร้าง</label>
@@ -135,12 +143,12 @@ export default {
             selectedTransaction: null,
             columns: [
                 { key: 'id', label: 'ไอดี', type: 'number' },
-                { key: 'transaction_id', label: 'รหัสธุรกรรม' },
+                { key: 'transaction_id', label: 'รหัสคำขอ' },
                 { key: 'transaction_type', label: 'ประเภท', type: 'badge' },
                 { key: 'user.name', label: 'ผู้ใช้' },
                 { key: 'equipment.name', label: 'อุปกรณ์' },
                 { key: 'status', label: 'สถานะ', type: 'badge' },
-                { key: 'amount', label: 'จำนวนเงิน' },
+                { key: 'amount', label: 'ค่าปรับ' },
                 { key: 'start_date', label: 'เริ่มวันที่', type: 'date' },
                 { key: 'end_date', label: 'ถึงวันที่', type: 'date' },
                 { key: 'created_at', label: 'วันที่สร้าง', type: 'date' },
@@ -148,30 +156,16 @@ export default {
             ],
             availableFilters: [
                 {
-                    key: 'transaction_type',
-                    label: 'ประเภทธุรกรรม',
-                    type: 'select',
-                    placeholder: 'เลือกประเภทธุรกรรม',
-                    options: [
-                        { value: 'borrow', label: 'การยืม' },
-                        { value: 'return', label: 'การคืน' },
-                        { value: 'penalty', label: 'ค่าปรับ' },
-                        { value: 'maintenance', label: 'ค่าซ่อมบำรุง' },
-                        { value: 'deposit', label: 'เงินมัดจำ' },
-                        { value: 'refund', label: 'เงินคืน' }
-                    ]
-                },
-                {
                     key: 'status',
                     label: 'สถานะ',
                     type: 'select',
                     placeholder: 'เลือกสถานะ',
                     options: [
                         { value: 'pending', label: 'รอดำเนินการ' },
-                        { value: 'completed', label: 'เสร็จสิ้น' },
+                        { value: 'approved', label: 'อนุมัติแล้ว' },
+                        { value: 'rejected', label: 'ปฏิเสธ' },
                         { value: 'cancelled', label: 'ยกเลิก' },
-                        { value: 'failed', label: 'ล้มเหลว' },
-                        { value: 'refunded', label: 'คืนเงินแล้ว' }
+                        { value: 'completed', label: 'เสร็จสิ้น' }
                     ]
                 },
                 {
@@ -188,7 +182,15 @@ export default {
         async fetchTransactions() {
             try {
                 const response = await api.get('/api/transactions');
-                this.transactions = response.data.data || response.data || [];
+                console.log('Transaction API Response:', response);
+                console.log('Response data:', response.data);
+                console.log('Response data type:', typeof response.data);
+                console.log('Response data length:', Array.isArray(response.data) ? response.data.length : 'not an array');
+                
+                // The API returns data directly, not wrapped in a data property
+                this.transactions = Array.isArray(response.data) ? response.data : [];
+                console.log('Transactions loaded:', this.transactions.length);
+                console.log('First transaction:', this.transactions[0]);
             } catch (error) {
                 console.error('Failed to fetch transactions:', error);
                 this.transactions = [];
@@ -196,54 +198,39 @@ export default {
         },
         getTransactionTypeBadgeClass(type) {
             const classes = {
-                'borrow': 'bg-blue-100 text-blue-800',
-                'return': 'bg-green-100 text-green-800',
-                'penalty': 'bg-red-100 text-red-800',
-                'maintenance': 'bg-yellow-100 text-yellow-800',
-                'deposit': 'bg-purple-100 text-purple-800',
-                'refund': 'bg-orange-100 text-orange-800'
+                'borrow': 'bg-blue-100 text-blue-800'
             };
             return classes[type] || 'bg-gray-100 text-gray-800';
         },
         getTransactionTypeLabel(type) {
             const labels = {
-                'borrow': 'การยืม',
-                'return': 'การคืน',
-                'penalty': 'ค่าปรับ',
-                'maintenance': 'ค่าซ่อมบำรุง',
-                'deposit': 'เงินมัดจำ',
-                'refund': 'เงินคืน'
+                'borrow': 'การยืม'
             };
             return labels[type] || type;
         },
         getStatusBadgeClass(status) {
             const classes = {
                 'pending': 'bg-yellow-100 text-yellow-800',
-                'completed': 'bg-green-100 text-green-800',
+                'approved': 'bg-green-100 text-green-800',
+                'rejected': 'bg-red-100 text-red-800',
                 'cancelled': 'bg-red-100 text-red-800',
-                'failed': 'bg-red-100 text-red-800',
-                'refunded': 'bg-orange-100 text-orange-800'
+                'completed': 'bg-blue-100 text-blue-800'
             };
             return classes[status] || 'bg-gray-100 text-gray-800';
         },
         getStatusLabel(status) {
             const labels = {
                 'pending': 'รอดำเนินการ',
-                'completed': 'เสร็จสิ้น',
+                'approved': 'อนุมัติแล้ว',
+                'rejected': 'ปฏิเสธ',
                 'cancelled': 'ยกเลิก',
-                'failed': 'ล้มเหลว',
-                'refunded': 'คืนเงินแล้ว'
+                'completed': 'เสร็จสิ้น'
             };
             return labels[status] || status;
         },
         getAmountClass(type) {
             const classes = {
-                'borrow': 'text-blue-600',
-                'return': 'text-green-600',
-                'penalty': 'text-red-600',
-                'maintenance': 'text-yellow-600',
-                'deposit': 'text-purple-600',
-                'refund': 'text-orange-600'
+                'borrow': 'text-blue-600'
             };
             return classes[type] || 'text-gray-600';
         },
