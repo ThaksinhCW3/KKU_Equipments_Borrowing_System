@@ -49,6 +49,6 @@ class Equipment extends Model
      */
     public function getBorrowedQuantityAttribute()
     {
-        return static::where('name', $this->name)->where('status', 'borrowed')->count();
+        return static::where('name', $this->name)->where('status', 'unavailable')->count();
     }
 }

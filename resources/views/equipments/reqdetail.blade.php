@@ -28,7 +28,7 @@
                 </div>
             @else
                 @foreach ($allRequests as $req)
-                    <div class="bg-white rounded-2xl shadow p-3 mb-10" x-data="{ openModal: false }">
+                    <div class="bg-white rounded-2xl shadow p-3 mb-10">
                         @if ($req->status === 'pending')
                             <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
                                 <div class="flex items-center">
@@ -264,58 +264,13 @@
                                     กลับ
                                 </a>
                                 @if ($req->status === 'pending')
-                                <button @click="openModal = true"
+                                <button onclick="showCancelModal({{ $req->id }})"
                                     class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
                                     ยกเลิกคำขอ
                                 </button>
                                 @endif
                             </div>
                             
-                            <!-- Modal -->
-                            <div x-show="openModal"
-                                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                x-cloak>
-                                <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                                    <h3 class="text-lg font-semibold mb-4">เลือกเหตุผลการยกเลิก</h3>
-
-                                    <form action="{{ route('borrower.requests.cancel', $req->id) }}" method="POST"
-                                        x-data="{ otherChecked: false }">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div class="space-y-2 mb-4">
-                                            <label class="flex items-center gap-2">
-                                                <input type="checkbox" name="cancel_reason[]" value="เปลี่ยนใจ"
-                                                    class="text-red-600 rounded" @click="otherChecked = false">
-                                                <span>เปลี่ยนใจ</span>
-                                            </label>
-                                            <label class="flex items-center gap-2">
-                                                <input type="checkbox" name="cancel_reason[]" value="เลือกอุปกรณ์ผิด"
-                                                    class="text-red-600 rounded" @click="otherChecked = false">
-                                                <span>เลือกอุปกรณ์ผิด</span>
-                                            </label>
-                                            <label class="flex items-center gap-2">
-                                                <input type="checkbox" name="cancel_reason[]" value="อื่น ๆ"
-                                                    class="text-red-600 rounded" x-model="otherChecked">
-                                                <span>อื่น ๆ</span>
-                                            </label>
-                                            <input type="text" name="cancel_reason[]" placeholder="ระบุเหตุผลอื่น..."
-                                                class="mt-2 w-full border rounded px-3 py-2" x-show="otherChecked"
-                                                x-transition>
-                                        </div>
-
-                                        <div class="flex justify-end gap-3">
-                                            <button type="button" @click="openModal = false"
-                                                class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
-                                                ปิด
-                                            </button>
-                                            <button type="submit"
-                                                class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
-                                                ยืนยันการยกเลิก
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -345,4 +300,71 @@
             });
         </script>
     @endif
+
+    <script>
+        // SweetAlert cancel modal function
+        window.showCancelModal = function(requestId) {
+            Swal.fire({
+                title: 'เลือกเหตุผลการยกเลิก',
+                html: `
+                    <div class="text-left space-y-2">
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="เปลี่ยนใจ"> เปลี่ยนใจ</label>
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="เลือกอุปกรณ์ผิด"> เลือกอุปกรณ์ผิด</label>
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="อื่นๆ"> อื่นๆ</label>
+                      <input id="reason-text" type="text" placeholder="ระบุเหตุผลอื่น..." maxlength="50" class="w-full border rounded px-2 py-1" />
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันการยกเลิก',
+                cancelButtonText: 'ปิด',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const selected = document.querySelector('input[name="reason"]:checked');
+                    const text = (document.getElementById('reason-text') || {}).value || '';
+                    let reason = selected ? selected.value : '';
+                    if (!reason) {
+                        Swal.showValidationMessage('กรุณาเลือกเหตุผล');
+                        return false;
+                    }
+                    if (reason === 'อื่นๆ') {
+                        if (!text.trim()) {
+                            Swal.showValidationMessage('กรุณาระบุเหตุผลเพิ่มเติม');
+                            return false;
+                        }
+                        reason = text.trim();
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/borrower/requests/${requestId}/cancel`;
+                    
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'PATCH';
+                    
+                    const reasonField = document.createElement('input');
+                    reasonField.type = 'hidden';
+                    reasonField.name = 'cancel_reason[]';
+                    reasonField.value = result.value;
+                    
+                    form.appendChild(csrfToken);
+                    form.appendChild(methodField);
+                    form.appendChild(reasonField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

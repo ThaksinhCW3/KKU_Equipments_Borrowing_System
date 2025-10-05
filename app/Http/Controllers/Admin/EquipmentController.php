@@ -13,20 +13,31 @@ use Illuminate\Support\Facades\Cache;
 
 class EquipmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $equipments = Cache::remember('equipments_with_category', 600, function () {
-            return Equipment::with('category')->get()->map(function ($equipment) {
-                // Ensure accessories is properly cast to array
-                if ($equipment->accessories) {
-                    if (is_string($equipment->accessories)) {
-                        $equipment->accessories = json_decode($equipment->accessories, true) ?: [];
-                    }
-                } else {
-                    $equipment->accessories = [];
+        $query = Equipment::with('category');
+
+        // Filter by search term if provided
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('code', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $equipments = $query->get()->map(function ($equipment) {
+            // Ensure accessories is properly cast to array
+            if ($equipment->accessories) {
+                if (is_string($equipment->accessories)) {
+                    $equipment->accessories = json_decode($equipment->accessories, true) ?: [];
                 }
-                return $equipment;
-            });
+            } else {
+                $equipment->accessories = [];
+            }
+            return $equipment;
         });
 
         $categories = Cache::remember('all_categories', 600, function () {
@@ -86,7 +97,12 @@ class EquipmentController extends Controller
                 'action' => 'create',
                 'target_type' => 'equipment',
                 'target_id' => $equipment->id,
+                'target_name' => $equipment->name,
                 'description' => "สร้างอุปกรณ์: {$equipment->name} (ID {$equipment->id})",
+                'module' => 'equipment',
+                'severity' => 'info',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
             ]);
 
 
@@ -285,7 +301,12 @@ class EquipmentController extends Controller
             'action' => 'delete',
             'target_type' => 'equipment',
             'target_id' => $id,
+            'target_name' => $equipment->name,
             'description' => "ลบอุปกรณ์: {$equipment->name} (ID {$equipment->code})",
+            'module' => 'equipment',
+            'severity' => 'info',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent()
         ]);
 
         $equipment->delete();

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\BorrowRequest;
+use App\Models\Equipment;
 use App\Models\Log;
+use App\Models\User;
+use App\Models\VerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
@@ -34,13 +37,22 @@ class AdminController extends Controller
                 'Approved' => (clone $query)->where('status', 'approved')->count(),
                 'Rejected' => (clone $query)->where('status', 'rejected')->count(),
                 'Pending' => (clone $query)->where('status', 'pending')->count(),
+                'Cancelled' => (clone $query)->where('status', 'cancelled')->count(),
+            ];
+
+            // Equipment stats
+            $equipmentStats = [
+                'TotalEquipment' => Equipment::count(),
+                'AvailableEquipment' => Equipment::where('status', 'available')->count(),
+                'BorrowedEquipment' => Equipment::where('status', 'unavailable')->count(),
+                'MaintenanceEquipment' => Equipment::where('status', 'maintenance')->count(),
             ];
 
             // Chart data
             if ($month) {
                 $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
-                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
+                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected, SUM(status="cancelled") as cancelled')
                     ->whereYear('created_at', $year)
                     ->whereMonth('created_at', $month)
                     ->groupBy('day')
@@ -51,21 +63,25 @@ class AdminController extends Controller
                 $chartData = [
                     'labels' => array_map(fn($d) => "Day $d", range(1, $daysInMonth)),
                     'TotalRequests' => [],
+                    'Approved' => [],
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
+                    'Cancelled' => [],
                 ];
 
                 for ($d = 1; $d <= $daysInMonth; $d++) {
                     $chartData['TotalRequests'][] = $dailyData[$d]->total ?? 0;
+                    $chartData['Approved'][] = $dailyData[$d]->approved ?? 0;
                     $chartData['checkinReq'][] = $dailyData[$d]->checkin ?? 0;
                     $chartData['Pending'][] = $dailyData[$d]->pending ?? 0;
                     $chartData['Rejected'][] = $dailyData[$d]->rejected ?? 0;
+                    $chartData['Cancelled'][] = $dailyData[$d]->cancelled ?? 0;
                 }
             } else {
                 $months = range(1, 12);
 
-                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
+                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected, SUM(status="cancelled") as cancelled')
                     ->whereYear('created_at', $year)
                     ->groupBy('month')
                     ->orderBy('month')
@@ -75,16 +91,20 @@ class AdminController extends Controller
                 $chartData = [
                     'labels' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
                     'TotalRequests' => [],
+                    'Approved' => [],
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
+                    'Cancelled' => [],
                 ];
 
                 foreach ($months as $m) {
                     $chartData['TotalRequests'][] = $monthlyData[$m]->total ?? 0;
+                    $chartData['Approved'][] = $monthlyData[$m]->approved ?? 0;
                     $chartData['checkinReq'][] = $monthlyData[$m]->checkin ?? 0;
                     $chartData['Pending'][] = $monthlyData[$m]->pending ?? 0;
                     $chartData['Rejected'][] = $monthlyData[$m]->rejected ?? 0;
+                    $chartData['Cancelled'][] = $monthlyData[$m]->cancelled ?? 0;
                 }
             }
 
@@ -110,19 +130,51 @@ class AdminController extends Controller
 
             return [
                 'borrowStatus' => $borrowStatus,
+                'equipmentStats' => $equipmentStats,
                 'chartData' => $chartData,
                 'availableYears' => $availableYears,
                 'selectedYear' => $year,
                 'selectedMonth' => $month,
                 'recentRequests' => $recentRequests,
-                'categoryCounts' => Category::withCount(['equipments' => function($query) {
-                    $query->where('status', 'available');
-                }])->get(),
+                'categoryCounts' => Category::withCount([
+                    'equipments',
+                    'equipments as available_equipments_count' => function($query) {
+                        $query->where('status', 'available');
+                    },
+                    'equipments as borrowed_equipments_count' => function($query) {
+                        $query->where('status', 'unavailable');
+                    },
+                    'equipments as maintenance_equipments_count' => function($query) {
+                        $query->where('status', 'maintenance');
+                    }
+                ])->get(),
                 // Analytics data
                 'popularEquipment' => $popularEquipment,
                 'borrowingTrends' => $borrowingTrends,
+                'frequentUsers' => BorrowRequest::with('user')
+                    ->selectRaw('users_id, COUNT(*) as request_count')
+                    ->groupBy('users_id')
+                    ->orderByDesc('request_count')
+                    ->limit(5)
+                    ->get()
+                    ->map(function($item) {
+                        return [
+                            'user' => $item->user,
+                            'request_count' => $item->request_count
+                        ];
+                    }),
             ];
         });
+
+        // Get pending verification requests (outside cache for real-time data)
+        $pendingVerifications = VerificationRequest::with('user')
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Add pending verifications to the data array
+        $data['pendingVerifications'] = $pendingVerifications;
 
         return view('admin.index', $data);
     }
@@ -155,38 +207,74 @@ class AdminController extends Controller
 
     private function getBorrowingTrends($year, $month)
     {
-        $query = BorrowRequest::query();
-        $query->whereYear('created_at', $year);
-        $query->where('status', 'check_in');
+        $baseQuery = BorrowRequest::query();
+        $baseQuery->whereYear('created_at', $year);
         
         if ($month) {
-            $query->whereMonth('created_at', $month);
+            $baseQuery->whereMonth('created_at', $month);
         }
 
         if ($month) {
             // Daily data for specific month
             $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-            $data = $query->selectRaw('DAY(created_at) as day, COUNT(*) as total_borrows')
+            
+            // Get completed borrows
+            $completedData = (clone $baseQuery)->where('status', 'check_in')
+                ->selectRaw('DAY(created_at) as day, COUNT(*) as total_borrows')
+                ->groupBy('day')
+                ->orderBy('day')
+                ->get()
+                ->keyBy('day');
+
+            // Get canceled requests
+            $canceledData = (clone $baseQuery)->where('status', 'cancelled')
+                ->selectRaw('DAY(created_at) as day, COUNT(*) as total_canceled')
                 ->groupBy('day')
                 ->orderBy('day')
                 ->get()
                 ->keyBy('day');
 
             $labels = [];
-            $values = [];
+            $completedValues = [];
+            $canceledValues = [];
+            
             for ($d = 1; $d <= $daysInMonth; $d++) {
                 $labels[] = "Day $d";
-                $values[] = $data[$d]->total_borrows ?? 0;
+                $completedValues[] = $completedData[$d]->total_borrows ?? 0;
+                $canceledValues[] = $canceledData[$d]->total_canceled ?? 0;
             }
 
             return [
                 'labels' => $labels,
-                'data' => $values,
+                'datasets' => [
+                    [
+                        'label' => 'ยืมสำเร็จ',
+                        'data' => $completedValues,
+                        'backgroundColor' => 'rgba(34, 197, 94, 0.8)',
+                        'borderColor' => 'rgba(34, 197, 94, 1)',
+                        'borderWidth' => 1
+                    ],
+                    [
+                        'label' => 'ยกเลิก',
+                        'data' => $canceledValues,
+                        'backgroundColor' => 'rgba(239, 68, 68, 0.8)',
+                        'borderColor' => 'rgba(239, 68, 68, 1)',
+                        'borderWidth' => 1
+                    ]
+                ],
                 'title' => "ยอดยืมรายวัน - " . date('F Y', mktime(0, 0, 0, $month, 1, $year))
             ];
         } else {
             // Monthly data
-            $data = $query->selectRaw('MONTH(created_at) as month, COUNT(*) as total_borrows')
+            $completedData = (clone $baseQuery)->where('status', 'check_in')
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as total_borrows')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            $canceledData = (clone $baseQuery)->where('status', 'cancelled')
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as total_canceled')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
@@ -194,15 +282,32 @@ class AdminController extends Controller
 
             $months = range(1, 12);
             $labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            $values = [];
+            $completedValues = [];
+            $canceledValues = [];
 
             foreach ($months as $m) {
-                $values[] = $data[$m]->total_borrows ?? 0;
+                $completedValues[] = $completedData[$m]->total_borrows ?? 0;
+                $canceledValues[] = $canceledData[$m]->total_canceled ?? 0;
             }
 
             return [
                 'labels' => $labels,
-                'data' => $values,
+                'datasets' => [
+                    [
+                        'label' => 'ยืมสำเร็จ',
+                        'data' => $completedValues,
+                        'backgroundColor' => 'rgba(34, 197, 94, 0.8)',
+                        'borderColor' => 'rgba(34, 197, 94, 1)',
+                        'borderWidth' => 1
+                    ],
+                    [
+                        'label' => 'ยกเลิก',
+                        'data' => $canceledValues,
+                        'backgroundColor' => 'rgba(239, 68, 68, 0.8)',
+                        'borderColor' => 'rgba(239, 68, 68, 1)',
+                        'borderWidth' => 1
+                    ]
+                ],
                 'title' => "ยอดยืมรายเดือน - $year"
             ];
         }
@@ -221,7 +326,7 @@ class AdminController extends Controller
             'admin_id' => Auth::id() ?? 1,
             'action' => 'export_initiated',
             'target_type' => 'system',
-            'target_id' => null,
+            'target_id' => 0,
             'target_name' => 'Dashboard Export',
             'description' => "เริ่มส่งออกข้อมูล CSV: {$type} สำหรับปี {$year}" . ($month ? " เดือน {$month}" : ""),
             'module' => 'export',
@@ -230,33 +335,115 @@ class AdminController extends Controller
             'user_agent' => $request->userAgent()
         ]);
 
-        if ($type === 'trends') {
-            $data = $this->getBorrowingTrends($year, $month);
-            $csvData = [];
-            $csvData[] = ['Period', 'Borrow Count'];
-            
-            foreach ($data['labels'] as $index => $label) {
-                $csvData[] = [$label, $data['data'][$index]];
-            }
-        } else { // popular
-            $popularEquipment = $this->getPopularEquipment($year, $month);
-            $csvData = [];
-            $csvData[] = ['Equipment Name', 'Equipment Code', 'Borrow Count', 'Category'];
-            
-            foreach ($popularEquipment as $item) {
-                $csvData[] = [
-                    $item['equipment_name'],
-                    $item['equipment_code'],
-                    $item['borrow_count'],
-                    $item['category']
-                ];
-            }
+        switch ($type) {
+            case 'borrow_requests':
+                $query = BorrowRequest::with(['user', 'equipment.category']);
+                
+                if ($year) {
+                    $query->whereYear('created_at', $year);
+                }
+                if ($month) {
+                    $query->whereMonth('created_at', $month);
+                }
+                
+                $borrowRequests = $query->orderBy('created_at', 'desc')->get();
+                
+                $csvData = [];
+                $csvData[] = ['Request ID', 'User Email', 'User Role', 'Device Name', 'Device Code', 'Category', 'Start Date', 'End Date', 'Status'];
+                
+                foreach ($borrowRequests as $borrowRequest) {
+                    $csvData[] = [
+                        $borrowRequest->req_id,
+                        $borrowRequest->user->email ?? 'N/A',
+                        'นักศึกษา', // Default role
+                        $borrowRequest->equipment->name ?? 'N/A',
+                        $borrowRequest->equipment->code ?? 'N/A',
+                        $borrowRequest->equipment->category->name ?? 'N/A',
+                        $borrowRequest->start_at ? $borrowRequest->start_at->format('Y-m-d') : '',
+                        $borrowRequest->end_at ? $borrowRequest->end_at->format('Y-m-d') : '',
+                        $this->getStatusText($borrowRequest->status)
+                    ];
+                }
+                break;
+
+            case 'device_usage':
+                $query = BorrowRequest::with(['equipment.category'])
+                    ->where('status', 'check_in'); // Only completed borrows
+                
+                if ($year) {
+                    $query->whereYear('created_at', $year);
+                }
+                if ($month) {
+                    $query->whereMonth('created_at', $month);
+                }
+                
+                $deviceUsage = $query->selectRaw('equipments_id, COUNT(*) as times_borrowed')
+                    ->groupBy('equipments_id')
+                    ->orderByDesc('times_borrowed')
+                    ->get();
+                
+                $csvData = [];
+                $csvData[] = ['Device Name', 'Device Code', 'Category', 'Times Borrowed'];
+                
+                foreach ($deviceUsage as $usage) {
+                    $equipment = Equipment::with('category')->find($usage->equipments_id);
+                    if ($equipment) {
+                        $csvData[] = [
+                            $equipment->name,
+                            $equipment->code,
+                            $equipment->category->name ?? 'N/A',
+                            $usage->times_borrowed
+                        ];
+                    }
+                }
+                break;
+
+            case 'user_activity':
+                $query = BorrowRequest::with('user');
+                
+                if ($year) {
+                    $query->whereYear('created_at', $year);
+                }
+                if ($month) {
+                    $query->whereMonth('created_at', $month);
+                }
+                
+                $userActivity = $query->selectRaw('users_id, COUNT(*) as total_requests, SUM(status = "check_in") as completed, SUM(status = "cancelled") as canceled')
+                    ->groupBy('users_id')
+                    ->orderByDesc('total_requests')
+                    ->get();
+                
+                $csvData = [];
+                $csvData[] = ['User Email', 'Role', 'Total Requests', 'Completed', 'Canceled'];
+                
+                foreach ($userActivity as $activity) {
+                    $user = User::find($activity->users_id);
+                    if ($user) {
+                        $csvData[] = [
+                            $user->email,
+                            'นักศึกษา', // Default role
+                            $activity->total_requests,
+                            $activity->completed,
+                            $activity->canceled
+                        ];
+                    }
+                }
+                break;
+
+            default:
+                $csvData = [];
+                $csvData[] = ['No data available'];
+                break;
         }
 
         $callback = function() use ($csvData) {
             $file = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM for proper encoding
+            fwrite($file, "\xEF\xBB\xBF");
+            
             foreach ($csvData as $row) {
-                fputcsv($file, $row);
+                fputcsv($file, $row, ',', '"');
             }
             fclose($file);
         };
@@ -266,7 +453,7 @@ class AdminController extends Controller
             'admin_id' => Auth::id() ?? 1,
             'action' => 'export_completed',
             'target_type' => 'system',
-            'target_id' => null,
+            'target_id' => 0,
             'target_name' => 'Dashboard Export',
             'description' => "ส่งออกข้อมูล CSV เสร็จสิ้น: {$filename}",
             'module' => 'export',
@@ -276,8 +463,28 @@ class AdminController extends Controller
         ]);
 
         return response()->stream($callback, 200, [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    private function getStatusText($status)
+    {
+        switch (strtolower($status)) {
+            case 'pending':
+                return 'รอดำเนินการ';
+            case 'approved':
+                return 'อนุมัติแล้ว';
+            case 'rejected':
+                return 'ปฏิเสธ';
+            case 'check_out':
+                return 'มารับของแล้ว';
+            case 'check_in':
+                return 'มาคืนของแล้ว';
+            case 'cancelled':
+                return 'ยกเลิก';
+            default:
+                return ucfirst($status);
+        }
     }
 }

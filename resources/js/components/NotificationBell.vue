@@ -61,19 +61,18 @@
               @click="handleNotificationClick(notification)"
             >
               <div class="font-semibold text-gray-800">
-                {{ notification.data.user || 'admin' }}
+                {{ getNotificationSender(notification) }}
               </div>
               
               <div 
-                v-if="notification.data.status"
                 class="text-sm"
-                :class="getStatusColor(notification.data.status)"
+                :class="getNotificationColor(notification)"
               >
                 {{ notification.data.message }}
               </div>
               
               <div class="text-xs text-gray-400 mt-1">
-                อุปกรณ์: {{ notification.data.equipment }} |
+                {{ getNotificationDetails(notification) }} |
                 {{ notification.created_at_human }}
               </div>
             </div>
@@ -196,6 +195,51 @@ export default {
       if (!this.$el.contains(event.target)) {
         this.isOpen = false
       }
+    },
+    
+    getNotificationSender(notification) {
+      // For verification notifications
+      if (notification.data.type === 'verification_submitted' || notification.data.type === 'verification_processed') {
+        return notification.data.user_name || notification.data.user_email || 'admin'
+      }
+      // For borrow request notifications
+      return notification.data.user || 'admin'
+    },
+    
+    getNotificationColor(notification) {
+      // For verification notifications
+      if (notification.data.type === 'verification_submitted') {
+        return 'text-yellow-600'
+      }
+      if (notification.data.type === 'verification_processed') {
+        return notification.data.status === 'approved' ? 'text-green-600' : 'text-red-600'
+      }
+      // For borrow request notifications
+      if (notification.data.status) {
+        switch (notification.data.status) {
+          case 'rejected':
+            return 'text-red-600'
+          case 'approved':
+            return 'text-green-600'
+          case 'cancelled':
+            return 'text-gray-600'
+          default:
+            return 'text-yellow-600'
+        }
+      }
+      return 'text-gray-600'
+    },
+    
+    getNotificationDetails(notification) {
+      // For verification notifications
+      if (notification.data.type === 'verification_submitted') {
+        return 'การยืนยันตัวตน'
+      }
+      if (notification.data.type === 'verification_processed') {
+        return 'การยืนยันตัวตน'
+      }
+      // For borrow request notifications
+      return `อุปกรณ์: ${notification.data.equipment}`
     },
     
     getStatusColor(status) {

@@ -73,7 +73,6 @@
                     <div id="historyRequests" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         @foreach ($allRequests as $req)
                             <div class="bg-white rounded-2xl shadow p-4 flex flex-col justify-between h-full request-card" 
-                                 x-data="{ openModal: false }" 
                                  data-equipment-name="{{ strtolower($req->equipment->name) }}"
                                  data-request-id="{{ strtolower($req->req_id) }}"
                                  data-status="{{ $req->status }}"
@@ -87,17 +86,20 @@
                                             <h2 class="text-lg font-semibold text-gray-800">#{{ $req->req_id }}</h2>
                                         </div>
                                         <span class="px-4 py-2 text-sm font-semibold rounded-lg border-2
-                                            @if ($req->status === 'pending') bg-yellow-50 text-yellow-800 border-yellow-300
-                                            @elseif($req->status === 'approved') bg-green-50 text-green-800 border-green-300
-                                            @elseif($req->status === 'rejected') bg-red-50 text-red-800 border-red-300
-                                            @elseif($req->status === 'cancelled') bg-gray-50 text-gray-800 border-gray-300
-                                            @else bg-gray-50 text-gray-800 border-gray-300 @endif">
+                                            @if ($req->status === 'pending') bg-yellow-50 text-yellow-700 border-yellow-300
+                                            @elseif($req->status === 'approved') bg-green-50 text-green-700 border-green-300
+                                            @elseif($req->status === 'rejected') bg-red-50 text-red-700 border-red-300
+                                            @elseif($req->status === 'check_in') bg-purple-50 text-purple-700 border-purple-300
+                                            @elseif($req->status === 'cancelled') bg-gray-50 text-gray-700 border-gray-300
+                                            @else bg-gray-50 text-gray-700 border-gray-300 @endif">
                                             @if ($req->status === 'pending')
                                                 <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>รอดำเนินการ
                                             @elseif($req->status === 'approved')
-                                                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>อนุมัติ
+                                                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>อนุมัติแล้ว
                                             @elseif($req->status === 'rejected')
                                                 <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>ปฏิเสธ
+                                            @elseif($req->status === 'check_in')
+                                                <span class="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>มาคืนของแล้ว
                                             @elseif($req->status === 'cancelled')
                                                 <span class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>ยกเลิกแล้ว
                                             @else
@@ -185,58 +187,13 @@
                                     </a>
 
                                     @if ($req->status === 'pending')
-                                        <button @click="openModal = true"
-                                            class="bg-red-600 text-black px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                                        <button @click="showCancelModal({{ $req->id }})"
+                                            class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
                                             ยกเลิก
                                         </button>
                                     @endif
                                 </div>
 
-                                <!-- Cancel Modal -->
-                                <div x-show="openModal"
-                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                    x-cloak>
-                                    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                                        <h3 class="text-lg font-semibold mb-4">เลือกเหตุผลการยกเลิก</h3>
-                                        <form action="{{ route('borrower.requests.cancel', $req->id) }}" method="POST"
-                                            x-data="{ otherChecked: false }">
-                                            @csrf
-                                            @method('PATCH')
-
-                                            <div class="space-y-2 mb-4">
-                                                <label class="flex items-center gap-2">
-                                                    <input type="checkbox" name="cancel_reason[]" value="เปลี่ยนใจ"
-                                                        class="text-red-600 rounded" @click="otherChecked = false">
-                                                    <span>เปลี่ยนใจ</span>
-                                                </label>
-                                                <label class="flex items-center gap-2">
-                                                    <input type="checkbox" name="cancel_reason[]" value="เลือกอุปกรณ์ผิด"
-                                                        class="text-red-600 rounded" @click="otherChecked = false">
-                                                    <span>เลือกอุปกรณ์ผิด</span>
-                                                </label>
-                                                <label class="flex items-center gap-2">
-                                                    <input type="checkbox" name="cancel_reason[]" value="อื่น ๆ"
-                                                        class="text-red-600 rounded" x-model="otherChecked">
-                                                    <span>อื่น ๆ</span>
-                                                </label>
-                                                <input type="text" name="cancel_reason[]" placeholder="ระบุเหตุผลอื่น..."
-                                                    class="mt-2 w-full border rounded px-3 py-2" x-show="otherChecked"
-                                                    x-transition>
-                                            </div>
-
-                                            <div class="flex justify-end gap-3">
-                                                <button type="button" @click="openModal = false"
-                                                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
-                                                    ปิด
-                                                </button>
-                                                <button type="submit"
-                                                    class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
-                                                    ยืนยันการยกเลิก
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -295,6 +252,71 @@
     @endif
 
     <script>
+        // SweetAlert cancel modal function
+        window.showCancelModal = function(requestId) {
+            Swal.fire({
+                title: 'เลือกเหตุผลการยกเลิก',
+                html: `
+                    <div class="text-left space-y-2">
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="เปลี่ยนใจ"> เปลี่ยนใจ</label>
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="เลือกอุปกรณ์ผิด"> เลือกอุปกรณ์ผิด</label>
+                      <label class="flex items-center gap-2"><input type="radio" name="reason" value="อื่นๆ"> อื่นๆ</label>
+                      <input id="reason-text" type="text" placeholder="ระบุเหตุผลอื่น..." maxlength="50" class="w-full border rounded px-2 py-1" />
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันการยกเลิก',
+                cancelButtonText: 'ปิด',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const selected = document.querySelector('input[name="reason"]:checked');
+                    const text = (document.getElementById('reason-text') || {}).value || '';
+                    let reason = selected ? selected.value : '';
+                    if (!reason) {
+                        Swal.showValidationMessage('กรุณาเลือกเหตุผล');
+                        return false;
+                    }
+                    if (reason === 'อื่นๆ') {
+                        if (!text.trim()) {
+                            Swal.showValidationMessage('กรุณาระบุเหตุผลเพิ่มเติม');
+                            return false;
+                        }
+                        reason = text.trim();
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create and submit form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/borrower/requests/${requestId}/cancel`;
+                    
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'PATCH';
+                    
+                    const reasonField = document.createElement('input');
+                    reasonField.type = 'hidden';
+                    reasonField.name = 'cancel_reason[]';
+                    reasonField.value = result.value;
+                    
+                    form.appendChild(csrfToken);
+                    form.appendChild(methodField);
+                    form.appendChild(reasonField);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchHistory');
             const statusFilter = document.getElementById('statusFilter');
@@ -441,7 +463,6 @@
             function createRequestCard(request) {
                 const div = document.createElement('div');
                 div.className = 'bg-white rounded-2xl shadow p-4 flex flex-col justify-between h-full request-card';
-                div.setAttribute('x-data', '{ openModal: false }');
                 div.setAttribute('data-equipment-name', request.equipment.name.toLowerCase());
                 div.setAttribute('data-request-id', request.req_id.toLowerCase());
                 div.setAttribute('data-status', request.status);
@@ -453,19 +474,23 @@
                 switch(request.status) {
                     case 'pending':
                         statusDisplay = 'รอดำเนินการ';
-                        statusClass = 'bg-yellow-50 text-yellow-800 border-yellow-300';
+                        statusClass = 'bg-yellow-50 text-yellow-700 border-yellow-300';
                         break;
                     case 'approved':
-                        statusDisplay = 'อนุมัติ';
-                        statusClass = 'bg-green-50 text-green-800 border-green-300';
+                        statusDisplay = 'อนุมัติแล้ว';
+                        statusClass = 'bg-green-50 text-green-700 border-green-300';
                         break;
                     case 'rejected':
                         statusDisplay = 'ปฏิเสธ';
-                        statusClass = 'bg-red-50 text-red-800 border-red-300';
+                        statusClass = 'bg-red-50 text-red-700 border-red-300';
+                        break;
+                    case 'check_in':
+                        statusDisplay = 'มาคืนของแล้ว';
+                        statusClass = 'bg-purple-50 text-purple-700 border-purple-300';
                         break;
                     case 'cancelled':
                         statusDisplay = 'ยกเลิกแล้ว';
-                        statusClass = 'bg-gray-50 text-gray-800 border-gray-300';
+                        statusClass = 'bg-gray-50 text-gray-700 border-gray-300';
                         break;
                 }
 
@@ -530,7 +555,7 @@
                                 <h2 class="text-lg font-semibold text-gray-800">#${request.req_id}</h2>
                             </div>
                             <span class="px-4 py-2 text-sm font-semibold rounded-lg border-2 ${statusClass}">
-                                <span class="inline-block w-2 h-2 bg-${request.status === 'pending' ? 'yellow' : request.status === 'approved' ? 'green' : request.status === 'rejected' ? 'red' : 'gray'}-500 rounded-full mr-2"></span>${statusDisplay}
+                                <span class="inline-block w-2 h-2 bg-${request.status === 'pending' ? 'yellow' : request.status === 'approved' ? 'green' : request.status === 'rejected' ? 'red' : request.status === 'check_in' ? 'purple' : 'gray'}-500 rounded-full mr-2"></span>${statusDisplay}
                             </span>
                         </div>
 
@@ -569,42 +594,12 @@
                             ดูรายละเอียด
                         </a>
                         ${request.status === 'pending' ? `
-                        <button @click="openModal = true" class="bg-red-600 text-black px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                        <button onclick="showCancelModal(${request.id})" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
                             ยกเลิก
                         </button>
                         ` : ''}
                     </div>
 
-                    ${request.status === 'pending' ? `
-                    <div x-show="openModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-cloak>
-                        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                            <h3 class="text-lg font-semibold mb-4">เลือกเหตุผลการยกเลิก</h3>
-                            <form action="/borrower/requests/${request.id}/cancel" method="POST" x-data="{ otherChecked: false }">
-                                <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').getAttribute('content')}">
-                                <input type="hidden" name="_method" value="PATCH">
-                                <div class="space-y-2 mb-4">
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="cancel_reason[]" value="เปลี่ยนใจ" class="text-red-600 rounded" @click="otherChecked = false">
-                                        <span>เปลี่ยนใจ</span>
-                                    </label>
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="cancel_reason[]" value="เลือกอุปกรณ์ผิด" class="text-red-600 rounded" @click="otherChecked = false">
-                                        <span>เลือกอุปกรณ์ผิด</span>
-                                    </label>
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="cancel_reason[]" value="อื่น ๆ" class="text-red-600 rounded" x-model="otherChecked">
-                                        <span>อื่น ๆ</span>
-                                    </label>
-                                    <input type="text" name="cancel_reason[]" placeholder="ระบุเหตุผลอื่น..." class="mt-2 w-full border rounded px-3 py-2" x-show="otherChecked" x-transition>
-                                </div>
-                                <div class="flex justify-end gap-3">
-                                    <button type="button" @click="openModal = false" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">ปิด</button>
-                                    <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">ยืนยันการยกเลิก</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    ` : ''}
                 `;
 
                 return div;

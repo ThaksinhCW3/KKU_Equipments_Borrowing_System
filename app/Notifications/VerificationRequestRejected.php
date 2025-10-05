@@ -29,7 +29,7 @@ class VerificationRequestRejected extends Notification implements ShouldQueue
             ->subject('คำขอยืนยันตัวตนถูกปฏิเสธ')
             ->greeting("สวัสดี {$notifiable->name}")
             ->line("คำขอยืนยันตัวตนของคุณถูกปฏิเสธ")
-            ->line("เหตุผล: {$this->verificationRequest->admin_notes}")
+            ->line("เหตุผล: {$this->verificationRequest->reject_note}")
             ->line("กรุณาตรวจสอบข้อมูลและส่งคำขอใหม่หากต้องการ")
             ->action('ส่งคำขอใหม่', route('profile.show'))
             ->line('หากมีข้อสงสัย กรุณาติดต่อผู้ดูแลระบบ');
@@ -43,7 +43,7 @@ class VerificationRequestRejected extends Notification implements ShouldQueue
             'message' => 'คำขอยืนยันตัวตนถูกปฏิเสธ',
             'type' => 'verification_request_rejected',
             'url' => route('profile.show'),
-            'admin_notes' => $this->verificationRequest->admin_notes,
+            'reject_note' => $this->verificationRequest->reject_note,
             'created_at' => now()->toDateTimeString(),
         ];
     }

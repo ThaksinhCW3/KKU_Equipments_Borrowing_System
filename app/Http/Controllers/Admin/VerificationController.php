@@ -22,12 +22,43 @@ class VerificationController extends Controller
 
     public function api(Request $request)
     {
-        $query = VerificationRequest::with(['user', 'processedBy'])
-            ->orderBy('created_at', 'desc');
+        $query = VerificationRequest::with(['user', 'processedBy']);
 
         // Filter by status if provided
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
+        }
+
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->whereHas('user', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Sort functionality
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        // Map frontend sort fields to database fields
+        $sortFieldMap = [
+            'name' => 'users.name',
+            'email' => 'users.email',
+            'status' => 'verification_requests.status',
+            'created_at' => 'verification_requests.created_at'
+        ];
+
+        $sortField = $sortFieldMap[$sortBy] ?? 'verification_requests.created_at';
+
+        // Handle sorting for user fields (name, email)
+        if (in_array($sortBy, ['name', 'email'])) {
+            $query->join('users', 'verification_requests.users_id', '=', 'users.id')
+                  ->orderBy($sortField, $sortOrder)
+                  ->select('verification_requests.*'); // Select only verification_requests columns
+        } else {
+            $query->orderBy($sortField, $sortOrder);
         }
 
         $verificationRequests = $query->paginate(10);
@@ -44,14 +75,14 @@ class VerificationController extends Controller
     public function approve(Request $request, $id)
     {
         $request->validate([
-            'admin_note' => 'nullable|string|max:1000',
+            'reject_note' => 'nullable|string|max:1000',
         ]);
 
         $verificationRequest = VerificationRequest::findOrFail($id);
 
         $verificationRequest->update([
             'status' => VerificationRequest::STATUS_APPROVED,
-            'admin_note' => $request->admin_note,
+            'reject_note' => $request->reject_note,
             'processed_by' => Auth::id(),
             'process_at' => now(),
         ]);
@@ -65,14 +96,14 @@ class VerificationController extends Controller
     public function reject(Request $request, $id)
     {
         $request->validate([
-            'admin_note' => 'required|string|max:1000',
+            'reject_note' => 'required|string|max:1000',
         ]);
 
         $verificationRequest = VerificationRequest::findOrFail($id);
 
         $verificationRequest->update([
             'status' => VerificationRequest::STATUS_REJECTED,
-            'admin_note' => $request->admin_note,
+            'reject_note' => $request->reject_note,
             'processed_by' => Auth::id(),
             'process_at' => now(),
         ]);

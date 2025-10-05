@@ -256,7 +256,10 @@
 
                                 <div class="bg-gray-50 rounded p-4 md:col-span-2">
                                     <label class="text-gray-500 text-sm block mb-1">หมายเหตุ</label>
-                                        <textarea name="notes" class="w-full border rounded px-2 py-1" rows="2">{{ $requests->transaction->notes ?? '' }}</textarea>
+                                    <textarea name="notes" id="notes" class="w-full border rounded px-2 py-1" rows="2" maxlength="255" oninput="updateCharCount('notes', 'charCount')">{{ $requests->transaction->notes ?? '' }}</textarea>
+                                    <div class="text-right text-xs text-gray-500 mt-1">
+                                        <span id="charCount">{{ strlen($requests->transaction->notes ?? '') }}</span>/255
+                                    </div>
                                 </div>
                                 @endif
                             @endif
@@ -885,4 +888,25 @@
             });
         }
     });
+
+    // Character counter function for textareas (global scope)
+    function updateCharCount(textareaId, counterId) {
+        const textarea = document.getElementById(textareaId);
+        const charCount = document.getElementById(counterId);
+        if (textarea && charCount) {
+            const currentLength = textarea.value.length;
+            const maxLength = parseInt(textarea.getAttribute('maxlength')) || 255;
+            
+            charCount.textContent = currentLength;
+            
+            // Change color based on remaining characters
+            if (currentLength > maxLength * 0.9) {
+                charCount.style.color = '#ef4444'; // red
+            } else if (currentLength > maxLength * 0.8) {
+                charCount.style.color = '#f59e0b'; // orange
+            } else {
+                charCount.style.color = '#6b7280'; // gray
+            }
+        }
+    }
 </script>

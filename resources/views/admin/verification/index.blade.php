@@ -1,6 +1,5 @@
 <x-admin-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
@@ -23,17 +22,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        import VerificationTable from '../../../js/components/tables/VerificationTable.vue';
-        
-        const { createApp } = Vue;
-        
-        createApp({
-            components: {
-                VerificationTable
-            }
-        }).mount('#verification-table-app');
-    </script>
+    @vite('resources/js/verification-app.js')
 </x-admin-layout>

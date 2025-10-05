@@ -26,6 +26,10 @@
                                 <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->user->name }}</p>
                             </div>
                             <div>
+                                <p class="text-sm text-gray-500">รหัสนักศึกษา</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->user->uid }}</p>
+                            </div>
+                            <div>
                                 <p class="text-sm text-gray-500">อีเมล</p>
                                 <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->user->email }}</p>
                             </div>
@@ -99,24 +103,24 @@
                     </div>
 
                     <!-- Processing Information -->
-                    @if($verificationRequest->processed_by || $verificationRequest->admin_note)
+                    @if($verificationRequest->processed_by || $verificationRequest->reject_note)
                         <div class="mb-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-3">ข้อมูลการประมวลผล</h3>
+                            <h3 class="text-lg font-medium text-gray-900 mb-3">ข้อมูลการกระทำการ</h3>
                             <div class="bg-gray-50 rounded-lg p-4">
                                 @if($verificationRequest->processedBy)
                                     <div class="mb-3">
-                                        <p class="text-sm text-gray-500">ผู้ประมวลผล</p>
+                                        <p class="text-sm text-gray-500">ผู้กระทำการ</p>
                                         <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->processedBy->name }}</p>
                                     </div>
                                     <div class="mb-3">
-                                        <p class="text-sm text-gray-500">วันที่ประมวลผล</p>
+                                        <p class="text-sm text-gray-500">วันที่กระทำการ</p>
                                         <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->process_at->format('d/m/Y H:i') }}</p>
                                     </div>
                                 @endif
-                                @if($verificationRequest->admin_note)
+                                @if($verificationRequest->reject_note)
                                     <div>
                                         <p class="text-sm text-gray-500">หมายเหตุ</p>
-                                        <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->admin_note }}</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->reject_note }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -131,14 +135,6 @@
                                 @csrf
                                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                     <h4 class="text-sm font-medium text-green-800 mb-3">อนุมัติการยืนยันตัวตน</h4>
-                                    <div class="mb-3">
-                                        <label for="approve_note" class="block text-sm text-green-700 mb-1">หมายเหตุ (ไม่บังคับ)</label>
-                                        <textarea id="approve_note" 
-                                                  name="admin_note" 
-                                                  rows="3" 
-                                                  class="w-full text-sm border border-green-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                                                  placeholder="หมายเหตุการอนุมัติ..."></textarea>
-                                    </div>
                                     <button type="submit" 
                                             class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
                                         อนุมัติ
@@ -147,29 +143,92 @@
                             </form>
 
                             <!-- Reject Form -->
-                            <form action="{{ route('admin.verification.reject', $verificationRequest->id) }}" method="POST" class="flex-1">
-                                @csrf
+                            <div class="flex-1">
                                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                                     <h4 class="text-sm font-medium text-red-800 mb-3">ปฏิเสธการยืนยันตัวตน</h4>
-                                    <div class="mb-3">
-                                        <label for="reject_note" class="block text-sm text-red-700 mb-1">เหตุผลในการปฏิเสธ <span class="text-red-500">*</span></label>
-                                        <textarea id="reject_note" 
-                                                  name="admin_note" 
-                                                  rows="3" 
-                                                  class="w-full text-sm border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500"
-                                                  placeholder="กรุณาระบุเหตุผลในการปฏิเสธ..."
-                                                  required></textarea>
-                                    </div>
-                                    <button type="submit" 
+                                    <button type="button" 
+                                            onclick="showRejectModal()"
                                             class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
                                         ปฏิเสธ
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+
+    @if($verificationRequest->status === 'pending')
+        <form id="reject-form" action="{{ route('admin.verification.reject', $verificationRequest->id) }}" method="POST" class="hidden">
+            @csrf
+            <input type="hidden" name="reject_note" id="reject-reason" />
+        </form>
+    @endif
 </x-admin-layout>
+
+<script>
+    window.showRejectModal = function() {
+        Swal.fire({
+            title: 'ปฏิเสธการยืนยันตัวตน',
+            html: `
+                <div class="text-left space-y-2">
+                  <label class="flex items-center gap-2"><input type="radio" name="reason" value="รูปไม่ชัด"> รูปไม่ชัด</label>
+                  <label class="flex items-center gap-2"><input type="radio" name="reason" value="รูปไม่ใช่บัตรนักศึกษา"> รูปไม่ใช่บัตรนักศึกษา</label>
+                  <label class="flex items-center gap-2"><input type="radio" name="reason" value="ข้อมูลไม่ตรงกับบัตร"> ข้อมูลไม่ตรงกับบัตร</label>
+                  <label class="flex items-center gap-2"><input type="radio" name="reason" value="อื่นๆ"> อื่นๆ</label>
+                  <input id="reason-text" type="text" placeholder="ระบุเหตุผลเพิ่มเติม (ถ้าเลือก อื่นๆ)" maxlength="50" class="w-full border rounded px-2 py-1" />
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'ปฏิเสธ',
+            cancelButtonText: 'ยกเลิก',
+            focusConfirm: false,
+            preConfirm: () => {
+                const selected = document.querySelector('input[name="reason"]:checked');
+                const text = (document.getElementById('reason-text') || {}).value || '';
+                let reason = selected ? selected.value : '';
+                if (!reason) {
+                    Swal.showValidationMessage('กรุณาเลือกเหตุผล');
+                    return false;
+                }
+                if (reason === 'อื่นๆ') {
+                    if (!text.trim()) {
+                        Swal.showValidationMessage('กรุณาระบุเหตุผลเพิ่มเติม');
+                        return false;
+                    }
+                    reason = text.trim();
+                }
+                return reason;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('reject-form');
+                document.getElementById('reject-reason').value = result.value;
+                form.submit();
+            }
+        });
+    }
+
+    // Character counter function for textareas (global scope)
+    function updateCharCount(textareaId, counterId) {
+        const textarea = document.getElementById(textareaId);
+        const charCount = document.getElementById(counterId);
+        if (textarea && charCount) {
+            const currentLength = textarea.value.length;
+            const maxLength = parseInt(textarea.getAttribute('maxlength')) || 255;
+            
+            charCount.textContent = currentLength;
+            
+            // Change color based on remaining characters
+            if (currentLength > maxLength * 0.9) {
+                charCount.style.color = '#ef4444'; // red
+            } else if (currentLength > maxLength * 0.8) {
+                charCount.style.color = '#f59e0b'; // orange
+            } else {
+                charCount.style.color = '#6b7280'; // gray
+            }
+        }
+    }
+</script>

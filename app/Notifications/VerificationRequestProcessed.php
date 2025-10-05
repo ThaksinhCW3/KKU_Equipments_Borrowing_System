@@ -36,8 +36,8 @@ class VerificationRequestProcessed extends Notification implements ShouldQueue
             ->subject($subject)
             ->greeting("สวัสดี {$notifiable->name}")
             ->line($message)
-            ->when($this->verificationRequest->admin_note, function ($mail) {
-                return $mail->line('หมายเหตุ: ' . $this->verificationRequest->admin_note);
+            ->when($this->verificationRequest->reject_note, function ($mail) {
+                return $mail->line('หมายเหตุ: ' . $this->verificationRequest->reject_note);
             })
             ->action('ดูสถานะการยืนยัน', route('verification/index'));
     }
@@ -45,14 +45,14 @@ class VerificationRequestProcessed extends Notification implements ShouldQueue
     public function toDatabase($notifiable)
     {
         $message = $this->status === 'approved' 
-            ? 'การยืนยันตัวตนของคุณได้รับการอนุมัติแล้ว'
-            : 'การยืนยันตัวตนของคุณถูกปฏิเสธ';
+            ? 'การยืนยันตัวตนได้รับการอนุมัติ'
+            : 'การยืนยันตัวตนถูกปฏิเสธ';
 
         return [
             'verification_id' => $this->verificationRequest->id,
             'status' => $this->status,
             'message' => $message,
-            'admin_note' => $this->verificationRequest->admin_note,
+            'reject_note' => $this->verificationRequest->reject_note,
             'processed_by' => $this->verificationRequest->processedBy->name ?? 'ผู้ดูแลระบบ',
             'type' => 'verification_processed',
             'url' => route('verification/index'),

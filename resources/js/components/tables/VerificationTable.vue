@@ -2,8 +2,21 @@
   <div class="bg-white rounded-lg shadow">
     <!-- Header -->
     <div class="px-6 py-4 border-b border-gray-200">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-medium text-gray-900">การยืนยันตัวตน</h3>
+      </div>
+      
+      <!-- Search, Filter, and Sort Controls -->
+      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <!-- Search Bar -->
+        <div class="relative flex-1 min-w-0">
+          <input type="text" v-model="searchQuery" @input="handleSearch" placeholder="ค้นหาชื่อ, อีเมล..."
+            class="pl-10 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+          </svg>
+        </div>
         <div class="flex space-x-2">
           <select v-model="statusFilter" @change="fetchVerifications" class="text-sm border-gray-300 rounded-md">
             <option value="">ทุกสถานะ</option>
@@ -11,6 +24,12 @@
             <option value="approved">อนุมัติแล้ว</option>
             <option value="rejected">ปฏิเสธแล้ว</option>
           </select>
+        </div>
+        <!-- Sort Dropdown -->
+        <div class="flex items-center space-x-2">
+          <button @click="toggleSortOrder" class="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+            {{ sortOrder === 'asc' ? 'ASC' : 'DESC' }}
+          </button>
         </div>
       </div>
     </div>
@@ -24,7 +43,6 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปบัตร</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่ส่ง</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้ประมวลผล</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การดำเนินการ</th>
           </tr>
         </thead>
@@ -47,9 +65,14 @@
 
             <!-- Student ID Image -->
             <td class="px-6 py-4 whitespace-nowrap">
-              <button @click="viewImage(verification)" class="text-blue-600 hover:text-blue-900 text-sm">
-                ดูรูปภาพ
-              </button>
+              <div v-if="verification.student_id_image_path" class="w-16 h-16 cursor-pointer" @click="viewImage(verification)">
+                <img :src="verification.student_id_image_path" 
+                     alt="Student ID" 
+                     class="w-full h-full object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+              </div>
+              <div v-else class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                <span class="text-gray-400 text-xs">ไม่มีรูป</span>
+              </div>
             </td>
 
             <!-- Created Date -->
@@ -57,26 +80,18 @@
               {{ formatDate(verification.created_at) }}
             </td>
 
-            <!-- Processed By -->
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              <div v-if="verification.processed_by">
-                <div>{{ verification.processed_by_user?.name || 'ผู้ดูแลระบบ' }}</div>
-                <div class="text-xs text-gray-500">{{ formatDate(verification.process_at) }}</div>
-              </div>
-              <span v-else class="text-gray-400">-</span>
-            </td>
 
             <!-- Actions -->
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex space-x-2">
-                <button @click="viewDetails(verification)" class="text-blue-600 hover:text-blue-900">
+                <button @click="viewDetails(verification)" class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors">
                   ดูรายละเอียด
                 </button>
                 <template v-if="verification.status === 'pending'">
-                  <button @click="approveVerification(verification)" class="text-green-600 hover:text-green-900">
+                  <button @click="approveVerification(verification)" class="px-3 py-1 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-md transition-colors">
                     อนุมัติ
                   </button>
-                  <button @click="rejectVerification(verification)" class="text-red-600 hover:text-red-900">
+                  <button @click="rejectVerification(verification)" class="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
                     ปฏิเสธ
                   </button>
                 </template>
@@ -147,47 +162,6 @@
     </div>
   </div>
 
-  <!-- Action Modal -->
-  <div v-if="showActionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click="closeActionModal">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white" @click.stop>
-      <div class="mt-3">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-medium text-gray-900">
-            {{ actionType === 'approve' ? 'อนุมัติการยืนยันตัวตน' : 'ปฏิเสธการยืนยันตัวตน' }}
-          </h3>
-          <button @click="closeActionModal" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ actionType === 'approve' ? 'หมายเหตุ (ไม่บังคับ)' : 'เหตุผลในการปฏิเสธ *' }}
-          </label>
-          <textarea v-model="actionNote" rows="3" 
-                    :class="actionType === 'reject' && !actionNote ? 'border-red-300' : 'border-gray-300'"
-                    class="w-full text-sm border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    :placeholder="actionType === 'approve' ? 'หมายเหตุการอนุมัติ...' : 'กรุณาระบุเหตุผลในการปฏิเสธ...'">
-          </textarea>
-        </div>
-
-        <div class="flex justify-end space-x-3">
-          <button @click="closeActionModal" 
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
-            ยกเลิก
-          </button>
-          <button @click="confirmAction" 
-                  :disabled="actionType === 'reject' && !actionNote"
-                  :class="actionType === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'"
-                  class="px-4 py-2 text-sm font-medium text-white rounded-md disabled:opacity-50">
-            {{ actionType === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -207,11 +181,12 @@ export default {
       currentPage: 1,
       lastPage: 1,
       statusFilter: '',
+      searchQuery: '',
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+      searchTimeout: null,
       showImageModal: false,
       selectedImage: '',
-      showActionModal: false,
-      actionType: '',
-      actionNote: '',
       selectedVerification: null,
       loading: false
     }
@@ -237,7 +212,10 @@ export default {
       try {
         const params = new URLSearchParams({
           page: this.currentPage,
-          status: this.statusFilter
+          status: this.statusFilter,
+          search: this.searchQuery,
+          sort_by: this.sortBy,
+          sort_order: this.sortOrder
         });
         
         const response = await fetch(`/admin/verification/api?${params}`);
@@ -261,6 +239,26 @@ export default {
       }
     },
     
+    handleSearch() {
+      // Debounce search to avoid too many API calls
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => {
+        this.currentPage = 1; // Reset to first page when searching
+        this.fetchVerifications();
+      }, 300);
+    },
+    
+    handleSort() {
+      this.currentPage = 1; // Reset to first page when sorting
+      this.fetchVerifications();
+    },
+    
+    toggleSortOrder() {
+      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      this.currentPage = 1; // Reset to first page when changing sort order
+      this.fetchVerifications();
+    },
+    
     viewImage(verification) {
       this.selectedImage = verification.student_id_image_path;
       this.showImageModal = true;
@@ -277,59 +275,121 @@ export default {
     },
     
     approveVerification(verification) {
-      this.actionType = 'approve';
       this.selectedVerification = verification;
-      this.actionNote = '';
-      this.showActionModal = true;
+      this.confirmApprove();
     },
     
     rejectVerification(verification) {
-      this.actionType = 'reject';
       this.selectedVerification = verification;
-      this.actionNote = '';
-      this.showActionModal = true;
+      this.showRejectModal();
     },
     
-    closeActionModal() {
-      this.showActionModal = false;
-      this.actionType = '';
-      this.actionNote = '';
-      this.selectedVerification = null;
+    
+    showRejectModal() {
+      // Use SweetAlert2 for reject modal
+      Swal.fire({
+        title: 'ปฏิเสธการยืนยันตัวตน',
+        html: `
+          <div class="text-left space-y-2">
+            <label class="flex items-center gap-2"><input type="radio" name="reason" value="รูปไม่ชัด"> รูปไม่ชัด</label>
+            <label class="flex items-center gap-2"><input type="radio" name="reason" value="รูปไม่ใช่บัตรนักศึกษา"> รูปไม่ใช่บัตรนักศึกษา</label>
+            <label class="flex items-center gap-2"><input type="radio" name="reason" value="ข้อมูลไม่ตรงกับบัตร"> ข้อมูลไม่ตรงกับบัตร</label>
+            <label class="flex items-center gap-2"><input type="radio" name="reason" value="อื่นๆ"> อื่นๆ</label>
+            <input id="reason-text" type="text" placeholder="ระบุเหตุผลเพิ่มเติม (ถ้าเลือก อื่นๆ)" maxlength="50" class="w-full border rounded px-2 py-1" />
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'ปฏิเสธ',
+        cancelButtonText: 'ยกเลิก',
+        focusConfirm: false,
+        preConfirm: () => {
+          const selected = document.querySelector('input[name="reason"]:checked');
+          const text = (document.getElementById('reason-text') || {}).value || '';
+          let reason = selected ? selected.value : '';
+          if (!reason) {
+            Swal.showValidationMessage('กรุณาเลือกเหตุผล');
+            return false;
+          }
+          if (reason === 'อื่นๆ') {
+            if (!text.trim()) {
+              Swal.showValidationMessage('กรุณาระบุเหตุผลเพิ่มเติม');
+              return false;
+            }
+            reason = text.trim();
+          }
+          return reason;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.processReject(result.value);
+        }
+      });
     },
     
-    async confirmAction() {
-      if (this.actionType === 'reject' && !this.actionNote.trim()) {
-        this.showNotification('กรุณาระบุเหตุผลในการปฏิเสธ', 'error');
-        return;
-      }
-      
+    confirmApprove() {
+      // Simple confirmation for approve
+      Swal.fire({
+        title: 'อนุมัติการยืนยันตัวตน',
+        text: 'คุณต้องการอนุมัติการยืนยันตัวตนนี้หรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'อนุมัติ',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.processApprove();
+        }
+      });
+    },
+    
+    async processApprove() {
       try {
-        const response = await fetch(`/admin/verification/${this.selectedVerification.id}/${this.actionType}`, {
+        const response = await fetch(`/admin/verification/${this.selectedVerification.id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({})
+        });
+        
+        if (response.ok) {
+          this.showNotification('อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว', 'success');
+          this.fetchVerifications();
+        } else {
+          throw new Error('Approve failed');
+        }
+      } catch (error) {
+        console.error('Error approving verification:', error);
+        this.showNotification('เกิดข้อผิดพลาดในการอนุมัติ', 'error');
+      }
+    },
+    
+    async processReject(reason) {
+      try {
+        const response = await fetch(`/admin/verification/${this.selectedVerification.id}/reject`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
           },
           body: JSON.stringify({
-            admin_note: this.actionNote
+            reject_note: reason
           })
         });
         
         if (response.ok) {
-          this.showNotification(
-            this.actionType === 'approve' ? 'อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว' : 'ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว',
-            'success'
-          );
-          this.closeActionModal();
+          this.showNotification('ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว', 'success');
           this.fetchVerifications();
         } else {
-          throw new Error('Action failed');
+          throw new Error('Reject failed');
         }
       } catch (error) {
-        console.error('Error processing action:', error);
-        this.showNotification('เกิดข้อผิดพลาดในการดำเนินการ', 'error');
+        console.error('Error rejecting verification:', error);
+        this.showNotification('เกิดข้อผิดพลาดในการปฏิเสธ', 'error');
       }
     },
+    
     
     getStatusClass(status) {
       switch (status) {

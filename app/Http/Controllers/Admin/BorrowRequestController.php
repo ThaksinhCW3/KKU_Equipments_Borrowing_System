@@ -17,26 +17,38 @@ class BorrowRequestController extends Controller
 {
     use ClearsDashboardCache;
 
-    public function index()
+    public function index(Request $request)
     {
-        $requests = BorrowRequest::with('user', 'equipment')
-            ->latest()
-            ->get()
-            ->map(function ($r) {
-                return [
-                    'id' => $r->id,
-                    'req_id' => $r->req_id,
-                    'uid' => $r->user->uid,
-                    'user_name' => $r->user->name ?? 'N/A',
-                    'equipment_name' => $r->equipment->name ?? 'N/A',
-                    'equipment_photo' => $r->equipment->photo_path ?? null,
-                    'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
-                    'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
-                    'date' => $r->created_at->format('d-m-Y'),
-                    'status' => ucfirst($r->status),
-                    'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
-                ];
+        $query = BorrowRequest::with('user', 'equipment');
+
+        // Filter by user email if provided
+        if ($request->filled('user_email')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('email', $request->user_email);
             });
+        }
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->latest()->get()->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'req_id' => $r->req_id,
+                'uid' => $r->user->uid,
+                'user_name' => $r->user->name ?? 'N/A',
+                'user_email' => $r->user->email ?? 'N/A',
+                'equipment_name' => $r->equipment->name ?? 'N/A',
+                'equipment_photo' => $r->equipment->photo_path ?? null,
+                'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
+                'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
+                'date' => $r->created_at->format('d-m-Y'),
+                'status' => ucfirst($r->status),
+                'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
+            ];
+        });
 
         return view('admin.request.index', compact('requests'));
     }

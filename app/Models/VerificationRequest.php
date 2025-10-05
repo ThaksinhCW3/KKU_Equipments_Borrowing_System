@@ -10,7 +10,7 @@ class VerificationRequest extends Model
         'users_id',
         'status',
         'student_id_image_path',
-        'admin_note',
+        'reject_note',
         'processed_by',
         'process_at',
     ];

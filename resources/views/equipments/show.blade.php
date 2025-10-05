@@ -251,10 +251,14 @@
                                 name="request_reason_detail" 
                                 maxlength="500"
                                 rows="3"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                oninput="updateCharCount('request_details', 'request_details_count')" 
                                 placeholder="เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ"
                                 @if ($hasBorrowed) disabled @endif
                             ></textarea>
+                            <div class="text-right text-xs text-gray-500 mt-1">
+                                <span id="request_details_count">0</span>/500
+                            </div>
 
                             <input type="hidden" id="request_reason" name="request_reason" value="">
 
@@ -269,7 +273,7 @@
                         <div id="message" class="text-sm text-red-500 mb-4 h-4"></div>
                     
                         @if ($hasBorrowed)
-                            <a href="{{ route('borrower.equipments.myreq') }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-600 transition">ไปยังหน้าคำขอของฉัน</a>
+                            <a href="{{ route('borrower.equipments.reqdetail',$borrowRequest->req_id) }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-600 transition">ไปยังคำขอของฉัน</a>
                         @elseif (!auth()->user() || !auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
                             <a href="{{ route('verification.index') }}" class="block w-full text-center bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
                                  ยืนยันตัวตนก่อนยืมอุปกรณ์
@@ -581,4 +585,25 @@
             });
         }
     });
+
+    // Character counter function for textareas (global scope)
+    function updateCharCount(textareaId, counterId) {
+        const textarea = document.getElementById(textareaId);
+        const charCount = document.getElementById(counterId);
+        if (textarea && charCount) {
+            const currentLength = textarea.value.length;
+            const maxLength = parseInt(textarea.getAttribute('maxlength')) || 255;
+            
+            charCount.textContent = currentLength;
+            
+            // Change color based on remaining characters
+            if (currentLength > maxLength * 0.9) {
+                charCount.style.color = '#ef4444'; // red
+            } else if (currentLength > maxLength * 0.8) {
+                charCount.style.color = '#f59e0b'; // orange
+            } else {
+                charCount.style.color = '#6b7280'; // gray
+            }
+        }
+    }
 </script>

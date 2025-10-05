@@ -1,4 +1,30 @@
 <x-admin-layout>
+    @if(request('user_email'))
+        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-sm text-blue-700">กำลังแสดงคำขอของ: <strong>{{ request('user_email') }}</strong></span>
+                </div>
+                <a href="{{ route('admin.requests.index') }}" class="text-sm text-blue-600 hover:text-blue-800 underline">
+                    ล้างตัวกรอง
+                </a>
+            </div>
+        </div>
+    @endif
+
+    @if(request('status'))
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-sm text-green-700">กำลังแสดงคำขอสถานะ: <strong>{{ ucfirst(request('status')) }}</strong></span>
+                </div>
+                <a href="{{ route('admin.requests.index') }}" class="text-sm text-green-600 hover:text-green-800 underline">
+                    ล้างตัวกรอง
+                </a>
+            </div>
+        </div>
+    @endif
+
 <div id="admin-table" data-requests='@json($requests)'>
     <admin-approve-table :requests='@json($requests)'></admin-approve-table>
 </div>

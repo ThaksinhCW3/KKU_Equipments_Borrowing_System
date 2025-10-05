@@ -29,7 +29,7 @@ class VerificationRequestSubmitted extends Notification implements ShouldQueue
             'user_id' => $this->user->id,
             'user_name' => $this->user->name,
             'user_email' => $this->user->email,
-            'message' => 'มีคำขอการยืนยันตัวตนใหม่ที่รอการอนุมัติ',
+            'message' => 'มีคำขอการยืนยันตัวตนใหม่',
             'type' => 'verification_submitted',
             'url' => route('admin.verification.index'),
             'created_at' => now()->toDateTimeString(),

@@ -95,7 +95,7 @@ class VerificationController extends Controller
         $verificationRequest->update([
             'status' => VerificationRequest::STATUS_PENDING,
             'student_id_image_path' => $imagePath,
-            'admin_note' => null,
+            'reject_note' => null,
             'processed_by' => null,
             'process_at' => null,
         ]);

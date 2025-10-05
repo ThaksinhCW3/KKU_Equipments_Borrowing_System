@@ -102,10 +102,10 @@
                     </div>
 
                     <!-- Admin Note -->
-                    @if($verificationRequest && $verificationRequest->admin_note)
+                    @if($verificationRequest && $verificationRequest->reject_note)
                         <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                             <h3 class="text-sm font-medium text-gray-900 mb-2">หมายเหตุจากผู้ดูแลระบบ</h3>
-                            <p class="text-sm text-gray-700">{{ $verificationRequest->admin_note }}</p>
+                            <p class="text-sm text-gray-700">{{ $verificationRequest->reject_note }}</p>
                             @if($verificationRequest->processed_by && $verificationRequest->process_at)
                                 <p class="text-xs text-gray-500 mt-2">
                                     โดย: {{ $verificationRequest->processedBy->name ?? 'ผู้ดูแลระบบ' }} 

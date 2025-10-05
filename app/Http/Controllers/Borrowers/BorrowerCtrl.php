@@ -19,18 +19,20 @@ use Carbon\Carbon;
 
 class BorrowerCtrl extends Controller
 {
-    public function show($code)
+        public function show($code)
     {
         $equipment = Cache::remember("equipment:$code", 600, function () use ($code) {
             return Equipment::where('code', $code)->firstOrFail();
         });
 
         $hasBorrowed = false;
+        $borrowRequest = null;
         if (Auth::check()) {
-            $hasBorrowed = BorrowRequest::where('users_id', Auth::id())
+            $borrowRequest = BorrowRequest::where('users_id', Auth::id())
                 ->where('equipments_id', $equipment->id)
                 ->whereIn('status', ['pending', 'approved', 'check_out'])
-                ->exists();
+                ->first();
+            $hasBorrowed = $borrowRequest ? true : false;
         }
 
         $bookings = BorrowRequest::where('equipments_id', $equipment->id)
@@ -39,7 +41,7 @@ class BorrowerCtrl extends Controller
             ->get();
 
         $currentDate = Carbon::now()->toDateString();
-        return view('equipments.show', compact('equipment', 'bookings', 'hasBorrowed', 'currentDate'));
+        return view('equipments.show', compact('equipment', 'bookings', 'hasBorrowed', 'borrowRequest', 'currentDate'));
     }
 
     public function myreq()
