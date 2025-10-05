@@ -27,7 +27,7 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
     {
         $equipment = $this->borrowRequest->equipment->name ?? '-';
         $reqId = $this->borrowRequest->req_id;
-        $checkedInAt = optional($this->borrowRequest->transaction?->checked_in_at)->format('d/m/Y H:i');
+        $checkedInAt = optional($this->borrowRequest->transaction?->checked_in_at)->format('d/m/Y');
         $penaltyAmount = $this->borrowRequest->transaction?->penalty_amount ?? 0;
         $penaltyStatus = $this->borrowRequest->transaction?->penalty_check ?? 'unpaid';
         $notes = $this->borrowRequest->transaction?->notes;
@@ -75,7 +75,7 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
 
         $mail->line("")
              ->line("**หากต้องการยืมอุปกรณ์อีกครั้ง** สามารถทำได้ผ่านระบบ")
-             ->action('ดูประวัติการยืม', route('borrower.equipments.reqdetail', $this->borrowRequest->req_id))
+             ->action('ดูประวัติการยืม', route('borrower/equipments/reqdetail', $this->borrowRequest->req_id))
              ->line("ขอบคุณที่ใช้บริการระบบยืมอุปกรณ์");
 
         return $mail;
@@ -83,7 +83,7 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
 
     public function toDatabase($notifiable)
     {
-        $checkedInAt = optional($this->borrowRequest->transaction?->checked_in_at)->format('d/m/Y H:i');
+        $checkedInAt = optional($this->borrowRequest->transaction?->checked_in_at)->format('d/m/Y ');
         $penaltyAmount = $this->borrowRequest->transaction?->penalty_amount ?? 0;
         $penaltyStatus = $this->borrowRequest->transaction?->penalty_check ?? 'unpaid';
         $notes = $this->borrowRequest->transaction?->notes;
@@ -103,10 +103,10 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
             'message'    => $message,
             'status'     => $hasPenalty && !$isPenaltyPaid ? 'warning' : 'success',
             'type'       => 'equipment_checked_in',
-            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => [
-                'checked_in_at' => $this->borrowRequest->transaction?->checked_in_at?->format('Y-m-d H:i:s'),
+                'checked_in_at' => $this->borrowRequest->transaction?->checked_in_at?->format('Y-m-d'),
                 'equipment_name' => $this->borrowRequest->equipment->name,
                 'penalty_amount' => $penaltyAmount,
                 'penalty_status' => $penaltyStatus,

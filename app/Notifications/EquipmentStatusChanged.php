@@ -38,7 +38,7 @@ class EquipmentStatusChanged extends Notification implements ShouldQueue
             ->line("จาก: {$oldStatusText}")
             ->line("เป็น: {$statusText}")
             ->line("รหัสอุปกรณ์: {$this->equipment->code}")
-            ->action('ดูรายละเอียดอุปกรณ์', route('equipments.show', $this->equipment->code))
+            ->action('ดูรายละเอียดอุปกรณ์', route('equipments/show', $this->equipment->code))
             ->line('กรุณาตรวจสอบสถานะอุปกรณ์ใหม่');
     }
 
@@ -56,7 +56,7 @@ class EquipmentStatusChanged extends Notification implements ShouldQueue
             'old_status_text' => $oldStatusText,
             'new_status_text' => $statusText,
             'message' => "สถานะอุปกรณ์ {$this->equipment->name} เปลี่ยนจาก {$oldStatusText} เป็น {$statusText}",
-            'url' => route('equipments.show', $this->equipment->code),
+            'url' => route('equipments/show', $this->equipment->code),
         ];
     }
 

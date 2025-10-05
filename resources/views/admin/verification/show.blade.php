@@ -39,7 +39,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">วันที่ส่งคำขอ</p>
-                                <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->created_at->format('d/m/Y') }}</p>
                             </div>
                         </div>
                     </div>
@@ -114,7 +114,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <p class="text-sm text-gray-500">วันที่กระทำการ</p>
-                                        <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->process_at->format('d/m/Y H:i') }}</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->process_at->format('d/m/Y') }}</p>
                                     </div>
                                 @endif
                                 @if($verificationRequest->reject_note)

@@ -31,7 +31,7 @@ class BorrowRequestCancelled extends Notification implements ShouldQueue
             ->line("อุปกรณ์: {$this->borrowRequest->equipment->name}")
             ->line("รหัสคำขอ: #{$this->borrowRequest->req_id}")
             ->line("เหตุผลการยกเลิก: {$this->borrowRequest->cancel_reason}")
-            ->action('ดูรายละเอียด', route('admin.requests.show', $this->borrowRequest->req_id))
+            ->action('ดูรายละเอียด', route('admin/requests/show', $this->borrowRequest->req_id))
             ->line('กรุณาตรวจสอบรายละเอียดการยกเลิก');
     }
 
@@ -45,7 +45,7 @@ class BorrowRequestCancelled extends Notification implements ShouldQueue
             'message' => 'คำขอยืมอุปกรณ์ถูกยกเลิก',
             'reason' => $this->borrowRequest->cancel_reason,
             'type' => 'borrow_request_cancelled',
-            'url' => route('admin.requests.show', $this->borrowRequest->req_id),
+            'url' => route('admin/requests/show', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
         ];
     }

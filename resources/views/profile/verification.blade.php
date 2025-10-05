@@ -109,7 +109,7 @@
                             @if($verificationRequest->processed_by && $verificationRequest->process_at)
                                 <p class="text-xs text-gray-500 mt-2">
                                     โดย: {{ $verificationRequest->processedBy->name ?? 'ผู้ดูแลระบบ' }} 
-                                    เมื่อ: {{ $verificationRequest->process_at->format('d/m/Y H:i') }}
+                                    เมื่อ: {{ $verificationRequest->process_at->format('d/m/Y') }}
                                 </p>
                             @endif
                         </div>
