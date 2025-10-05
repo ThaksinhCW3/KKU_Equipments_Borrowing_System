@@ -6,176 +6,232 @@
     <span class="font-semibold text-gray-900">หน้าจัดการหมวดหมู่</span>
   </nav>
 
-  <div class="bg-white p-6 rounded-lg shadow">
-    <!-- Search Bar -->
-    <div class="relative mb-4">
-      <input type="text" v-model="searchQuery" placeholder="Search"
-        class="pl-10 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-      </svg>
-    </div>
+  <BaseTable
+    :data="categories"
+    :columns="columns"
+    :user-role="userRole"
+    :loading="loading"
+    title="หมวดหมู่ทั้งหมด"
+    search-placeholder="ค้นหาหมวดหมู่..."
+    add-button-text="เพิ่มหมวดหมู่ใหม่"
+    :show-pagination="false"
+    :show-advanced-filters="false"
+    :available-filters="availableFilters"
+    :search-fields="['name', 'cate_id']"
+    @create="openCreateModal"
+    @edit="openEditModal"
+    @delete="deleteCategory"
+    @view="viewCategoryEquipments"
+  >
+    <!-- Custom Headers -->
+    <template #headers="{ columns }">
+      <th class="px-4 py-2 text-left">รหัสหมวดหมู่</th>
+      <th class="px-4 py-2 text-left">ชื่อหมวดหมู่</th>
+      <th class="px-4 py-2 text-left">จํานวนอุปกรณ์</th>
+      <th v-if="userRole === 'admin'" class="px-4 py-2 text-left">แอคชั่น</th>
+    </template>
 
-    <!-- Header + Counts -->
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-      <h2 class="text-lg font-semibold">
-        หมวดหมู่ทั้งหมด: {{ filteredCategories.length }}
-      </h2>
-      <div class="flex flex-wrap gap-2 items-center">
-        <!-- Sort toggle -->
-        <button @click="toggleSort"
-          class="border border-gray-300 rounded-md px-5 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-          {{ sortDirection.toUpperCase() }}
+    <!-- Custom Rows -->
+    <template #rows="{ item: category, actions }">
+      <td class="px-4 py-2">{{ category.cate_id }}</td>
+      <td class="px-4 py-2">
+        <button 
+          @click="viewCategoryEquipments(category)" 
+          class="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+        >
+          {{ category.name }}
         </button>
-        <!-- Add button (only admin) -->
-        <button v-if="userRole === 'admin'" @click="createModalOpen = true"
-          class="ml-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          เพิ่มหมวดหมู่ใหม่
-        </button>
-      </div>
-    </div>
+      </td>
+      <td class="px-4 py-2">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {{ category.equipments_count || 0 }} รายการ
+        </span>
+      </td>
+      <td v-if="userRole === 'admin'" class="px-4 py-2">
+        <div class="flex items-center space-x-2">
+          <button 
+            @click="actions.edit()"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded flex items-center justify-center"
+            :disabled="updatingCategory === category.id"
+            title="แก้ไขข้อมูล"
+          >
+            <svg v-if="updatingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </button>
+          <button 
+            @click="actions.delete()"
+            class="bg-red-500 hover:bg-red-600 text-white p-2 rounded flex items-center justify-center"
+            :disabled="deletingCategory === category.id"
+            title="ลบรายการ"
+          >
+            <svg v-if="deletingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </td>
+    </template>
 
-    <!-- Table -->
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b">
-        <tr>
-          <th class="px-4 py-2 text-left">รหัสหมวดหมู่</th>
-          <th class="px-4 py-2 text-left">ชื่อหมวดหมู่</th>
-          <th class="px-4 py-2 text-left">จํานวนอุปกรณ์</th>
-          <th v-if="userRole === 'admin'" class="px-4 py-2 text-left">แอคชั่น</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="category in filteredCategories" :key="category.id" class="border-b">
-          <td class="px-4 py-2">{{ category.cate_id }}</td>
-          <td class="px-4 py-2">
-            <button @click="viewCategoryEquipments(category)" 
-              class="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
-              {{ category.name }}
-            </button>
-          </td>
-          <td class="px-4 py-2">{{ category.equipments_count }}</td>
-          <td class="px-4 py-2">
-            <div class="flex items-center space-x-2">
-              <button v-if="userRole === 'admin'" @click="openModal(category)"
-                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded flex items-center justify-center"
-                :disabled="updatingCategory === category.id"
-                title="แก้ไขข้อมูล">
-                <svg v-if="updatingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-              </button>
-              <button v-if="userRole === 'admin'" @click="deleteCategory(category.id)"
-                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded flex items-center justify-center"
-                :disabled="deletingCategory === category.id"
-                title="ลบรายการ">
-                <svg v-if="deletingCategory === category.id" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Custom Badges -->
+    <template #badges="{ counts }">
+      <span class="px-2 py-1 rounded text-sm font-medium bg-blue-100 text-blue-800">
+        ทั้งหมด: {{ counts.all }}
+      </span>
+    </template>
+  </BaseTable>
 
-    <!-- Edit Modal -->
-    <CategoryEditModal ref="editModal" :isOpen="isOpen" :category="selectedCategory" @close="isOpen = false"
-      @save="updateCategoryFromModal" />
-
-    <!-- Create Modal -->
-    <CategoryCreateModal ref="createModal" :isOpen="createModalOpen" @close="createModalOpen = false" @create="handleCreateCategory" />
-  </div>
+  <!-- Unified Modal -->
+  <CategoryModal 
+    ref="categoryModal"
+    :isOpen="modal.isOpen" 
+    :mode="modal.mode"
+    :category="selectedCategory" 
+    :all-equipments="allEquipments"
+    :user-role="userRole"
+    @close="closeModal" 
+    @edit="openEditModal"
+    @save="updateCategoryFromModal"
+    @create="handleCreateCategory"
+  />
 </template>
 
 <script>
-import CategoryEditModal from '../modals/CategoryEditModal.vue';
-import CategoryCreateModal from '../modals/CategoryCreateModal.vue';
+import BaseTable from './BaseTable.vue';
+import CategoryModal from '../modals/CategoryModal.vue';
 
 export default {
-  name: "CategoriesTable",
-  components: { CategoryEditModal, CategoryCreateModal },
+  name: "CategoryTableNew",
+  components: { 
+    BaseTable,
+    CategoryModal
+  },
+  
   data() {
     const el = document.getElementById("category-table");
     return {
       userRole: el?.dataset?.role || "",
-      equipments: [],
       categories: [],
-      searchQuery: "",
-      isOpen: false,
-      createModalOpen: false,
+      allEquipments: JSON.parse(el?.dataset?.equipments || "[]"),
+      loading: false,
       selectedCategory: null,
-      categoryTypes: [],
-      sortDirection: "asc",
+      modal: {
+        isOpen: false,
+        mode: 'view' // 'view', 'edit', or 'create'
+      },
       updatingCategory: null,
       deletingCategory: null,
+      columns: [
+        { key: 'cate_id', label: 'รหัสหมวดหมู่' },
+        { key: 'name', label: 'ชื่อหมวดหมู่' },
+        { key: 'equipments_count', label: 'จํานวนอุปกรณ์' }
+      ],
+      availableFilters: [
+        {
+          key: 'created_at',
+          label: 'วันที่สร้าง',
+          type: 'daterange',
+          fromPlaceholder: 'จากวันที่',
+          toPlaceholder: 'ถึงวันที่'
+        }
+      ]
     };
   },
-  computed: {
-    filteredCategories() {
-      let list = this.categories;
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        list = list.filter(c => c.name.toLowerCase().includes(q));
-      }
-      // Sort by created_at
-      list = [...list].sort((a, b) => {
-        const da = new Date(a.created_at);
-        const db = new Date(b.created_at);
-        return this.sortDirection === "asc" ? da - db : db - da;
-      });
-      return list;
-    },
-    typeCounts() {
-      const counts = {};
-      for (const cat of this.categories) {
-        const type = cat.type || 'Unknown';
-        counts[type] = (counts[type] || 0) + 1;
-      }
-      return counts;
-    }
-  },
+  
   methods: {
-    toggleSort() {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-    },
-    typeClass(type) {
-      return type === 'Unknown'
-        ? 'bg-gray-100 text-gray-800'
-        : 'bg-green-100 text-green-800';
-    },
     fetchCategories() {
+      this.loading = true;
       fetch("/api/categories")
         .then(res => res.json())
         .then(data => {
           this.categories = data || [];
-          this.categoryTypes = [...new Set(this.categories.map(c => c.type || 'Unknown'))];
+        })
+        .catch(err => {
+          console.error('Error fetching categories:', err);
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
-    fetchEquipments() {
-      fetch("/api/equipments")
-        .then(res => res.json())
-        .then(data => {
-          this.equipments = data || [];
-        });
+    
+    async fetchEquipments() {
+      if (this.allEquipments.length === 0) {
+        console.log('No equipment data available, trying to fetch...');
+        try {
+          // Try multiple possible endpoints for equipment data
+            const endpoints = [
+              '/api/equipments',
+              '/api/categories',
+              '/admin/equipment',
+              '/api/admin/equipment'
+            ];
+          
+          for (const endpoint of endpoints) {
+            try {
+              const response = await fetch(endpoint, {
+                headers: {
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                this.allEquipments = data.equipments || data.data || data || [];
+                console.log(`Fetched equipments from ${endpoint}:`, this.allEquipments);
+                if (this.allEquipments.length > 0) {
+                  break;
+                }
+              }
+            } catch (e) {
+              console.log(`Failed to fetch from ${endpoint}:`, e);
+            }
+          }
+          
+          if (this.allEquipments.length === 0) {
+            console.log('No equipment data found from any endpoint');
+          }
+        } catch (error) {
+          console.error('Error fetching equipments:', error);
+        }
+      } else {
+        console.log('Equipment data already available:', this.allEquipments.length, 'items');
+      }
     },
-    openModal(category) {
-      this.selectedCategory = { ...category };
-      this.isOpen = true;
+    
+    async     openModal(category, mode = 'view') {
+      this.selectedCategory = category ? { ...category } : null;
+      this.modal.mode = mode;
+      this.modal.isOpen = true;
     },
+    
+    closeModal() {
+      this.modal.isOpen = false;
+      this.selectedCategory = null;
+    },
+    
+    openEditModal(category) {
+      this.openModal(category, 'edit');
+    },
+    
     viewCategoryEquipments(category) {
-      // Redirect to equipment page with category filter
-      window.location.href = `/admin/equipment?category=${encodeURIComponent(category.name)}&category_id=${category.id}`;
+      this.openModal(category, 'view');
     },
+    
+    openCreateModal() {
+      this.openModal(null, 'create');
+    },
+    
+    
+    
     updateCategoryFromModal(updatedCategory) {
       this.updatingCategory = updatedCategory.id;
       fetch(`/admin/category/update/${updatedCategory.id}`, {
@@ -184,14 +240,18 @@ export default {
           "Content-Type": "application/json",
           "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({ name: updatedCategory.name, type: updatedCategory.type })
+        body: JSON.stringify({ 
+          name: updatedCategory.name
+        })
       })
         .then(res => res.json())
         .then(data => {
           if (data.status) {
             const index = this.categories.findIndex(c => c.id === updatedCategory.id);
-            if (index !== -1) this.categories[index] = { ...this.categories[index], ...updatedCategory };
-            this.isOpen = false;
+            if (index !== -1) {
+              this.categories[index] = { ...this.categories[index], ...updatedCategory };
+            }
+            this.closeModal();
             Swal.fire('สำเร็จ!', 'แก้ไขหมวดหมู่เรียบร้อย', 'success');
           } else {
             Swal.fire('ผิดพลาด', 'ไม่สามารถแก้ไขหมวดหมู่ได้', 'error');
@@ -200,10 +260,13 @@ export default {
         .catch(() => Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการแก้ไขหมวดหมู่', 'error'))
         .finally(() => {
           this.updatingCategory = null;
-          this.$refs.editModal.resetSubmitting();
+          if (this.$refs.categoryModal && this.$refs.categoryModal.resetSubmitting) {
+            this.$refs.categoryModal.resetSubmitting();
+          }
         });
     },
-    deleteCategory(id) {
+    
+    deleteCategory(category) {
       Swal.fire({
         title: 'คุณแน่ใจหรือไม่?',
         text: "รายการนี้จะถูกลบถาวร!",
@@ -215,21 +278,27 @@ export default {
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
-          this.deletingCategory = id;
-          fetch(`/admin/category/destroy/${id}`, {
+          this.deletingCategory = category.id;
+          fetch(`/admin/category/destroy/${category.id}`, {
             method: "DELETE",
-            headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
-          }).then(() => {
-            this.categories = this.categories.filter(c => c.id !== id);
-            Swal.fire('ลบแล้ว!', 'หมวดหมู่ถูกลบเรียบร้อย', 'success');
-          }).catch(() => {
-            Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการลบหมวดหมู่', 'error');
-          }).finally(() => {
-            this.deletingCategory = null;
-          });
+            headers: { 
+              "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content 
+            }
+          })
+            .then(() => {
+              this.categories = this.categories.filter(c => c.id !== category.id);
+              Swal.fire('ลบแล้ว!', 'หมวดหมู่ถูกลบเรียบร้อย', 'success');
+            })
+            .catch(() => {
+              Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการลบหมวดหมู่', 'error');
+            })
+            .finally(() => {
+              this.deletingCategory = null;
+            });
         }
       });
     },
+    
     handleCreateCategory(newCategory) {
       fetch('/admin/category/store', {
         method: 'POST',
@@ -246,8 +315,7 @@ export default {
         .then(data => {
           if (data.status) {
             this.categories.push(data.category);
-            this.categoryTypes = [...new Set(this.categories.map(c => c.type || 'Unknown'))];
-            this.createModalOpen = false;
+            this.closeModal();
             Swal.fire('สำเร็จ!', 'สร้างหมวดหมู่เรียบร้อย', 'success');
           } else {
             Swal.fire('ผิดพลาด', data.message || 'ไม่สามารถสร้างหมวดหมู่ได้', 'error');
@@ -258,18 +326,50 @@ export default {
           Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการสร้างหมวดหมู่', 'error');
         })
         .finally(() => {
-          this.$refs.createModal.resetSubmitting();
+          if (this.$refs.categoryModal && this.$refs.categoryModal.resetSubmitting) {
+            this.$refs.categoryModal.resetSubmitting();
+          }
         });
     }
   },
+  
   mounted() {
     const el = document.getElementById("category-table");
     if (el) {
       this.categories = JSON.parse(el.dataset.categories || "[]");
       this.userRole = el.dataset.role || '';
+      // Also try to get equipments from dataset
+      if (el.dataset.equipments) {
+        this.allEquipments = JSON.parse(el.dataset.equipments);
+      }
     }
+    
+    // Try to get equipment data from equipment table if it exists on the same page
+    const equipmentEl = document.getElementById("equipment-table");
+    if (equipmentEl && equipmentEl.dataset.equipments) {
+      this.allEquipments = JSON.parse(equipmentEl.dataset.equipments);
+      console.log('Found equipment data from equipment table:', this.allEquipments.length, 'items');
+    }
+    
+    console.log('CategoryTable mounted - allEquipments:', this.allEquipments);
     this.fetchCategories();
-    this.fetchEquipments();
+    
+    // Check for URL parameters to auto-open category modal
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryId = urlParams.get('category_id');
+    
+    if (categoryId) {
+      // Wait for categories to load, then find and open the modal
+      this.$nextTick(() => {
+        const category = this.categories.find(c => c.id == categoryId);
+        if (category) {
+          // Small delay to ensure the page is fully loaded
+          setTimeout(() => {
+            this.viewCategoryEquipments(category);
+          }, 100);
+        }
+      });
+    }
   }
 };
 </script>

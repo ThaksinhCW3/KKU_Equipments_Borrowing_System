@@ -37,7 +37,9 @@ class CategoryController extends Controller
             'target_name' => $category->name,
             'description' => "สร้างหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
-            'severity' => 'info'
+            'severity' => 'info',
+            'user_agent' => request()->userAgent(),
+            'ip_address' => request()->ip()
         ]);
 
         return response()->json([
@@ -74,7 +76,9 @@ class CategoryController extends Controller
             'module' => 'equipment',
             'severity' => 'info',
             'old_values' => $oldValues,
-            'new_values' => $validated
+            'new_values' => $validated,
+            'user_agent' => request()->userAgent(),
+            'ip_address' => request()->ip()
         ]);
 
         return response()->json([
@@ -98,7 +102,9 @@ class CategoryController extends Controller
             'target_name' => $category->name,
             'description' => "ลบหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
-            'severity' => 'warning'
+            'severity' => 'warning',
+            'user_agent' => request()->userAgent(),
+            'ip_address' => request()->ip()
         ]);
         
         $category->delete();

@@ -86,7 +86,12 @@ class EquipmentController extends Controller
                 'action' => 'create',
                 'target_type' => 'equipment',
                 'target_id' => $equipment->id,
+                'target_name' => $equipment->name,
                 'description' => "สร้างอุปกรณ์: {$equipment->name} (ID {$equipment->id})",
+                'module' => 'equipment',
+                'severity' => 'info',
+                'user_agent' => $request->userAgent() ?? 'Unknown',
+                'ip_address' => $request->ip() ?? 'Unknown'
             ]);
 
 
@@ -244,7 +249,9 @@ class EquipmentController extends Controller
                 'module' => 'equipment',
                 'severity' => 'info',
                 'old_values' => $oldValues,
-                'new_values' => $updatePayload
+                'new_values' => $updatePayload,
+                'user_agent' => $request->userAgent() ?? 'Unknown',
+                'ip_address' => $request->ip() ?? 'Unknown'
             ]);
             
             \Log::info('Updated equipment data:', ['equipment' => $updatedEquipment->toArray()]);
@@ -285,7 +292,12 @@ class EquipmentController extends Controller
             'action' => 'delete',
             'target_type' => 'equipment',
             'target_id' => $id,
+            'target_name' => $equipment->name,
             'description' => "ลบอุปกรณ์: {$equipment->name} (ID {$equipment->code})",
+            'module' => 'equipment',
+            'severity' => 'info',
+            'user_agent' => request()->userAgent() ?? 'Unknown',
+            'ip_address' => request()->ip() ?? 'Unknown'
         ]);
 
         $equipment->delete();
@@ -310,7 +322,7 @@ class EquipmentController extends Controller
 
         // Get users with pending requests for this equipment
         $pendingRequests = \App\Models\BorrowRequest::with('user')
-            ->where('equipment_id', $equipment->id)
+            ->where('equipments_id', $equipment->id)
             ->where('status', 'pending')
             ->get();
 

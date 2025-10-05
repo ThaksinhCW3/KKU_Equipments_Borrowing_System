@@ -128,25 +128,29 @@
         </div>
     </div>
 
-    <EquipmentEditModal :isOpen="isOpen" :equipment="selectedEquipment" :categories="categories" :statuses="statuses"
-        @cancel="isOpen = false" @save="updateEquipment" @image-change="selectedImageFile = $event" />
-
-    <EquipmentCreateModal :isOpen="createModal.isOpen" :categories="categories" :statuses="statuses"
-        @cancel="closeCreateModal" @create="createEquipment" />
+    <EquipmentModal 
+        :isOpen="isOpen" 
+        :mode="modalMode"
+        :equipment="selectedEquipment" 
+        :categories="categories" 
+        :statuses="statuses"
+        :user-role="'admin'"
+        @close="closeModal" 
+        @save="updateEquipment"
+        @create="createEquipment"
+    />
 
     <PhotoModal :isOpen="photoModal.isOpen" :url="photoModal.url" @close="closePhotoModal" />
 </template>
 
 <script>
-import EquipmentEditModal from "../modals/EquipmentEditModal.vue";
-import EquipmentCreateModal from "../modals/EquipmentCreateModal.vue";
+import EquipmentModal from "../modals/EquipmentModal.vue";
 import PhotoModal from "../modals/PhotoModal.vue";
 
 export default {
     name: "EquipmentTable",
     components: {
-        EquipmentEditModal,
-        EquipmentCreateModal,
+        EquipmentModal,
         PhotoModal,
     },
     data() {
@@ -165,6 +169,7 @@ export default {
             filterStatus: "",
             filterCategoryId: "",
             isOpen: false,
+            modalMode: 'edit', // 'edit' or 'create'
             selectedEquipment: {},
             selectedCategoryId: null,
             selectedImageFile: null,
@@ -172,10 +177,6 @@ export default {
             photoModal: {
                 isOpen: false,
                 url: "",
-            },
-
-            createModal: {
-                isOpen: false,
             },
         };
     },
@@ -291,17 +292,23 @@ export default {
             if (this.currentPage > 1) this.currentPage -= 1;
         },
         openCreateModal() {
-            this.createModal.isOpen = true;
-        },
-        closeCreateModal() {
-            this.createModal.isOpen = false;
+            this.modalMode = 'create';
+            this.selectedEquipment = null;
+            this.selectedCategoryId = null;
+            this.isOpen = true;
         },
         openModal(equipment) {
+            this.modalMode = 'edit';
             this.selectedEquipment = { ...equipment };
             this.selectedCategoryId = equipment.category
                 ? equipment.category.id
                 : null;
             this.isOpen = true;
+        },
+        closeModal() {
+            this.isOpen = false;
+            this.selectedEquipment = null;
+            this.selectedCategoryId = null;
         },
         onEditImageChange(event) {
             const files = event.target.files;
@@ -369,7 +376,7 @@ export default {
                     if (idx !== -1) {
                         this.equipments.splice(idx, 1, updated);
                     }
-                    this.isOpen = false;
+                    this.closeModal();
                     this.ensureSwal().then(() => {
                         window.Swal.fire({
                             title: "อัปเดตสำเร็จ",
@@ -523,7 +530,7 @@ export default {
                         }
                     }
                     this.equipments.unshift(created);
-                    this.closeCreateModal();
+                    this.closeModal();
                     this.ensureSwal().then(() => {
                         window.Swal.fire({
                             title: "เพิ่มข้อมูลสำเร็จ",
