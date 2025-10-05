@@ -35,7 +35,7 @@ class CategoryController extends Controller
             'target_type' => 'category',
             'target_id' => $category->id,
             'target_name' => $category->name,
-            'description' => "Created category: {$category->name} (ID {$category->id})",
+            'description' => "สร้างหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
             'severity' => 'info'
         ]);
@@ -70,7 +70,7 @@ class CategoryController extends Controller
             'target_type' => 'category',
             'target_id' => $category->id,
             'target_name' => $category->name,
-            'description' => "Updated category: {$category->name} (ID {$category->id})",
+            'description' => "แก้ไขหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
             'severity' => 'info',
             'old_values' => $oldValues,
@@ -96,7 +96,7 @@ class CategoryController extends Controller
             'target_type' => 'category',
             'target_id' => $category->id,
             'target_name' => $category->name,
-            'description' => "Deleted category: {$category->name} (ID {$category->id})",
+            'description' => "ลบหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
             'severity' => 'warning'
         ]);

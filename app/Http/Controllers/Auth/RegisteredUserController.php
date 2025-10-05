@@ -68,7 +68,7 @@ class RegisteredUserController extends Controller
             'target_type' => 'user',
             'target_id' => $user->id,
             'target_name' => $user->name,
-            'description' => "User registered: {$user->name} ({$user->email})",
+            'description' => "ผู้ใช้สมัครสมาชิก: {$user->name} ({$user->email})",
             'module' => 'authentication',
             'severity' => 'info',
             'ip_address' => $request->ip(),

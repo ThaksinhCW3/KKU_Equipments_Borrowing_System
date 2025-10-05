@@ -65,6 +65,17 @@
             <span v-else class="text-gray-400">-</span>
         </template>
 
+        <!-- User Name Column -->
+        <template #cell-admin.name="{ item }">
+            <span v-if="item.admin && item.admin.name"
+                  class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
+                  @click="viewAdminDetails(item.admin_id)"
+                  :title="`คลิกเพื่อดูรายละเอียดผู้ดูแล: ${item.admin.name}`">
+                {{ item.admin.name }}
+            </span>
+            <span v-else class="text-gray-400">-</span>
+        </template>
+
         <template #cell-admin_id="{ item }">
             <span v-if="item.admin_id"
                   class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline font-medium"
@@ -116,7 +127,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ผู้ใช้</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.user?.name || 'N/A' }}</p>
+                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.admin?.name || 'N/A' }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">การดำเนินการ</label>
@@ -151,7 +162,7 @@
                     </span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">IP Address</label>
+                    <label class="block text-sm font-medium text-gray-700">ที่อยู่ IP</label>
                     <p class="mt-1 text-sm text-gray-900">{{ selectedLog.ip_address || '-' }}</p>
                 </div>
                 <div>
@@ -322,9 +333,28 @@ export default {
         }
     },
     methods: {
-        async fetchLogs() {
+        async fetchLogs(filters = {}) {
             try {
-                const response = await api.get('/api/logs');
+                // Build query parameters
+                const params = new URLSearchParams();
+                
+                // Add filter parameters
+                Object.keys(filters).forEach(key => {
+                    if (filters[key]) {
+                        if (key === 'created_at_from') {
+                            params.append('date_from', filters[key]);
+                        } else if (key === 'created_at_to') {
+                            params.append('date_to', filters[key]);
+                        } else {
+                            params.append(key, filters[key]);
+                        }
+                    }
+                });
+                
+                const url = `/api/logs${params.toString() ? '?' + params.toString() : ''}`;
+                console.log('Fetching logs with URL:', url);
+                
+                const response = await api.get(url);
                 this.logs = response.data.data || response.data || [];
             } catch (error) {
                 console.error('Failed to fetch logs:', error);
@@ -632,6 +662,19 @@ export default {
                     baseTable.applyFilters();
                 }
             }
+            
+            // For date filters, refetch data from API
+            if (filterKey === 'created_at_from' || filterKey === 'created_at_to') {
+                this.fetchLogsFromAPI();
+            }
+        },
+        
+        // Fetch logs from API with current filters
+        async fetchLogsFromAPI() {
+            const baseTable = this.$refs.baseTable;
+            if (!baseTable) return;
+            
+            await this.fetchLogs(baseTable.filters);
         }
     },
     mounted() {

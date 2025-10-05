@@ -86,7 +86,7 @@ class EquipmentController extends Controller
                 'action' => 'create',
                 'target_type' => 'equipment',
                 'target_id' => $equipment->id,
-                'description' => "Created equipment: {$equipment->name} (ID {$equipment->id})",
+                'description' => "สร้างอุปกรณ์: {$equipment->name} (ID {$equipment->id})",
             ]);
 
 
@@ -240,7 +240,7 @@ class EquipmentController extends Controller
                 'target_type' => 'equipment',
                 'target_id' => $equipment->id,
                 'target_name' => $equipment->name,
-                'description' => "Updated equipment: {$equipment->name} (ID {$equipment->code})",
+                'description' => "แก้ไขอุปกรณ์: {$equipment->name} (ID {$equipment->code})",
                 'module' => 'equipment',
                 'severity' => 'info',
                 'old_values' => $oldValues,
@@ -285,7 +285,7 @@ class EquipmentController extends Controller
             'action' => 'delete',
             'target_type' => 'equipment',
             'target_id' => $id,
-            'description' => "Deleted equipment: {$equipment->name} (ID {$equipment->code})",
+            'description' => "ลบอุปกรณ์: {$equipment->name} (ID {$equipment->code})",
         ]);
 
         $equipment->delete();
