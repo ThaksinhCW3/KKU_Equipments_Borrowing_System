@@ -1,10 +1,10 @@
 <template>
-      <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-        <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
-        <span>/</span>
-        <span class="font-semibold text-gray-900">หน้าจัดการคำขอ</span>
-    </nav>
+  <!-- Breadcrumb -->
+  <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+    <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
+    <span>/</span>
+    <span class="font-semibold text-gray-900">หน้าจัดการคำขอ</span>
+  </nav>
 
   <div class="bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center flex-wrap gap-y-4 mb-6">
@@ -23,14 +23,23 @@
         </button>
       </div>
     </div>
-    <div class="relative mb-4">
-      <input type="text" v-model="searchQuery" placeholder="Search"
-        class="pl-10 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" />
-      <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-      </svg>
-    </div>
+    
+     <div class="flex items-center space-x-4 mb-4">
+       <div class="relative flex-1 max-w-md">
+         <input type="text" v-model="searchQuery" placeholder="ค้นหา รหัสคำขอ, ผู้ขอ, อุปกรณ์, สถานะ"
+           class="pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full" />
+         <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+         </svg>
+       </div>
+       <div class="flex items-center space-x-2">
+         <button @click="clearSearch" v-if="searchQuery"
+           class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50">
+           ล้าง
+         </button>
+       </div>
+     </div>
 
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-semibold">
@@ -43,7 +52,6 @@
         <thead class="bg-gray-50 border-b">
           <tr>
             <th class="text-left px-4 py-2">รหัสคำขอ</th>
-            <th class="text-left px-4 py-2">รหัสนสส</th>
             <th class="text-left px-4 py-2">ผู้ขอ</th>
             <th class="text-left px-4 py-2">อุปกรณ์</th>
             <th class="text-left px-4 py-2">วันที่ขอ</th>
@@ -55,20 +63,19 @@
         <tbody>
           <tr v-for="request in paginatedRequests" :key="request.id" class="border-b">
             <td class="px-4 py-2">
-                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewRequestDetails(request)">
-                    {{ request.req_id }}
-                </span>
-            </td>
-            <td class="px-4 py-2">{{ request.uid }}</td>
-            <td class="px-4 py-2">
-                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewUserProfile(request)">
-                    {{ request.user_name }}
-                </span>
+              <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewRequestDetails(request)">
+                {{ request.req_id }}
+              </span>
             </td>
             <td class="px-4 py-2">
-                <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewEquipmentDetails(request)">
-                    {{ request.equipment_name }}
-                </span>
+              <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewUserProfile(request)">
+                {{ request.user_name }}
+              </span>
+            </td>
+            <td class="px-4 py-2">
+              <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" @click="viewEquipmentDetails(request)">
+                {{ request.equipment_name }}
+              </span>
             </td>
             <td class="px-4 py-2">{{ request.start_at }}</td>
             <td class="px-4 py-2">{{ request.end_at }}</td>
@@ -169,17 +176,18 @@ export default {
       if (this.activeStatusFilter !== 'all') {
         filtered = filtered.filter(r => r.status.toLowerCase() === this.activeStatusFilter);
       }
-      // 2. Apply search query
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (r) =>
-            r.user_name.toLowerCase().includes(q) ||
-            r.equipment_name.toLowerCase().includes(q) ||
-            r.status.toLowerCase().includes(q) ||
-            String(r.req_id).includes(q)
-        );
-      }
+       // 2. Apply search query
+       if (this.searchQuery) {
+         const q = this.searchQuery.toLowerCase();
+         filtered = filtered.filter(
+           (r) =>
+             String(r.req_id).toLowerCase().includes(q) ||           // รหัสคำขอ
+             (r.user_name && r.user_name.toLowerCase().includes(q)) || // ผู้ขอ
+             (r.equipment_name && r.equipment_name.toLowerCase().includes(q)) || // อุปกรณ์
+             this.getStatusText(r.status).toLowerCase().includes(q) || // สถานะ (Thai text)
+             r.status.toLowerCase().includes(q) // สถานะ (English)
+         );
+       }
 
       // 3. Apply sorting
       filtered.sort((a, b) => {
@@ -234,6 +242,7 @@ export default {
         case 'check_out': return 'bg-blue-100 text-blue-800';
         case 'check_in': return 'bg-purple-100 text-purple-800';
         case 'rejected': return 'bg-red-100 text-red-800';
+        case 'cancelled': return 'bg-gray-100 text-gray-800';
         case 'in use': return 'bg-blue-100 text-blue-800';
         default: return 'bg-gray-100 text-gray-800';
       }
@@ -250,6 +259,7 @@ export default {
         case 'check_out': return 'มารับของแล้ว';
         case 'check_in': return 'มาคืนของแล้ว';
         case 'rejected': return 'ปฏิเสธ';
+        case 'cancelled': return 'ยกเลิก';
         case 'in use': return 'กำลังใช้งาน';
         default: return this.capitalize(status);
       }
@@ -274,10 +284,13 @@ export default {
       // Redirect to user report page filtered by this user
       window.location.href = `/admin/report/user?search=${encodeURIComponent(request.user_name)}`;
     },
-    viewEquipmentDetails(request) {
-      // Search for the equipment in the equipment page
-      window.location.href = `/admin/equipment?search=${encodeURIComponent(request.equipment_name)}`;
-    },
+     viewEquipmentDetails(request) {
+       // Search for the equipment in the equipment page
+       window.location.href = `/admin/equipment?search=${encodeURIComponent(request.equipment_name)}`;
+     },
+     clearSearch() {
+       this.searchQuery = '';
+     },
   },
   watch: {
     searchQuery() {

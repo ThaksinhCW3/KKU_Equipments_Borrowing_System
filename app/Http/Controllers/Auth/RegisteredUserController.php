@@ -72,7 +72,7 @@ class RegisteredUserController extends Controller
             'module' => 'authentication',
             'severity' => 'info',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent() ?? 0
         ]);
 
         event(new Registered($user));

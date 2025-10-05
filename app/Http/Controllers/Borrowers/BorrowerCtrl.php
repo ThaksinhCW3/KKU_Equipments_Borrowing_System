@@ -124,7 +124,7 @@ class BorrowerCtrl extends Controller
             'module' => 'borrow_request',
             'severity' => 'warning',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'user_agent' => $request->userAgent() ?? 0,
         ]);
 
         // Make equipment available again
@@ -238,7 +238,7 @@ class BorrowerCtrl extends Controller
             'module' => 'borrow_request',
             'severity' => 'info',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'user_agent' => $request->userAgent() ??0
         ]);
 
         // Make equipment unavailable

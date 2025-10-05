@@ -38,9 +38,13 @@ class CategoryController extends Controller
             'description' => "สร้างหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
             'severity' => 'info',
-            'user_agent' => request()->userAgent(),
+            'user_agent' => request()->userAgent() ?? 0,
             'ip_address' => request()->ip()
         ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::forget('all_categories');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to ensure fresh data
 
         return response()->json([
             'status' => true,
@@ -77,9 +81,13 @@ class CategoryController extends Controller
             'severity' => 'info',
             'old_values' => $oldValues,
             'new_values' => $validated,
-            'user_agent' => request()->userAgent(),
+            'user_agent' => request()->userAgent() ?? 0,
             'ip_address' => request()->ip()
         ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::forget('all_categories');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to ensure fresh data
 
         return response()->json([
             'status' => true,
@@ -103,11 +111,15 @@ class CategoryController extends Controller
             'description' => "ลบหมวดหมู่: {$category->name} (ID {$category->id})",
             'module' => 'equipment',
             'severity' => 'warning',
-            'user_agent' => request()->userAgent(),
+            'user_agent' => request()->userAgent() ?? 0,
             'ip_address' => request()->ip()
         ]);
         
         $category->delete();
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::forget('all_categories');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to ensure fresh data
 
         return response()->json(
             [

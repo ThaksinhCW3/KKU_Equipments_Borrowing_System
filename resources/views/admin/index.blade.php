@@ -228,8 +228,8 @@
                             {
                                 label: 'อุปกรณ์ทั้งหมด',
                                 data: @json($categoryCounts->pluck('equipments_count')),
-                                backgroundColor: 'rgba(168, 85, 247, 0.8)',
-                                borderColor: '#a855f7',
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                borderColor: '#3b82f6',
                                 borderWidth: 1
                             },
                             {

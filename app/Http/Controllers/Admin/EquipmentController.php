@@ -97,16 +97,14 @@ class EquipmentController extends Controller
                 'action' => 'create',
                 'target_type' => 'equipment',
                 'target_id' => $equipment->id,
-                'target_name' => $equipment->name,
                 'description' => "สร้างอุปกรณ์: {$equipment->name} (ID {$equipment->id})",
-                'module' => 'equipment',
-                'severity' => 'info',
-                'user_agent' => $request->userAgent() ?? 'Unknown',
-                'ip_address' => $request->ip() ?? 'Unknown'
             ]);
 
 
+            // Clear relevant caches
             Cache::forget('equipments_with_category');
+            Cache::forget('all_categories');
+            Cache::flush(); // Clear all cache to ensure fresh data
 
             return response()->json([
                 "status" => true,
@@ -245,7 +243,10 @@ class EquipmentController extends Controller
                 $this->notifyUsersOnStatusChange($equipment, $oldValues['status'], $updatePayload['status']);
             }
 
+            // Clear relevant caches
             Cache::forget('equipments_with_category');
+            Cache::forget('all_categories');
+            Cache::flush(); // Clear all cache to ensure fresh data
             
             $updatedEquipment = $equipment->fresh()->load('category');
             
@@ -260,9 +261,7 @@ class EquipmentController extends Controller
                 'module' => 'equipment',
                 'severity' => 'info',
                 'old_values' => $oldValues,
-                'new_values' => $updatePayload,
-                'user_agent' => $request->userAgent() ?? 'Unknown',
-                'ip_address' => $request->ip() ?? 'Unknown'
+                'new_values' => $updatePayload
             ]);
             
             \Log::info('Updated equipment data:', ['equipment' => $updatedEquipment->toArray()]);
@@ -303,17 +302,15 @@ class EquipmentController extends Controller
             'action' => 'delete',
             'target_type' => 'equipment',
             'target_id' => $id,
-            'target_name' => $equipment->name,
             'description' => "ลบอุปกรณ์: {$equipment->name} (ID {$equipment->code})",
-            'module' => 'equipment',
-            'severity' => 'info',
-            'user_agent' => request()->userAgent() ?? 'Unknown',
-            'ip_address' => request()->ip() ?? 'Unknown'
         ]);
 
         $equipment->delete();
 
+        // Clear relevant caches
         Cache::forget('equipments_with_category');
+        Cache::forget('all_categories');
+        Cache::flush(); // Clear all cache to ensure fresh data
 
         return response()->json([
             "status" => true,
@@ -333,7 +330,7 @@ class EquipmentController extends Controller
 
         // Get users with pending requests for this equipment
         $pendingRequests = \App\Models\BorrowRequest::with('user')
-            ->where('equipments_id', $equipment->id)
+            ->where('equipment_id', $equipment->id)
             ->where('status', 'pending')
             ->get();
 

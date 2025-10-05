@@ -87,6 +87,9 @@ class VerificationController extends Controller
             'process_at' => now(),
         ]);
 
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
+
         // Send notification to user
         $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'approved'));
 
@@ -107,6 +110,9 @@ class VerificationController extends Controller
             'processed_by' => Auth::id(),
             'process_at' => now(),
         ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
 
         // Send notification to user
         $verificationRequest->user->notify(new VerificationRequestProcessed($verificationRequest, 'rejected'));

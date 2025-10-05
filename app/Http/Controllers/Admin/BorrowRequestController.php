@@ -150,7 +150,7 @@ class BorrowRequestController extends Controller
             'old_values' => $oldData,
             'new_values' => $newData,
             'ip_address' => $req->ip(),
-            'user_agent' => $req->userAgent(),
+            'user_agent' => $req->userAgent() ?? 0,
         ]);
 
         $user = $borrowRequest->user;
@@ -207,7 +207,7 @@ class BorrowRequestController extends Controller
             'old_values' => $oldData,
             'new_values' => $newData,
             'ip_address' => $req->ip(),
-            'user_agent' => $req->userAgent(),
+            'user_agent' => $req->userAgent() ?? 0,
         ]);
 
         $user = $request->user;
@@ -262,7 +262,7 @@ public function update(Request $req, $req_id)
             'module' => 'borrow_request',
             'severity' => 'info',
             'ip_address' => $req->ip(),
-            'user_agent' => $req->userAgent(),
+            'user_agent' => $req->userAgent() ?? 0,
         ]);
         
         // Send notification to user
@@ -286,7 +286,7 @@ public function update(Request $req, $req_id)
             'module' => 'borrow_request',
             'severity' => 'info',
             'ip_address' => $req->ip(),
-            'user_agent' => $req->userAgent(),
+            'user_agent' => $req->userAgent() ?? 0,
         ]);
         
         // Make equipment available again
@@ -323,6 +323,17 @@ public function update(Request $req, $req_id)
     return redirect()
         ->route('admin.requests.index')
         ->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
-}
+    }
+
+    /**
+     * Clear dashboard cache when borrow request data changes
+     */
+    private function clearDashboardCache($borrowRequest = null)
+    {
+        // Clear all relevant caches
+        \Illuminate\Support\Facades\Cache::forget('equipments_with_category');
+        \Illuminate\Support\Facades\Cache::forget('all_categories');
+        \Illuminate\Support\Facades\Cache::flush(); // Clear all cache to ensure fresh data
+    }
 
 }

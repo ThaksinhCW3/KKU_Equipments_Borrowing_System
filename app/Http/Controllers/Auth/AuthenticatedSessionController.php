@@ -60,7 +60,7 @@ class AuthenticatedSessionController extends Controller
             'module' => 'authentication',
             'severity' => 'info',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent() ?? 0
         ]);
 
         if (in_array($user->role, ['admin', 'staff'])) {
@@ -89,7 +89,7 @@ class AuthenticatedSessionController extends Controller
                 'module' => 'authentication',
                 'severity' => 'info',
                 'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'user_agent' => $request->userAgent() ?? 0
             ]);
         }
 

@@ -30,4 +30,36 @@
         data-categories='@json($categories)'
         data-role="{{ Auth::user()->role }}">
     </div>
+
+    <script>
+        // Debug: Check if data is loaded correctly
+        document.addEventListener('DOMContentLoaded', function() {
+            const el = document.getElementById('equipment-table');
+            if (el) {
+                console.log('Equipment table element found');
+                console.log('Equipment data:', el.dataset.equipments);
+                console.log('Categories data:', el.dataset.categories);
+                console.log('Role:', el.dataset.role);
+                
+                try {
+                    const equipments = JSON.parse(el.dataset.equipments || '[]');
+                    console.log('Parsed equipments:', equipments);
+                    console.log('Equipment count:', equipments.length);
+                    
+                    // Check if CA-ER8-002 is in the data
+                    const targetEquipment = equipments.find(e => e.code === 'CA-ER8-002');
+                    if (targetEquipment) {
+                        console.log('✅ CA-ER8-002 found in data:', targetEquipment);
+                    } else {
+                        console.log('❌ CA-ER8-002 NOT found in data');
+                        console.log('Available codes:', equipments.map(e => e.code));
+                    }
+                } catch (e) {
+                    console.error('Error parsing equipment data:', e);
+                }
+            } else {
+                console.error('Equipment table element not found');
+            }
+        });
+    </script>
 </x-admin-layout>

@@ -332,7 +332,7 @@ class AdminController extends Controller
             'module' => 'export',
             'severity' => 'info',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent() ?? 0
         ]);
 
         switch ($type) {
@@ -459,7 +459,7 @@ class AdminController extends Controller
             'module' => 'export',
             'severity' => 'success',
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent() ?? 0
         ]);
 
         return response()->stream($callback, 200, [

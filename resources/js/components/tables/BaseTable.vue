@@ -364,12 +364,30 @@ export default {
       // Apply search
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
+        
         list = list.filter(item => {
-          return this.searchFields.some(field => {
+          const matches = this.searchFields.some(field => {
             const value = this.getNestedValue(item, field);
-            return value && value.toString().toLowerCase().includes(query);
+            const stringValue = value ? value.toString().toLowerCase() : '';
+            const matches = stringValue.includes(query);
+            
+            // Debug specific search for CA-ER8-002
+            if (query === 'ca-er8-002' && field === 'code') {
+              console.log(`🔍 Checking ${field}:`, value, '->', stringValue, 'includes', query, '?', matches);
+            }
+            
+            return matches;
           });
+          
+          // Debug specific item
+          if (item.code === 'CA-ER8-002') {
+            console.log('🔍 CA-ER8-002 search result:', matches);
+          }
+          
+          return matches;
         });
+        
+        console.log('🔍 Items after search:', list.length);
       }
       
       // Apply advanced filters (only use appliedFilters, not the temporary filters)

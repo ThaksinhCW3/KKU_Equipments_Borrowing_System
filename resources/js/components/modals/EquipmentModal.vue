@@ -113,12 +113,15 @@
                   </div>
                 </div>
 
-                <div v-if="equipment.accessories">
+                <div v-if="formattedAccessories.length > 0">
                   <label class="block text-sm font-medium text-gray-700 mb-1">อุปกรณ์เสริม</label>
                   <div class="px-3 py-2 bg-gray-50 rounded-md border min-h-[60px]">
-                    <span class="text-sm text-gray-900 whitespace-pre-wrap">
-                      {{ equipment.accessories }}
-                    </span>
+                    <div class="space-y-1">
+                      <div v-for="(accessory, index) in formattedAccessories" :key="index" class="flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        <span class="text-sm text-gray-900">{{ accessory }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -417,6 +420,26 @@ export default {
         return Array.isArray(photos) ? photos : [];
       } catch (e) {
         return [this.equipment.photo_path];
+      }
+    },
+    formattedAccessories() {
+      if (!this.equipment || !this.equipment.accessories) return [];
+      
+      try {
+        // Handle different formats
+        if (Array.isArray(this.equipment.accessories)) {
+          return this.equipment.accessories;
+        } else if (typeof this.equipment.accessories === 'string') {
+          const parsed = JSON.parse(this.equipment.accessories);
+          return Array.isArray(parsed) ? parsed : [];
+        }
+        return [];
+      } catch (e) {
+        // If JSON parsing fails, try to split by comma
+        if (typeof this.equipment.accessories === 'string') {
+          return this.equipment.accessories.split(',').map(item => item.trim()).filter(item => item);
+        }
+        return [];
       }
     },
     canSave() {
