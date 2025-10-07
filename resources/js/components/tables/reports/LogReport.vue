@@ -91,12 +91,6 @@
             </span>
         </template>
 
-        <template #cell-severity="{ item }">
-            <span :class="getSeverityBadgeClass(item.severity)"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-                {{ item.severity || 'info' }}
-            </span>
-        </template>
 
         <template #cell-target_type="{ item }">
             <span :class="getTargetTypeBadgeClass(item.target_type)"
@@ -197,10 +191,6 @@
                     </span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">โมดูล</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedLog.module || '-' }}</p>
-                </div>
-                <div>
                     <label class="block text-sm font-medium text-gray-700">ประเภทเป้าหมาย</label>
                     <p class="mt-1 text-sm text-gray-900">{{ selectedLog.target_type || '-' }}</p>
                 </div>
@@ -213,13 +203,6 @@
                         {{ selectedLog.target_name }}
                     </span>
                     <span v-else class="text-gray-400">-</span>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">ระดับความสำคัญ</label>
-                    <span :class="getSeverityBadgeClass(selectedLog.severity)"
-                        class="inline-block px-2 py-1 rounded-full text-xs">
-                        {{ selectedLog.severity || 'info' }}
-                    </span>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ที่อยู่ IP</label>
@@ -332,8 +315,6 @@ export default {
                 { key: 'action', label: 'การดำเนินการ', type: 'badge' },
                 { key: 'target_type', label: 'ประเภทเป้าหมาย' },
                 { key: 'target_name', label: 'เป้าหมาย' },
-                { key: 'module', label: 'โมดูล' },
-                { key: 'severity', label: 'ระดับความสำคัญ', type: 'badge' },
                 { key: 'description', label: 'รายละเอียด' },
                 { key: 'created_at', label: 'วันที่', type: 'date' },
                 { key: 'actions', label: 'การดำเนินการ' }
@@ -445,16 +426,6 @@ export default {
             };
             return classes[action] || 'bg-gray-100 text-gray-800';
         },
-        getSeverityBadgeClass(severity) {
-            const classes = {
-                'critical': 'bg-red-100 text-red-800',
-                'error': 'bg-red-100 text-red-800',
-                'warning': 'bg-yellow-100 text-yellow-800',
-                'info': 'bg-blue-100 text-blue-800',
-                'success': 'bg-green-100 text-green-800',
-            };
-            return classes[severity] || 'bg-gray-100 text-gray-800';
-        },
         getTargetTypeBadgeClass(targetType) {
             const classes = {
                 'equipment': 'bg-blue-100 text-blue-800',
@@ -537,8 +508,6 @@ export default {
                 'session_id': 'รหัสเซสชัน',
                 'request_method': 'วิธีการคำขอ',
                 'request_url': 'URL คำขอ',
-                'severity': 'ระดับความสำคัญ',
-                'module': 'โมดูล',
                 'target_type': 'ประเภทเป้าหมาย',
                 'target_id': 'รหัสเป้าหมาย',
                 'target_name': 'ชื่อเป้าหมาย',

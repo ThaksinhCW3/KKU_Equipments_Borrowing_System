@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Equipment;
 use App\Models\Category;
 use App\Models\BorrowRequest;
+use App\Models\Log;
 
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -30,6 +31,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             'categories' => $this->filteredCategories(),
             'requests' => $this->filteredRequests(),
             'transactions' => $this->filteredTransactions(),
+            'log' => $this->filteredLogs(),
             default => collect(),
         };
     }
@@ -42,6 +44,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             'categories' => ['ไอดี', 'รหัสหมวดหมู่', 'ชื่อหมวดหมู่', 'สร้างวันที่'],
             'requests' => ['ไอดี', 'รหัสคำขอ', 'รหัสนักศึกษา', 'ชื่อผู้ใช้', 'เลขไอดีอุปกรณ์', 'ชื่ออุปกรณ์', 'เริ่มวันที่', 'ถึงวันที่', 'สถานะ', 'สาเหตุการปฏิเสธ', 'สาเหตุการยกเลิก', 'สร้างวันที่'],
             'transactions' => ['ไอดี', 'รหัสคำขอ', 'ประเภท', 'ชื่อผู้ใช้', 'ชื่ออุปกรณ์', 'สถานะ', 'จำนวนเงิน', 'เริ่มวันที่', 'ถึงวันที่', 'สร้างวันที่'],
+            'log' => ['รหัส', 'ผู้ใช้', 'การดำเนินการ', 'ประเภทเป้าหมาย', 'เป้าหมาย', 'รายละเอียด', 'วันที่'],
             default => [],
         };
     }
@@ -302,6 +305,68 @@ class MultiFilteredExport implements FromCollection, WithHeadings
                 $transaction['start_date'] ? \Carbon\Carbon::parse($transaction['start_date'])->format('d-m-Y') : '-',
                 $transaction['end_date'] ? \Carbon\Carbon::parse($transaction['end_date'])->format('d-m-Y') : '-',
                 $transaction['created_at'] ? \Carbon\Carbon::parse($transaction['created_at'])->format('d-m-Y') : '-',
+            ];
+        });
+    }
+
+    protected function filteredLogs()
+    {
+        $query = Log::with('admin');
+
+        // Apply filters similar to ReportController
+        if ($this->request->filled('admin')) {
+            $query->whereHas('admin', function($q) {
+                $q->where('name', 'like', "%{$this->request->admin}%");
+            });
+        }
+
+        if ($this->request->filled('action')) {
+            $query->where('action', $this->request->action);
+        }
+
+        if ($this->request->filled('target_type')) {
+            $query->where('target_type', $this->request->target_type);
+        }
+
+        if ($this->request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $this->request->date_from);
+        }
+
+        if ($this->request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $this->request->date_to);
+        }
+
+        // Apply search filter
+        if ($this->request->filled('search')) {
+            $search = $this->request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('admin', function($adminQuery) use ($search) {
+                    $adminQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->orWhere('action', 'like', "%{$search}%")
+                ->orWhere('target_type', 'like', "%{$search}%")
+                ->orWhere('target_name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply sorting
+        if ($this->request->filled('sort')) {
+            $query->orderBy($this->request->sort, $this->request->direction ?? 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+        }
+
+        return $query->get()->map(function ($log) {
+            return [
+                $log->id,
+                $log->admin->name ?? 'N/A',
+                $log->action,
+                $log->target_type ?? '-',
+                $log->target_name ?? '-',
+                $log->description ?? '-',
+                $log->created_at ? $log->created_at->format('d-m-Y H:i:s') : '-',
             ];
         });
     }

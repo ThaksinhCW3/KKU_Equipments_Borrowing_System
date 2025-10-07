@@ -13,7 +13,6 @@ class Log extends Model
         'admin_id',
         'action',
         'ip_address',
-        'module',
         'target_type',
         'target_id',
         'target_name',
@@ -25,7 +24,6 @@ class Log extends Model
         'request_method',
         'request_url',
         'request_data',
-        'severity',
         'notes',
     ];
 
@@ -55,21 +53,6 @@ class Log extends Model
         return $query->where('action', $action);
     }
 
-    /**
-     * Scope for filtering by module
-     */
-    public function scopeByModule($query, $module)
-    {
-        return $query->where('module', $module);
-    }
-
-    /**
-     * Scope for filtering by severity
-     */
-    public function scopeBySeverity($query, $severity)
-    {
-        return $query->where('severity', $severity);
-    }
 
     /**
      * Scope for filtering by target type
@@ -110,20 +93,6 @@ class Log extends Model
         return "{$action} action performed{$target}";
     }
 
-    /**
-     * Get severity badge class
-     */
-    public function getSeverityBadgeClassAttribute(): string
-    {
-        return match($this->severity) {
-            'critical' => 'bg-red-100 text-red-800',
-            'error' => 'bg-red-100 text-red-800',
-            'warning' => 'bg-yellow-100 text-yellow-800',
-            'info' => 'bg-blue-100 text-blue-800',
-            'success' => 'bg-green-100 text-green-800',
-            default => 'bg-gray-100 text-gray-800',
-        };
-    }
 
     /**
      * Get action badge class

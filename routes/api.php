@@ -35,16 +35,12 @@ Route::get('/logs', function (Request $request) {
         })
         ->when($request->action, fn($q) => $q->where('action', $request->action))
         ->when($request->target_type, fn($q) => $q->where('target_type', $request->target_type))
-        ->when($request->module, fn($q) => $q->where('module', $request->module))
-        ->when($request->severity, fn($q) => $q->where('severity', $request->severity))
         ->when($request->date_from, fn($q) => $q->whereDate('created_at', '>=', $request->date_from))
         ->when($request->date_to, fn($q) => $q->whereDate('created_at', '<=', $request->date_to))
         ->orderBy('created_at', 'desc')
+        ->orderBy('id', 'desc')
         ->get()
         ->map(function ($log) {
-            // Add missing fields with default values or derived values
-            $log->module = $log->module ?: ($log->target_type === 'equipment' ? 'equipment' : 'system');
-            
             // Extract target name from description
             if (!$log->target_name && $log->description) {
                 if (preg_match('/: ([^(]+) \(/', $log->description, $matches)) {
@@ -56,7 +52,6 @@ Route::get('/logs', function (Request $request) {
                 $log->target_name = $log->target_name ?: '-';
             }
             
-            $log->severity = $log->severity ?: 'info';
             $log->ip_address = $log->ip_address ?: '-';
             return $log;
         });
