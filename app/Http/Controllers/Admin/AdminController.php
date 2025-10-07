@@ -355,7 +355,7 @@ class AdminController extends Controller
                     $csvData[] = [
                         $borrowRequest->req_id,
                         $borrowRequest->user->email ?? 'N/A',
-                        'นักศึกษา', // Default role
+                        'ผู้ขอยืม', // Default role
                         $borrowRequest->equipment->name ?? 'N/A',
                         $borrowRequest->equipment->code ?? 'N/A',
                         $borrowRequest->equipment->category->name ?? 'N/A',
@@ -421,7 +421,7 @@ class AdminController extends Controller
                     if ($user) {
                         $csvData[] = [
                             $user->email,
-                            'นักศึกษา', // Default role
+                            'ผู้ขอยืม', // Default role
                             $activity->total_requests,
                             $activity->completed,
                             $activity->canceled

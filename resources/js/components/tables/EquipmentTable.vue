@@ -181,7 +181,7 @@ export default {
           placeholder: 'เลือกสถานะ',
           options: [
             { value: 'available', label: 'พร้อมใช้งาน' },
-            { value: 'unavailable', label: 'ไม่พร้อมใช้งาน' },
+            { value: 'unavailable', label: 'ถูกยืม' },
             { value: 'retired', label: 'รอคืน' },
             { value: 'maintenance', label: 'ซ่อมบำรุง' }
           ]
@@ -242,7 +242,7 @@ export default {
         case "available":
           return "พร้อมใช้งาน";
         case "unavailable":
-          return "ไม่พร้อมใช้งาน";
+          return "ถูกยืม";
         case "retired":
           return "รอคืน";
         case "maintenance":

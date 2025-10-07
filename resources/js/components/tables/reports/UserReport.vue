@@ -53,7 +53,7 @@
                     <p class="mt-1 text-sm text-gray-900">{{ selectedUser.uid || '-' }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ชื่อ</label>
+                    <label class="block text-sm font-medium text-gray-700">ชื่อ-นามสกุน</label>
                     <p class="mt-1 text-sm text-gray-900">{{ selectedUser.name || '-' }}</p>
                 </div>
                 <div>
@@ -103,7 +103,7 @@ export default {
             columns: [
                 { key: 'id', label: 'ไอดี', type: 'number' },
                 { key: 'uid', label: 'รหัสผู้ใช้' },
-                { key: 'name', label: 'ชื่อ' },
+                { key: 'name', label: 'ชื่อ-นามสกุน' },
                 { key: 'email', label: 'อีเมล' },
                 { key: 'phonenumber', label: 'เบอร์โทรศัพท์' },
                 { key: 'role', label: 'ตำแหน่ง', type: 'badge' },

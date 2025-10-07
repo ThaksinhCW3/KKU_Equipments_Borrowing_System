@@ -29,6 +29,7 @@
             @else
                 @foreach ($allRequests as $req)
                     <div class="bg-white rounded-2xl shadow p-3 mb-10">
+                        
                         @if ($req->status === 'pending')
                             <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
                                 <div class="flex items-center">
@@ -122,6 +123,43 @@
                                 @endif
                             </span>
                         </div>
+                         <!-- Penalty Information -->
+                        @if($req->transaction && $req->transaction->penalty_amount > 0)
+                            <div class="mb-4">
+                                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-medium text-yellow-800">มีค่าปรับ</h4>
+                                            <p class="text-sm text-yellow-700 mt-1">
+                                                <strong>จำนวน: ฿{{ number_format($req->transaction->penalty_amount, 2) }}</strong>
+                                            </p>
+                                            @if($req->transaction->penalty_check === 'paid')
+                                                <p class="text-sm text-green-600 mt-1">
+                                                    <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                                    สถานะ: ชำระแล้ว
+                                                </p>
+                                            @else
+                                                <p class="text-sm text-red-600 mt-1">
+                                                    <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                                                    สถานะ: ยังไม่ชำระ
+                                                </p>
+                                                <p class="text-xs text-yellow-600 mt-1">
+                                                    กรุณาชำระค่าปรับตามที่กำหนด
+                                                </p>
+                                            @endif
+                                            @if($req->transaction->notes)
+                                                <p class="text-xs text-yellow-600 mt-1">
+                                                    <strong>หมายเหตุ:</strong> {{ $req->transaction->notes }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         <!-- Equipment -->
                         <div class="mb-4 flex flex-col sm:flex-row gap-4">
                             @php

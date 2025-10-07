@@ -45,7 +45,7 @@ class EquipmentCheckedOut extends Notification implements ShouldQueue
             ->line("• ห้ามให้ผู้อื่นยืมต่อ")
             ->line("")
             ->line("**ติดต่อ**: หากมีปัญหากรุณาติดต่อเจ้าหน้าที่")
-            ->action('ดูรายละเอียดคำขอ', route('borrower/equipments/reqdetail', $this->borrowRequest->req_id))
+            ->action('ดูรายละเอียดคำขอ', route('borrower.equipments.reqdetail', $this->borrowRequest->req_id))
             ->line("ขอบคุณที่ใช้บริการระบบยืมอุปกรณ์");
     }
 
@@ -59,7 +59,7 @@ class EquipmentCheckedOut extends Notification implements ShouldQueue
             'message'    => "ยืมอุปกรณ์สำเร็จ! กำหนดคืน: {$endDate} - กรุณาดูแลรักษาอุปกรณ์",
             'status'     => 'success',
             'type'       => 'equipment_checked_out',
-            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => [
                 'end_date' => $this->borrowRequest->end_at?->format('d-m-Y'),

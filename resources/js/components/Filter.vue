@@ -57,7 +57,7 @@
                         </label>
                         <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                             <input type="radio" name="availability_panel" class="form-radio text-blue-600" v-model="selectedAvailability" value="unavailable"/>
-                            <span>อุปกรณ์ไม่พร้อมใช้งาน</span>
+                            <span>อุปกรณ์ที่ถูกยืม</span>
                         </label>
                         <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                             <input type="radio" name="availability_panel" class="form-radio text-blue-600" v-model="selectedAvailability" value="maintenance"/>

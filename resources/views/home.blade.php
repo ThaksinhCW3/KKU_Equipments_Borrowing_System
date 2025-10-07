@@ -96,7 +96,7 @@
                             $activeFilters[] = 'ความพร้อมใช้งาน: ' . ($availabilityLabels[request('availability')] ?? request('availability'));
                         }
                         if(request('name')) {
-                            $activeFilters[] = 'ชื่อ: "' . request('name') . '"';
+                            $activeFilters[] = 'ชื่อ-นามสกุน: "' . request('name') . '"';
                         }
                     @endphp
                     

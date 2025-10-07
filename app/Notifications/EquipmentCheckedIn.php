@@ -75,7 +75,7 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
 
         $mail->line("")
              ->line("**หากต้องการยืมอุปกรณ์อีกครั้ง** สามารถทำได้ผ่านระบบ")
-             ->action('ดูประวัติการยืม', route('borrower/equipments/reqdetail', $this->borrowRequest->req_id))
+             ->action('ดูประวัติการยืม', route('borrower.equipments.reqdetail', $this->borrowRequest->req_id))
              ->line("ขอบคุณที่ใช้บริการระบบยืมอุปกรณ์");
 
         return $mail;
@@ -103,7 +103,7 @@ class EquipmentCheckedIn extends Notification implements ShouldQueue
             'message'    => $message,
             'status'     => $hasPenalty && !$isPenaltyPaid ? 'warning' : 'success',
             'type'       => 'equipment_checked_in',
-            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => [
                 'checked_in_at' => $this->borrowRequest->transaction?->checked_in_at?->format('Y-m-d'),

@@ -44,7 +44,7 @@
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-2">ข้อมูลผู้ใช้</h3>
                         <div class="space-y-2 text-sm">
-                            <p><span class="text-gray-500">ชื่อ:</span> {{ $requests->user->name ?? '-' }}</p>
+                            <p><span class="text-gray-500">ชื่อ-นามสกุน:</span> {{ $requests->user->name ?? '-' }}</p>
                             <p><span class="text-gray-500">UID:</span> {{ $requests->user->uid ?? '-' }}</p>
                             <p><span class="text-gray-500">อีเมล:</span> {{ $requests->user->email ?? '-' }}</p>
 
@@ -368,7 +368,6 @@
                 <div class="text-left space-y-2">
                   <label class="flex items-center gap-2"><input type="radio" name="reason" value="ไม่ตรงตามเงื่อนไขการยืม"> ไม่ตรงตามเงื่อนไขการยืม</label>
                   <label class="flex items-center gap-2"><input type="radio" name="reason" value="อุปกรณ์ไม่พร้อมใช้งาน"> อุปกรณ์ไม่พร้อมใช้งาน</label>
-                  <label class="flex items-center gap-2"><input type="radio" name="reason" value="เอกสารไม่ครบถ้วน"> เอกสารไม่ครบถ้วน</label>
                   <label class="flex items-center gap-2"><input type="radio" name="reason" value="อื่นๆ"> อื่นๆ</label>
                   <input id="reason-text" type="text" placeholder="ระบุเหตุผลเพิ่มเติม (ถ้าเลือก อื่นๆ)" class="w-full border rounded px-2 py-1" />
                 </div>

@@ -503,7 +503,7 @@ export default {
         formatFieldName(key) {
             const fieldNames = {
                 'id': 'รหัส',
-                'name': 'ชื่อ',
+                'name': 'ชื่อ-นามสกุน',
                 'code': 'รหัสอุปกรณ์',
                 'brand': 'ยี่ห้อ',
                 'model': 'รุ่น',
@@ -596,7 +596,7 @@ export default {
             const statusTranslations = {
                 'available': 'พร้อมใช้งาน',
                 'retired': 'รอคืน',
-                'unavailable': 'ไม่พร้อมใช้งาน',
+                'unavailable': 'ถูกยืม',
                 'maintenance': 'ซ่อมบำรุง',
                 'pending': 'รอดำเนินการ',
                 'approved': 'อนุมัติแล้ว',

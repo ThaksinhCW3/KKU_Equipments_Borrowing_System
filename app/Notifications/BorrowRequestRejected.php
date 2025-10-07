@@ -44,7 +44,7 @@ class BorrowRequestRejected extends Notification implements ShouldQueue
             'message' => 'คำขอยืมของคุณถูกปฏิเสธ',
             'reason' => $this->borrowRequest->reject_reason,
             'type' => 'borrow_request_rejected',
-            'url' => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
+            'url' => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
         ];
     }

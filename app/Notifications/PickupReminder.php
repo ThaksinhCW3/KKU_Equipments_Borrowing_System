@@ -47,7 +47,7 @@ class PickupReminder extends Notification implements ShouldQueue
             ->line('**เวลา**: จันทร์-ศุกร์ 08:00-17:00 น.')
             ->line("**หมดเขต**: {$deadline}")
             ->line('**หากไม่มารับภายในกำหนด คำขอจะถูกยกเลิกอัตโนมัติ**')
-            ->action('ดูรายละเอียด', route('borrower/equipments/reqdetail', $this->borrowRequest->req_id))
+            ->action('ดูรายละเอียด', route('borrower.equipments.reqdetail', $this->borrowRequest->req_id))
             ->line('กรุณามารับอุปกรณ์โดยเร็ว');
 
         return $mail;
@@ -63,7 +63,7 @@ class PickupReminder extends Notification implements ShouldQueue
             'message'    => "เตือน: กรุณามารับอุปกรณ์ หมดเขตในอีก {$daysLeft} วัน",
             'status' => 'warning',
             'type'       => 'pickup_reminder',
-            'url'        => route('borrower/equipments/reqdetail', $this->borrowRequest->req_id),
+            'url'        => route('borrower.equipments.reqdetail', $this->borrowRequest->req_id),
             'created_at' => now()->toDateTimeString(),
             'extra' => [
                 'days_remaining' => $daysLeft,

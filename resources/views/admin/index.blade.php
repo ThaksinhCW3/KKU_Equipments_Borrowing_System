@@ -142,7 +142,7 @@
                     <a href="{{ route('admin.requests.index') }}?user_email={{ urlencode($item['user']->email ?? '') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                         <div class="flex-1">
                             <div class="font-medium text-sm text-blue-600 hover:text-blue-800">{{ $item['user']->name ?? 'ไม่ระบุชื่อ' }}</div>
-                            <div class="text-xs text-gray-500">{{ $item['user']->email ?? 'ไม่ระบุอีเมล' }} • นักศึกษา</div>
+                            <div class="text-xs text-gray-500">{{ $item['user']->email ?? 'ไม่ระบุอีเมล' }} • ผู้ขอยืม</div>
                         </div>
                         <div class="text-right">
                             <div class="text-lg font-bold text-blue-600">{{ $item['request_count'] }}</div>
@@ -240,14 +240,14 @@
                                 borderWidth: 1
                             },
                             {
-                                label: 'ถูกยืม (ไม่พร้อมใช้งาน)',
+                                label: 'ถูกยืม',
                                 data: @json($categoryCounts->pluck('borrowed_equipments_count')),
                                 backgroundColor: 'rgba(239, 68, 68, 0.8)',
                                 borderColor: '#ef4444',
                                 borderWidth: 1
                             },
                             {
-                                label: 'ซ่อมบำรุง (ไม่พร้อมใช้งาน)',
+                                label: 'ซ่อมบำรุง',
                                 data: @json($categoryCounts->pluck('maintenance_equipments_count')),
                                 backgroundColor: 'rgba(249, 115, 22, 0.8)',
                                 borderColor: '#f97316',

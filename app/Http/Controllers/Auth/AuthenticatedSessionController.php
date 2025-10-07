@@ -64,7 +64,7 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (in_array($user->role, ['admin', 'staff'])) {
-            $defaultRoute = route('admin.index', absolute: false);
+            $defaultRoute = route('admin.requests.index', absolute: false);
         }
 
         return redirect()->intended($defaultRoute);

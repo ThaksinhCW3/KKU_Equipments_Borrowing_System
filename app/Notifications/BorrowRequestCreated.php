@@ -40,7 +40,7 @@ class BorrowRequestCreated extends Notification implements ShouldQueue
             'user'       => $this->borrowRequest->user->name,
             'status' => 'created',
             'message'    => 'มีคำขอยืมอุปกรณ์ใหม่',
-            'url'        => route('admin/requests/show', $this->borrowRequest->req_id),
+            'url'        => route('admin.requests.show', $this->borrowRequest->req_id),
         ];
     }
 }

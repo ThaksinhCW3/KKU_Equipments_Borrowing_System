@@ -394,7 +394,7 @@ export default {
         case "available":
           return "พร้อมใช้งาน";
         case "unavailable":
-          return "ไม่พร้อมใช้งาน";
+          return "ถูกยืม";
         case "retired":
           return "รอคืน";
         case "maintenance":
