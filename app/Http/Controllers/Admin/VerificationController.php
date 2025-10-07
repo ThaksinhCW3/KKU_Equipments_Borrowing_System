@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\VerificationRequest;
 use App\Models\User;
+use App\Models\Log;
 use App\Notifications\VerificationRequestApproved;
 use App\Notifications\VerificationRequestRejected;
 use Illuminate\Http\Request;
@@ -88,6 +89,18 @@ class VerificationController extends Controller
             'process_at' => now(),
         ]);
 
+        // Log the verification approval
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'verification_request_approved',
+            'target_type' => 'verification_request',
+            'target_id' => $verificationRequest->id,
+            'target_name' => $verificationRequest->user->name,
+            'description' => "อนุมัติการยืนยันตัวตนของผู้ใช้ {$verificationRequest->user->name}",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
         // Clear relevant caches
         \Illuminate\Support\Facades\Cache::flush();
 
@@ -111,6 +124,18 @@ class VerificationController extends Controller
             'reject_note' => $request->reject_note,
             'processed_by' => Auth::id(),
             'process_at' => now(),
+        ]);
+
+        // Log the verification rejection
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'verification_request_rejected',
+            'target_type' => 'verification_request',
+            'target_id' => $verificationRequest->id,
+            'target_name' => $verificationRequest->user->name,
+            'description' => "ปฏิเสธการยืนยันตัวตนของผู้ใช้ {$verificationRequest->user->name}",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
 
         // Clear relevant caches

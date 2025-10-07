@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VerificationRequest;
 use App\Models\User;
+use App\Models\Log;
 use App\Notifications\VerificationRequestCreated;
 use App\Notifications\VerificationRequestSubmitted;
 use Illuminate\Http\Request;
@@ -50,6 +51,18 @@ class VerificationController extends Controller
             'users_id' => $user->id,
             'status' => VerificationRequest::STATUS_PENDING,
             'student_id_image_path' => $imagePath,
+        ]);
+
+        // Log the verification request submission
+        Log::create([
+            'admin_id' => $user->id, // User who submitted the request
+            'action' => 'verification_request_submitted',
+            'target_type' => 'verification_request',
+            'target_id' => $verificationRequest->id,
+            'target_name' => $user->name,
+            'description' => "ผู้ใช้ {$user->name} ส่งคำขอการยืนยันตัวตน",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
 
         // Send notification to all admins
@@ -101,6 +114,7 @@ class VerificationController extends Controller
             'processed_by' => null,
             'process_at' => null,
         ]);
+
 
         return redirect()->back()->with('success', 'อัปเดตคำขอการยืนยันตัวตนเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลระบบ');
     }

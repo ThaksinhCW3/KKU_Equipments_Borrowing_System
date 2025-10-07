@@ -75,6 +75,22 @@
                     class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full hover:bg-indigo-200">
                     อุปกรณ์
                 </button>
+                <button @click="applyQuickFilter('action', 'verification_request_submitted')" 
+                    class="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full hover:bg-purple-200">
+                    ส่งคำขอยืนยัน
+                </button>
+                <button @click="applyQuickFilter('action', 'verification_request_approved')" 
+                    class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full hover:bg-green-200">
+                    อนุมัติยืนยัน
+                </button>
+                <button @click="applyQuickFilter('action', 'verification_request_rejected')" 
+                    class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full hover:bg-red-200">
+                    ปฏิเสธยืนยัน
+                </button>
+                <button @click="applyQuickFilter('target_type', 'verification_request')" 
+                    class="inline-flex items-center px-3 py-1 bg-violet-100 text-violet-800 text-sm rounded-full hover:bg-violet-200">
+                    การยืนยันตัวตน
+                </button>
                 <button @click="clearAllFilters" 
                     class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200">
                     ล้างทั้งหมด
@@ -296,6 +312,11 @@ export default {
                 'login': ['user'],
                 'logout': ['user'],
                 
+                // Verification actions
+                'verification_request_submitted': ['verification_request'],
+                'verification_request_approved': ['verification_request'],
+                'verification_request_rejected': ['verification_request'],
+                
                 // System actions (if they exist)
                 'export_initiated': ['system'],
                 'export_completed': ['system'],
@@ -307,6 +328,7 @@ export default {
                 'category': ['create', 'update', 'delete'], // Category actions may exist
                 'user': ['login', 'logout'],
                 'borrow_request': ['create', 'approve', 'reject', 'cancel', 'check_out', 'check_in'],
+                'verification_request': ['verification_request_submitted', 'verification_request_approved', 'verification_request_rejected'],
                 'system': ['export_initiated', 'export_completed', 'export_failed']
             },
             columns: [
@@ -420,6 +442,9 @@ export default {
                 'cancel': 'bg-yellow-100 text-yellow-800',
                 'check_out': 'bg-blue-100 text-blue-800',
                 'check_in': 'bg-green-100 text-green-800',
+                'verification_request_submitted': 'bg-purple-100 text-purple-800',
+                'verification_request_approved': 'bg-green-100 text-green-800',
+                'verification_request_rejected': 'bg-red-100 text-red-800',
                 'export_initiated': 'bg-indigo-100 text-indigo-800',
                 'export_completed': 'bg-green-100 text-green-800',
                 'export_failed': 'bg-red-100 text-red-800',
@@ -432,7 +457,7 @@ export default {
                 'category': 'bg-green-100 text-green-800',
                 'user': 'bg-purple-100 text-purple-800',
                 'borrow_request': 'bg-orange-100 text-orange-800',
-                'verification_request': 'bg-indigo-100 text-indigo-800',
+                'verification_request': 'bg-violet-100 text-violet-800',
                 'system': 'bg-gray-100 text-gray-800',
             };
             return classes[targetType] || 'bg-gray-100 text-gray-800';
@@ -670,6 +695,9 @@ export default {
                 { value: 'cancel', label: 'ยกเลิก' },
                 { value: 'check_out', label: 'เช็คเอาท์' },
                 { value: 'check_in', label: 'เช็คอิน' },
+                { value: 'verification_request_submitted', label: 'ส่งคำขอยืนยันตัวตน' },
+                { value: 'verification_request_approved', label: 'อนุมัติการยืนยันตัวตน' },
+                { value: 'verification_request_rejected', label: 'ปฏิเสธการยืนยันตัวตน' },
                 { value: 'export_initiated', label: 'เริ่มส่งออก' },
                 { value: 'export_completed', label: 'ส่งออกเสร็จ' },
                 { value: 'export_failed', label: 'ส่งออกล้มเหลว' }
@@ -681,6 +709,7 @@ export default {
                 { value: 'category', label: 'หมวดหมู่' },
                 { value: 'user', label: 'ผู้ใช้' },
                 { value: 'borrow_request', label: 'คำขอยืม' },
+                { value: 'verification_request', label: 'คำขอการยืนยันตัวตน' },
                 { value: 'system', label: 'ระบบ' }
             ];
         },
