@@ -37,11 +37,11 @@ class MultiFilteredExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return match ($this->type) {
-            'users' => ['ไอดี', 'รหัสผู้ใช้', 'ชื่อ-นามสกุน', 'อีเมล', 'โทรศัพท์', 'ตำแหน่ง', 'สร้างวันที่'],
+            'users' => ['ไอดี', 'รหัสนักศึกษา', 'ชื่อ-นามสกุล', 'อีเมล', 'โทรศัพท์', 'ตำแหน่ง', 'สร้างวันที่'],
             'equipments' => ['ไอดี', 'หมายเลขคุรุภัณฑ์', 'ชื่ออุปกรณ์', 'หมวดหมู่', 'สถานะ', 'สร้างวันที่'],
-            'categories' => ['ไอดี', 'รหัสหมวดหมู่', 'ชื่อ-นามสกุน', 'สร้างวันที่'],
-            'requests' => ['ไอดี', 'รหัสคำขอ', 'ไอดีผู้ยืม', 'ชื่อผู้ยืม', 'เลขไอดีอุปกรณ์', 'ชื่ออุปกรณ์', 'เริ่มวันที่', 'ถึงวันที่', 'สถานะ', 'สาเหตุการปฏิเสธ', 'สาเหตุการยกเลิก', 'สร้างวันที่'],
-            'transactions' => ['ไอดี', 'รหัสธุรกรรม', 'ประเภทธุรกรรม', 'ชื่อผู้ใช้', 'ชื่ออุปกรณ์', 'สถานะ', 'จำนวนเงิน', 'เริ่มวันที่', 'ถึงวันที่', 'สร้างวันที่'],
+            'categories' => ['ไอดี', 'รหัสหมวดหมู่', 'ชื่อหมวดหมู่', 'สร้างวันที่'],
+            'requests' => ['ไอดี', 'รหัสคำขอ', 'รหัสนักศึกษา', 'ชื่อผู้ใช้', 'เลขไอดีอุปกรณ์', 'ชื่ออุปกรณ์', 'เริ่มวันที่', 'ถึงวันที่', 'สถานะ', 'สาเหตุการปฏิเสธ', 'สาเหตุการยกเลิก', 'สร้างวันที่'],
+            'transactions' => ['ไอดี', 'รหัสคำขอ', 'ประเภท', 'ชื่อผู้ใช้', 'ชื่ออุปกรณ์', 'สถานะ', 'จำนวนเงิน', 'เริ่มวันที่', 'ถึงวันที่', 'สร้างวันที่'],
             default => [],
         };
     }
@@ -199,7 +199,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             // Borrow transaction
             $transactions->push([
                 'id' => $request->id * 1000 + 1,
-                'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'B',
+                'borrow_requests_id' => $request->req_id,
                 'transaction_type' => 'borrow',
                 'user' => $request->user,
                 'equipment' => $request->equipment,
@@ -218,7 +218,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
             if ($request->status === 'check_in') {
                 $transactions->push([
                     'id' => $request->id * 1000 + 2,
-                    'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'R',
+                    'borrow_requests_id' => $request->req_id,
                     'transaction_type' => 'return',
                     'user' => $request->user,
                     'equipment' => $request->equipment,
@@ -244,7 +244,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
                     
                     $transactions->push([
                         'id' => $request->id * 1000 + 3,
-                        'transaction_id' => 'TXN' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . 'P',
+                        'borrow_requests_id' => $request->req_id,
                         'transaction_type' => 'penalty',
                         'user' => $request->user,
                         'equipment' => $request->equipment,
@@ -293,7 +293,7 @@ class MultiFilteredExport implements FromCollection, WithHeadings
         return $filteredTransactions->map(function ($transaction) {
             return [
                 $transaction['id'],
-                $transaction['transaction_id'],
+                $transaction['borrow_requests_id'],
                 $transaction['transaction_type'],
                 $transaction['user']['name'] ?? 'N/A',
                 $transaction['equipment']['name'] ?? 'N/A',

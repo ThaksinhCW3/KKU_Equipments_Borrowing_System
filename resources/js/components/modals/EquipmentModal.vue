@@ -113,14 +113,17 @@
                   </div>
                 </div>
 
-                <div v-if="formattedAccessories.length > 0">
+                <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">อุปกรณ์เสริม</label>
                   <div class="px-3 py-2 bg-gray-50 rounded-md border min-h-[60px]">
-                    <div class="space-y-1">
+                    <div v-if="formattedAccessories.length > 0" class="space-y-1">
                       <div v-for="(accessory, index) in formattedAccessories" :key="index" class="flex items-center">
                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                         <span class="text-sm text-gray-900">{{ accessory }}</span>
                       </div>
+                    </div>
+                    <div v-else class="text-sm text-gray-500">
+                      ไม่มีอุปกรณ์เสริม
                     </div>
                   </div>
                 </div>

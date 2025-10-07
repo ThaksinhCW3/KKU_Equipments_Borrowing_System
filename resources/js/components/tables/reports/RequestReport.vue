@@ -92,7 +92,7 @@ export default {
                     type: 'select',
                     placeholder: 'เลือกสถานะ',
                     options: [
-                        { value: 'pending', label: 'รอดำเนินการ' },
+                        { value: 'pending', label: 'รออนุมัติ' },
                         { value: 'approved', label: 'อนุมัติแล้ว' },
                         { value: 'rejected', label: 'ปฏิเสธ' },
                         { value: 'check_out', label: 'ยืมออกแล้ว' },
@@ -145,7 +145,7 @@ export default {
         },
         getStatusLabel(status) {
             const labels = {
-                'pending': 'รอดำเนินการ',
+                'pending': 'รออนุมัติ',
                 'approved': 'อนุมัติแล้ว',
                 'rejected': 'ปฏิเสธ',
                 'check_out': 'ยืมออกแล้ว',

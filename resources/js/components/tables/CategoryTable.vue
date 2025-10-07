@@ -218,7 +218,9 @@ export default {
       this.selectedCategory = null;
     },
     
-    openEditModal(category) {
+    async openEditModal(category) {
+      // Fetch equipment data before opening edit modal
+      await this.fetchEquipments();
       this.openModal(category, 'edit');
     },
     

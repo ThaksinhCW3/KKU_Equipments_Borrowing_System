@@ -45,7 +45,7 @@
                             <div class="sm:w-48">
                                 <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     <option value="">สถานะทั้งหมด</option>
-                                    <option value="pending">รอดำเนินการ</option>
+                                    <option value="pending">รออนุมัติ</option>
                                     <option value="approved">อนุมัติ</option>
                                     <option value="rejected">ปฏิเสธ</option>
                                     <option value="cancelled">ยกเลิกแล้ว</option>
@@ -93,13 +93,13 @@
                                             @elseif($req->status === 'cancelled') bg-gray-50 text-gray-700 border-gray-300
                                             @else bg-gray-50 text-gray-700 border-gray-300 @endif">
                                             @if ($req->status === 'pending')
-                                                <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>รอดำเนินการ
+                                                <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>รออนุมัติ
                                             @elseif($req->status === 'approved')
                                                 <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>อนุมัติแล้ว
                                             @elseif($req->status === 'rejected')
                                                 <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>ปฏิเสธ
                                             @elseif($req->status === 'check_in')
-                                                <span class="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>มาคืนของแล้ว
+                                                <span class="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>คืนแล้ว
                                             @elseif($req->status === 'cancelled')
                                                 <span class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>ยกเลิกแล้ว
                                             @else
@@ -473,7 +473,7 @@
                 let statusClass = '';
                 switch(request.status) {
                     case 'pending':
-                        statusDisplay = 'รอดำเนินการ';
+                        statusDisplay = 'รออนุมัติ';
                         statusClass = 'bg-yellow-50 text-yellow-700 border-yellow-300';
                         break;
                     case 'approved':
@@ -485,7 +485,7 @@
                         statusClass = 'bg-red-50 text-red-700 border-red-300';
                         break;
                     case 'check_in':
-                        statusDisplay = 'มาคืนของแล้ว';
+                        statusDisplay = 'มาคืนแล้ว';
                         statusClass = 'bg-purple-50 text-purple-700 border-purple-300';
                         break;
                     case 'cancelled':

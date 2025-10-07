@@ -71,7 +71,7 @@
 
                 <!-- Responsive Filter Dropdown Panel -->
                 <div v-if="filtersOpen"
-                    class="absolute left-0 top-12 z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-6 w-full"
+                    class="absolute left-0 top-12 z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-6 w-full"
                     :class="{
                         'max-w-md': availableFilters.length <= 2,
                         'max-w-2xl': availableFilters.length > 2 && availableFilters.length <= 6,
@@ -140,12 +140,14 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
+            <div class="inline-block min-w-full align-middle">
+                <table class="min-w-full divide-y divide-gray-200 table-fixed">
                 <thead class="bg-gray-50">
                     <tr>
                         <th v-for="column in columns" :key="column.key" 
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            :class="getColumnWidthClass(column)">
                             <div class="flex items-center justify-between">
                                 <span>{{ column.label }}</span>
                                 <div class="flex flex-col ml-2">
@@ -180,7 +182,8 @@
                     <tr v-for="(item, index) in paginatedData" :key="getItemKey(item, index)" 
                         class="hover:bg-gray-50 transition-colors duration-150">
                         <td v-for="column in columns" :key="column.key" 
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            class="px-3 py-2 text-sm text-gray-900"
+                            :class="getCellClass(column)">
                             <slot :name="`cell-${column.key}`" :item="item" :value="getNestedValue(item, column.key)">
                                 <span v-if="column.type === 'badge'" :class="getBadgeClass(item, column.key)"
                                     class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
@@ -213,27 +216,28 @@
                         </td>
                     </tr>
                 </tbody>
-            </table>
+                </table>
+            </div>
         </div>
 
         <!-- Pagination -->
-        <div class="mt-6 flex items-center justify-between">
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex-1 flex justify-between sm:hidden">
                 <button @click="previousPage" :disabled="currentPage === 1"
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="relative inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                     ก่อนหน้า
                 </button>
-                <span class="flex items-center px-4 py-2 text-sm text-gray-500">
+                <span class="flex items-center px-3 py-2 text-sm text-gray-500">
                     หน้า {{ currentPage }} จาก {{ totalPages }}
                 </span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="relative inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                     ถัดไป
                 </button>
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-sm text-gray-700">
+                    <p class="text-xs sm:text-sm text-gray-700">
                         แสดง <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
                         ถึง <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredData.length) }}</span>
                         จาก <span class="font-medium">{{ filteredData.length }}</span> รายการ
@@ -719,6 +723,62 @@ export default {
                 sort: this.sortKey,
                 direction: this.sortDirection
             })
+        },
+        getColumnWidthClass(column) {
+            // Define responsive column widths based on column type and content
+            const widthClasses = {
+                'id': 'w-16', // ID columns should be narrow
+                'status': 'w-24', // Status badges
+                'actions': 'w-24', // Action buttons
+                'amount': 'w-20', // Amount/price columns
+                'date': 'w-28', // Date columns
+                'equipment_name': 'w-48', // Equipment names can be longer
+                'user_name': 'w-32', // User names
+                'transaction_id': 'w-32', // Transaction IDs
+                'req_id': 'w-32', // Request IDs
+                'default': 'w-32' // Default width
+            }
+            
+            // Check for specific column keys
+            if (column.key.includes('id') || column.key === 'id') return widthClasses.id
+            if (column.key.includes('status')) return widthClasses.status
+            if (column.key.includes('action')) return widthClasses.actions
+            if (column.key.includes('amount') || column.key.includes('fine')) return widthClasses.amount
+            if (column.key.includes('date') || column.key.includes('created') || column.key.includes('updated')) return widthClasses.date
+            if (column.key.includes('equipment') || column.key.includes('device')) return widthClasses.equipment_name
+            if (column.key.includes('user') || column.key.includes('name')) return widthClasses.user_name
+            if (column.key.includes('transaction')) return widthClasses.transaction_id
+            if (column.key.includes('req')) return widthClasses.req_id
+            
+            return widthClasses.default
+        },
+        getCellClass(column) {
+            // Define cell styling based on column type
+            const cellClasses = {
+                'id': 'text-center font-mono text-xs',
+                'status': 'text-center',
+                'actions': 'text-center',
+                'amount': 'text-right font-mono',
+                'date': 'text-center font-mono text-xs',
+                'equipment_name': 'truncate max-w-xs',
+                'user_name': 'truncate',
+                'transaction_id': 'font-mono text-xs',
+                'req_id': 'font-mono text-xs',
+                'default': 'truncate'
+            }
+            
+            // Check for specific column keys
+            if (column.key.includes('id') || column.key === 'id') return cellClasses.id
+            if (column.key.includes('status')) return cellClasses.status
+            if (column.key.includes('action')) return cellClasses.actions
+            if (column.key.includes('amount') || column.key.includes('fine')) return cellClasses.amount
+            if (column.key.includes('date') || column.key.includes('created') || column.key.includes('updated')) return cellClasses.date
+            if (column.key.includes('equipment') || column.key.includes('device')) return cellClasses.equipment_name
+            if (column.key.includes('user') || column.key.includes('name')) return cellClasses.user_name
+            if (column.key.includes('transaction')) return cellClasses.transaction_id
+            if (column.key.includes('req')) return cellClasses.req_id
+            
+            return cellClasses.default
         }
     },
     mounted() {

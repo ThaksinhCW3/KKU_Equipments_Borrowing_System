@@ -51,7 +51,7 @@
                 </a>
                 <a href="{{ route('admin.requests.index') }}?status=pending" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
                     <div class="text-2xl font-semibold mt-1 text-yellow-600">{{ $borrowStatus['Pending'] }}</div>
-                    <div class="text-xs text-gray-500">คำขอที่รอดำเนินการ</div>
+                    <div class="text-xs text-gray-500">คำขอที่รออนุมัติ</div>
                 </a>
                 <a href="{{ route('admin.requests.index') }}?status=rejected" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
                     <div class="text-2xl font-semibold mt-1 text-red-600">{{ $borrowStatus['Rejected'] }}</div>
@@ -158,7 +158,7 @@
         <!-- Pending Verifications -->
         <div class="lg:col-span-4 bg-white rounded-lg border p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold">การยืนยันตัวตนที่รอดำเนินการ</h2>
+                <h2 class="text-lg font-semibold">การยืนยันตัวตนที่รออนุมัติ</h2>
                 <a href="{{ route('admin.verification.index') }}" class="text-xs text-blue-600 hover:text-blue-800">ดูทั้งหมด</a>
             </div>
             
@@ -189,7 +189,7 @@
             @else
                 <div class="text-center text-gray-500 py-8">
                     <div class="text-lg mb-2"></div>
-                    <div>ไม่มีคำขอการยืนยันตัวตนที่รอดำเนินการ</div>
+                    <div>ไม่มีคำขอการยืนยันตัวตนที่รออนุมัติ</div>
                 </div>
             @endif
         </div>
@@ -291,7 +291,7 @@
                         { label: 'คำขอทั้งหมด', data: chartData.TotalRequests, backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: '#3b82f6', borderWidth: 1 },
                         { label: 'คำขอที่ถูกตอบรับแล้ว', data: chartData.Approved, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22c55e', borderWidth: 1 },
                         { label: 'การยืมที่สำเร็จ', data: chartData.checkinReq, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#a855f7', borderWidth: 1 },
-                        { label: 'คำขอที่รอดำเนินการ', data: chartData.Pending, backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: '#fbbf24', borderWidth: 1 },
+                        { label: 'คำขอที่รออนุมัติ', data: chartData.Pending, backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: '#fbbf24', borderWidth: 1 },
                         { label: 'คำขอที่ถูกปฏิเสธ', data: chartData.Rejected, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 1 },
                         { label: 'คำขอที่ยกเลิก', data: chartData.Cancelled, backgroundColor: 'rgba(107, 114, 128, 0.6)', borderColor: '#6b7280', borderWidth: 1 },
                     ]

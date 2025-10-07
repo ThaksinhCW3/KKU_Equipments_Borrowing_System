@@ -68,15 +68,15 @@ export default {
       const statusLower = status.toLowerCase();
       switch (statusLower) {
         case 'pending':
-          return 'รอดำเนินการ';
+          return 'รออนุมัติ';
         case 'approved':
           return 'อนุมัติแล้ว';
         case 'rejected':
           return 'ปฏิเสธ';
         case 'check_out':
-          return 'มารับของแล้ว';
+          return 'รับแล้ว';
         case 'check_in':
-          return 'มาคืนของแล้ว';
+          return 'คืนแล้ว';
         case 'cancelled':
           return 'ยกเลิก';
         default:

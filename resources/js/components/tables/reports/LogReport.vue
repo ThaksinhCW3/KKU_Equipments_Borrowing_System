@@ -598,7 +598,7 @@ export default {
                 'retired': 'รอคืน',
                 'unavailable': 'ถูกยืม',
                 'maintenance': 'ซ่อมบำรุง',
-                'pending': 'รอดำเนินการ',
+                'pending': 'รออนุมัติ',
                 'approved': 'อนุมัติแล้ว',
                 'rejected': 'ปฏิเสธ',
                 'cancelled': 'ยกเลิก',

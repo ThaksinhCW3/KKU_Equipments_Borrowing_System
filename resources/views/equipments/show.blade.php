@@ -11,8 +11,8 @@
         </script>
     @endif
 
-    <div class="max-w-screen-2xl mx-auto py-6 px-3 sm:px-6 lg:px-8">
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
+    <div class="max-w-screen-2xl mx-auto py-4 px-3 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row gap-4 items-start">
 
             {{-- Responsive Image Gallery --}}
             <div class="w-full lg:w-1/2">
@@ -71,17 +71,17 @@
                         }"
                     >
                         {{-- DESKTOP GALLERY --}}
-                        <div class="hidden md:flex gap-4">
-                            <div class="relative flex-shrink-0 w-24">
-                                <button x-show="photos.length > 4" @click="scrollUp()" class="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg hover:scale-110 transition-transform" aria-label="Scroll up"><svg class="w-6 h-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg></button>
-                                <div x-ref="thumbnails" class="absolute inset-0 overflow-auto scrollbar-hide pt-12 pb-12">
-                                    <div class="flex flex-col items-center gap-3">
+                        <div class="hidden md:flex gap-3">
+                            <div class="relative flex-shrink-0 w-20">
+                                <button x-show="photos.length > 4" @click="scrollUp()" class="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-lg hover:scale-110 transition-transform" aria-label="Scroll up"><svg class="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg></button>
+                                <div x-ref="thumbnails" class="absolute inset-0 overflow-auto scrollbar-hide pt-10 pb-10">
+                                    <div class="flex flex-col items-center gap-2">
                                         <template x-for="(photo, index) in photos" :key="index">
-                                            <div class="flex-shrink-0"><img :src="photo" :x-ref="`thumb-desktop-${index}`" alt="Thumbnail" class="w-20 h-20 object-cover rounded-lg border-2 cursor-pointer transition-all" :class="currentIndex === index ? 'border-blue-500 shadow-md scale-110' : 'border-transparent hover:border-gray-300'" @click="setActive(index)" /></div>
+                                            <div class="flex-shrink-0"><img :src="photo" :x-ref="`thumb-desktop-${index}`" alt="Thumbnail" class="w-16 h-16 object-cover rounded-lg border-2 cursor-pointer transition-all" :class="currentIndex === index ? 'border-blue-500 shadow-md scale-110' : 'border-transparent hover:border-gray-300'" @click="setActive(index)" /></div>
                                         </template>
                                     </div>
                                 </div>
-                                <button x-show="photos.length > 4" @click="scrollDown()" class="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg hover:scale-110 transition-transform" aria-label="Scroll down"><svg class="w-6 h-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg></button>
+                                <button x-show="photos.length > 4" @click="scrollDown()" class="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-lg hover:scale-110 transition-transform" aria-label="Scroll down"><svg class="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg></button>
                             </div>
                             <div class="w-full flex-grow relative overflow-hidden bg-gray-100 rounded-lg shadow-inner">
                                 <div class="flex transition-transform duration-500 ease-in-out" :style="`transform: translateX(-${currentIndex * 100}%)`">
@@ -99,7 +99,7 @@
                         </div>
 
                         <div class="md:hidden">
-                            <div class="relative overflow-hidden bg-gray-100 rounded-lg shadow-lg cursor-grab max-h-[300px]"
+                            <div class="relative overflow-hidden bg-gray-100 rounded-lg shadow-lg cursor-grab max-h-[250px]"
                                 @mousedown.prevent="startDrag" @touchstart.prevent="startDrag" @mousemove.prevent="drag"
                                 @touchmove.prevent="drag" @mouseup="endDrag" @touchend="endDrag" @mouseleave="endDrag">
                                 <div x-ref="slider" class="flex"
@@ -116,12 +116,12 @@
                             </div>
 
                             <template x-if="photos.length > 1">
-                                <div class="mt-2 overflow-x-auto scrollbar-hide">
-                                    <div class="flex space-x-2 pb-2">
+                                <div class="mt-1 overflow-x-auto scrollbar-hide">
+                                    <div class="flex space-x-1 pb-1">
                                         <template x-for="(photo, index) in photos.slice(0,6)" :key="index">
                                             <div class="flex-shrink-0">
                                                 <img :src="photo" alt="Thumbnail"
-                                                    class="w-12 h-12 object-cover rounded-md border-2"
+                                                    class="w-10 h-10 object-cover rounded-md border-2"
                                                     :class="currentIndex === index ? 'border-blue-500' : 'border-gray-200'"
                                                     @click="currentIndex=index">
                                             </div>
@@ -136,32 +136,32 @@
                 @endif
             </div>
 
-            <div class="w-full lg:w-1/2 flex flex-col justify-start gap-4 p-4 sm:p-5 border border-gray-200 rounded-lg shadow-sm">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 break-words">{{ $equipment->name }}</h1>
-                <p class="text-gray-500 text-lg break-words">หมายเลขครุภัณฑ์: {{ $equipment->code }}</p>
-                <p class="text-gray-500 text-lg break-words">หมวดหมู่: {{ $equipment->category->name }}</p>
-                <p class="text-gray-600 text-base leading-relaxed break-words">{{ $equipment->description }}</p>
+            <div class="w-full lg:w-1/2 flex flex-col justify-start gap-3 p-3 sm:p-4 border border-gray-200 rounded-lg shadow-sm">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900 break-words">{{ $equipment->name }}</h1>
+                <p class="text-gray-500 text-sm break-words">หมายเลขครุภัณฑ์: {{ $equipment->code }}</p>
+                <p class="text-gray-500 text-sm break-words">หมวดหมู่: {{ $equipment->category->name }}</p>
+                <p class="text-gray-600 text-sm leading-relaxed break-words">{{ $equipment->description }}</p>
                 
                 @php
                     $accessories = json_decode($equipment->accessories ?? '[]', true);
                 @endphp
                 
                 @if(!empty($accessories) && is_array($accessories))
-                <div class="text-gray-600 text-base leading-relaxed">
-                        <p class="font-medium text-gray-700 mb-2">เซ็ตของที่ติดมากับเครื่อง:</p>
-                        <div class="space-y-1">
+                <div class="text-gray-600 text-sm leading-relaxed">
+                        <p class="font-medium text-gray-700 mb-1">เซ็ตอุปกรณ์ที่ติดมากับเครื่อง:</p>
+                        <div class="space-y-0.5">
                             @foreach($accessories as $accessory)
                                 <div class="flex items-center">
-                                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                    <span class="text-gray-700">{{ $accessory }}</span>
+                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+                                    <span class="text-gray-700 text-sm">{{ $accessory }}</span>
                                 </div>
                             @endforeach
                         </div>
                     </div>
                 @else
-                    <p class="text-gray-600 text-base leading-relaxed">เซ็ตของที่ติดมากับเครื่อง: ไม่มี</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">เซ็ตอุปกรณ์ที่ติดมากับเครื่อง: ไม่มี</p>
                 @endif
-                <div class="mt-4 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                <div class="mt-3 p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     @php
                                     // Find all equipment with the same name
                                     $sameNameEquipment = \App\Models\Equipment::where('name', $equipment->name)->get();
@@ -178,14 +178,14 @@
                                 @endphp
                                 
                                 @if($earliestReturn)
-                                    <div class="m-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div class="m-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div class="flex items-start space-x-2">
                                             <div class="text-blue-600 mt-0.5">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                                 </svg>
                                             </div>
-                                            <div class="text-sm text-blue-800">
+                                            <div class="text-xs text-blue-800">
                                                 <p class="text-xs leading-relaxed">
                                                     อุปกรณ์{{ $equipment->name }} จะว่างเร็วที่สุดในวันที่<br>
                                                     <span class="font-medium text-blue-900">{{ \Carbon\Carbon::parse($earliestReturn)->format('d-m-Y') }}</span>
@@ -203,16 +203,16 @@
                                     </div>
                                 @endif
                                     <!-- Pickup Time Information -->
-                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div class="flex items-start space-x-2">
                         <div class="text-yellow-600 mt-0.5">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                             </svg>
                         </div>
                         
-                        <div class="text-sm text-yellow-800">
-                            <p class="font-medium mb-1"> เวลารับอุปกรณ์</p>
+                        <div class="text-xs text-yellow-800">
+                            <p class="font-medium mb-0.5"> เวลารับอุปกรณ์</p>
                             <p class="text-xs leading-relaxed">
                                 หลังจากได้รับการอนุมัติ กรุณามารับอุปกรณ์ภายในเวลาที่กำหนด<br>
                                 <span class="font-medium">เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น.</span>
@@ -220,8 +220,8 @@
                         </div>
                     </div>
                 </div>
-                    <div class="flex items-center justify-between mb-4">
-                        <p class="font-semibold text-lg">เลือกวันที่รับ-ส่ง :</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="font-semibold text-base">เลือกวันที่รับ-ส่ง :</p>
                         <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                              จันทร์-ศุกร์เท่านั้น
                         </span>
@@ -231,8 +231,11 @@
                         <input type="hidden" name="equipments_id" value="{{ $equipment->id }}">
                         
                         <!-- Request Reason Dropdown -->
-                        <div class="mb-4">
-                            <label for="reason_type" class="block text-sm font-medium text-gray-700 mb-2">เหตุผลในการยืม</label>
+                        <div class="mb-3">
+                            <label for="reason_type" class="block text-sm font-medium text-gray-700 mb-1">
+                                เหตุผลในการยืม
+                                <span class="text-red-500">*</span>
+                            </label>
                             <select id="reason_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" @if ($hasBorrowed) disabled @endif required>
                                 <option value="">-- เลือกเหตุผล --</option>
                                 <option value="assignment">งานมอบหมาย/การบ้าน</option>
@@ -242,18 +245,19 @@
                         </div>
 
                         <!-- Request Details Input (Conditional) -->
-                        <div id="request-details" class="hidden mb-4">
-                            <label for="request_details" class="block text-sm font-medium text-gray-700 mb-2">
-                                <span id="details-label">รายละเอียด</span>
+                        <div id="request-details" class="hidden mb-3">
+                            <label for="request_details" class="block text-sm font-medium text-gray-700 mb-1">
+                                <span id="details-label">หมายเหตุเพิ่มเติม</span>
+                                <span class="text-red-500">*</span>
                             </label>
                             <textarea 
                                 id="request_details" 
                                 name="request_reason_detail" 
                                 maxlength="250"
-                                rows="3"
+                                rows="2"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 oninput="updateCharCount('request_details', 'request_details_count')" 
-                                placeholder="เช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ"
+                                placeholder="ระบุเพิ่มเติมเช่น คณิตศาสตร์, ฟิสิกส์, โปรเจคถ่ายภาพ"
                                 @if ($hasBorrowed) disabled @endif
                             ></textarea>
                             <div class="text-right text-xs text-gray-500 mt-1">
@@ -266,26 +270,50 @@
 
 
                         <!-- Date Selection -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div><label for="start_at" class="block text-sm font-medium text-gray-700">วันที่รับ</label><input type="text" id="start_at" name="start_at" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" @if ($hasBorrowed) disabled @endif readonly onclick="toggleCalendar('start')"></div>
-                            <div><label for="end_at" class="block text-sm font-medium text-gray-700">วันที่ส่ง</label><input type="text" id="end_at" name="end_at" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" @if ($hasBorrowed) disabled @endif readonly onclick="toggleCalendar('end')"></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label for="start_at" class="block text-sm font-medium text-gray-700">วันที่รับ</label>
+                                <input 
+                                    type="text" 
+                                    id="start_at" 
+                                    name="start_at" 
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" 
+                                    @if ($hasBorrowed) disabled @endif 
+                                    readonly 
+                                    onclick="toggleCalendar('start')" 
+                                    placeholder="วันที่ / เดือน"
+                                >
+                            </div>
+                            <div>
+                                <label for="end_at" class="block text-sm font-medium text-gray-700">วันที่ส่ง</label>
+                                <input 
+                                    type="text" 
+                                    id="end_at" 
+                                    name="end_at" 
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm cursor-pointer" 
+                                    @if ($hasBorrowed) disabled @endif 
+                                    readonly 
+                                    onclick="toggleCalendar('end')" 
+                                    placeholder="วันที่ / เดือน"
+                                >
+                            </div>
                         </div>
-                        <div id="message" class="text-sm text-red-500 mb-4 h-4"></div>
+                        <div id="message" class="text-sm text-red-500 mb-3 h-4"></div>
                     
                         @if ($hasBorrowed)
-                            <a href="{{ route('borrower.equipments.reqdetail',$borrowRequest->req_id) }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-600 transition">ไปยังคำขอของฉัน</a>
+                            <a href="{{ route('borrower.equipments.reqdetail',$borrowRequest->req_id) }}" class="block w-full text-center bg-yellow-500 text-white font-bold py-2 rounded-lg hover:bg-yellow-600 transition">ไปยังคำขอของฉัน</a>
                         @elseif (!auth()->user() || !auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
-                            <a href="{{ route('verification.index') }}" class="block w-full text-center bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">
+                            <a href="{{ route('verification.index') }}" class="block w-full text-center bg-orange-500 text-white font-bold py-2 rounded-lg hover:bg-orange-600 transition">
                                  ยืนยันตัวตนก่อนยืมอุปกรณ์
                             </a>
                         @elseif ($equipment->status === 'maintenance')
-                            <button type="button" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>อุปกรณ์อยู่ระหว่างซ่อมบำรุง</button>
+                            <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded-lg cursor-not-allowed" disabled>อุปกรณ์อยู่ระหว่างซ่อมบำรุง</button>
                         @elseif ($equipment->status !== 'available')
                             <div class="w-full"></div>
-                            <button type="button" class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
+                            <button type="button" class="w-full bg-gray-400 text-white font-bold py-2 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
                             </div>
                         @else
-                            <button type="submit" id="borrowButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 disabled:opacity-50" disabled>ยืม</button>
+                            <button type="submit" id="borrowButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition duration-200 disabled:opacity-50" disabled>ส่งคำขอการยืม</button>
                         @endif
                     </form>
                 </div>
@@ -453,14 +481,14 @@
                 
                 // Update label and placeholder based on selection
                 if (reasonType.value === 'assignment') {
-                    detailsLabel.textContent = 'รายละเอียด';
-                    detailsInput.placeholder = 'เช่น วิชา/รายวิชา ,รายละเอียดการใช้งาน';
+                    detailsLabel.textContent = 'หมายเหตุเพิ่มเติม';
+                    detailsInput.placeholder = 'ระบุเพิ่มเติมเช่น วิชา/รายวิชา ,รายละเอียดการใช้งาน';
                 } else if (reasonType.value === 'personal') {
-                    detailsLabel.textContent = 'รายละเอียด';
-                    detailsInput.placeholder = 'เช่น, งานอดิเรก, การเรียนรู้';
+                    detailsLabel.textContent = 'หมายเหตุเพิ่มเติม';
+                    detailsInput.placeholder = 'ระบุเพิ่มเติมเช่น, งานอดิเรก, การเรียนรู้';
                 } else if (reasonType.value === 'others') {
-                    detailsLabel.textContent = 'รายละเอียด';
-                    detailsInput.placeholder = 'เช่น กิจกรรมพิเศษ, โครงการส่วนตัว';
+                    detailsLabel.textContent = 'หมายเหตุเพิ่มเติม';
+                    detailsInput.placeholder = 'ระบุเพิ่มเติมเช่น กิจกรรมพิเศษ, โครงการส่วนตัว';
                 }
             } else {
                 requestDetails.classList.add('hidden');
@@ -504,7 +532,7 @@
         // Check details input
         else if (!detailsInput.value.trim()) {
             isValid = false;
-            errorMessage = 'กรุณาระบุรายละเอียด';
+            errorMessage = 'กรุณาระบุหมายเหตุเพิ่มเติม';
         }
         // Check dates
         else if (!startDate.value || !endDate.value) {

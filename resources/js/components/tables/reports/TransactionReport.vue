@@ -6,14 +6,14 @@
         <!-- Custom cell templates -->
         <template #cell-transaction_type="{ item }">
             <span :class="getTransactionTypeBadgeClass(item.transaction_type)"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                class="inline-flex px-1.5 py-0.5 text-xs font-medium rounded">
                 {{ getTransactionTypeLabel(item.transaction_type) }}
             </span>
         </template>
 
         <template #cell-status="{ item }">
             <span :class="getStatusBadgeClass(item.status)"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                class="inline-flex px-1.5 py-0.5 text-xs font-medium rounded">
                 {{ getStatusLabel(item.status) }}
             </span>
         </template>
@@ -28,9 +28,30 @@
             {{ formatDate(item.created_at) }}
         </template>
 
+        <template #cell-transaction_id="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewRequestDetails(item)">
+                {{ item.transaction_id }}
+            </span>
+        </template>
+
+        <template #cell-user.name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewUserRequests(item.user?.name)">
+                {{ item.user?.name || 'N/A' }}
+            </span>
+        </template>
+
+        <template #cell-equipment.name="{ item }">
+            <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" 
+                  @click="viewEquipmentDetails(item.equipment?.name)">
+                {{ item.equipment?.name || 'N/A' }}
+            </span>
+        </template>
+
         <template #cell-actions="{ item }">
             <button @click="showTransactionDetails(item)"
-                class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 transition-colors">
+                class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded hover:bg-blue-200 transition-colors">
                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -44,85 +65,85 @@
     </BaseReportTable>
 
     <!-- Transaction Details Modal -->
-    <div v-if="selectedTransaction" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">รายละเอียดธุรกรรม</h3>
+    <div v-if="selectedTransaction" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+        <div class="bg-white rounded-lg p-4 max-w-3xl w-full mx-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-base font-semibold">รายละเอียดธุรกรรม</h3>
                 <button @click="selectedTransaction = null" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
                     </svg>
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">รหัสคำขอ</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.transaction_id }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">รหัสคำขอ</label>
+                    <p class="text-sm text-gray-900">{{ selectedTransaction.transaction_id }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ประเภทธุรกรรม</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">ประเภทธุรกรรม</label>
                     <span :class="getTransactionTypeBadgeClass(selectedTransaction.transaction_type)"
-                        class="inline-block px-2 py-1 rounded-full text-xs">
+                        class="inline-block px-2 py-0.5 rounded-full text-xs">
                         {{ getTransactionTypeLabel(selectedTransaction.transaction_type) }}
                     </span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ผู้ใช้</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.user?.name || 'N/A' }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">ผู้ใช้</label>
+                    <p class="text-sm text-gray-900">{{ selectedTransaction.user?.name || 'N/A' }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">อุปกรณ์</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.equipment?.name || 'N/A' }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">อุปกรณ์</label>
+                    <p class="text-sm text-gray-900">{{ selectedTransaction.equipment?.name || 'N/A' }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">สถานะ</label>
                     <span :class="getStatusBadgeClass(selectedTransaction.status)"
-                        class="inline-block px-2 py-1 rounded-full text-xs">
+                        class="inline-block px-2 py-0.5 rounded-full text-xs">
                         {{ getStatusLabel(selectedTransaction.status) }}
                     </span>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ค่าปรับ</label>
-                    <p class="mt-1 text-sm font-medium" :class="getAmountClass(selectedTransaction.transaction_type)">
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">ค่าปรับ</label>
+                    <p class="text-sm font-medium" :class="getAmountClass(selectedTransaction.transaction_type)">
                         {{ formatAmount(selectedTransaction.amount) }}
                     </p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่เริ่มต้น</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.start_date) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่เริ่มต้น</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.start_date) }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่สิ้นสุด</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.end_date) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่สิ้นสุด</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.end_date) }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่เช็คเอาท์</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_out_at) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่เช็คเอาท์</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_out_at) }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่เช็คอิน</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_in_at) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่เช็คอิน</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.checked_in_at) }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่สร้าง</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.created_at) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่สร้าง</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.created_at) }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่อัปเดต</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(selectedTransaction.updated_at) }}</p>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">วันที่อัปเดต</label>
+                    <p class="text-sm text-gray-900">{{ formatDate(selectedTransaction.updated_at) }}</p>
                 </div>
             </div>
 
-            <div v-if="selectedTransaction.description" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700">รายละเอียด</label>
-                <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.description }}</p>
+            <div v-if="selectedTransaction.description" class="mt-3">
+                <label class="block text-xs font-medium text-gray-600 mb-0.5">รายละเอียด</label>
+                <p class="text-sm text-gray-900">{{ selectedTransaction.description }}</p>
             </div>
 
-            <div v-if="selectedTransaction.notes" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
-                <p class="mt-1 text-sm text-gray-900">{{ selectedTransaction.notes }}</p>
+            <div v-if="selectedTransaction.notes" class="mt-3">
+                <label class="block text-xs font-medium text-gray-600 mb-0.5">หมายเหตุ</label>
+                <p class="text-sm text-gray-900">{{ selectedTransaction.notes }}</p>
             </div>
         </div>
     </div>
@@ -161,7 +182,7 @@ export default {
                     type: 'select',
                     placeholder: 'เลือกสถานะ',
                     options: [
-                        { value: 'pending', label: 'รอดำเนินการ' },
+                        { value: 'pending', label: 'รออนุมัติ' },
                         { value: 'approved', label: 'อนุมัติแล้ว' },
                         { value: 'rejected', label: 'ปฏิเสธ' },
                         { value: 'cancelled', label: 'ยกเลิก' },
@@ -220,7 +241,7 @@ export default {
         },
         getStatusLabel(status) {
             const labels = {
-                'pending': 'รอดำเนินการ',
+                'pending': 'รออนุมัติ',
                 'approved': 'อนุมัติแล้ว',
                 'rejected': 'ปฏิเสธ',
                 'cancelled': 'ยกเลิก',
@@ -263,6 +284,18 @@ export default {
             });
 
             window.location.href = `/admin/report/export/transactions?${params.toString()}`;
+        },
+        viewRequestDetails(transaction) {
+            // Redirect to request details page using the transaction_id (which should be the same as req_id)
+            window.location.href = `/admin/requests/${transaction.transaction_id}`;
+        },
+        viewUserRequests(userName) {
+            // Redirect to user report page filtered by this user
+            window.location.href = `/admin/report/user?search=${encodeURIComponent(userName)}`;
+        },
+        viewEquipmentDetails(equipmentName) {
+            // Redirect to equipment page filtered by this equipment
+            window.location.href = `/admin/equipment?search=${encodeURIComponent(equipmentName)}`;
         }
     },
     mounted() {

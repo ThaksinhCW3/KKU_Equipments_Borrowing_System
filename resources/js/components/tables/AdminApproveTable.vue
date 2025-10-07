@@ -254,10 +254,10 @@ export default {
     // NEW: Get Thai text for status
     getStatusText(status) {
       switch (status.toLowerCase()) {
-        case 'pending': return 'รอดำเนินการ';
+        case 'pending': return 'รออนุมัติ';
         case 'approved': return 'อนุมัติแล้ว';
-        case 'check_out': return 'มารับของแล้ว';
-        case 'check_in': return 'มาคืนของแล้ว';
+        case 'check_out': return 'รับแล้ว';
+        case 'check_in': return 'คืนแล้ว';
         case 'rejected': return 'ปฏิเสธ';
         case 'cancelled': return 'ยกเลิก';
         case 'in use': return 'กำลังใช้งาน';

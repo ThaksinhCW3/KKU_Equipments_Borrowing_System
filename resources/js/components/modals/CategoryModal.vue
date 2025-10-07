@@ -154,7 +154,8 @@
 
               <!-- Right Column -->
               <div class="space-y-4">
-                <div>
+                <!-- Equipment count only shown in edit mode, not create mode -->
+                <div v-if="mode === 'edit'">
                   <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนอุปกรณ์</label>
                   <div class="px-3 py-2 bg-gray-50 rounded-md border">
                     <span class="text-sm text-gray-900">
@@ -245,11 +246,12 @@ export default {
       return !!(this.form && this.form.name);
     }
   },
-  watch: {
+    watch: {
     isOpen(newVal) {
       if (newVal) {
         if (this.mode === 'edit' && this.category) {
           this.setupForm();
+          this.loadCategoryEquipments(); // Load equipment count for edit mode
         } else if (this.mode === 'create') {
           this.setupCreateForm();
         }
@@ -261,8 +263,14 @@ export default {
     mode(newVal) {
       if (newVal === 'edit' && this.category) {
         this.setupForm();
+        this.loadCategoryEquipments(); // Load equipment count when switching to edit mode
       } else if (newVal === 'create') {
         this.setupCreateForm();
+      }
+    },
+    category(newVal) {
+      if (newVal && (this.mode === 'view' || this.mode === 'edit')) {
+        this.loadCategoryEquipments();
       }
     }
   },
@@ -418,6 +426,13 @@ export default {
         });
       } catch (e) {
         return 'ไม่ระบุ';
+      }
+    },
+    
+    async refreshEquipmentCount() {
+      if (this.category && this.category.id) {
+        await this.loadCategoryEquipments();
+        this.$forceUpdate(); // Force re-render to update the count
       }
     }
   }
