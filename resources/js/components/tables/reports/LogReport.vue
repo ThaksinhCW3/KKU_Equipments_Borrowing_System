@@ -499,7 +499,7 @@ export default {
         formatFieldName(key) {
             const fieldNames = {
                 'id': 'รหัส',
-                'name': 'ชื่อ-นามสกุน',
+                'name': 'ชื่อ-นามสกุล',
                 'code': 'รหัสอุปกรณ์',
                 'brand': 'ยี่ห้อ',
                 'model': 'รุ่น',

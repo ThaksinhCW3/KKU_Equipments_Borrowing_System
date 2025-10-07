@@ -44,7 +44,7 @@
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-2">ข้อมูลผู้ใช้</h3>
                         <div class="space-y-2 text-sm">
-                            <p><span class="text-gray-500">ชื่อ-นามสกุน:</span> {{ $requests->user->name ?? '-' }}</p>
+                            <p><span class="text-gray-500">ชื่อ-นามสกุล:</span> {{ $requests->user->name ?? '-' }}</p>
                             <p><span class="text-gray-500">UID:</span> {{ $requests->user->uid ?? '-' }}</p>
                             <p><span class="text-gray-500">อีเมล:</span> {{ $requests->user->email ?? '-' }}</p>
 

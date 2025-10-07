@@ -13,7 +13,7 @@ import AdminApproveTable from "./components/tables/AdminApproveTable.vue";
 import ChartDashboard from "./components/ChartDashboard.vue";
 import EquipmentTable from "./components/tables/EquipmentTable.vue";
 import CategoriesTable from "./components/tables/CategoryTable.vue";
-import UsersTable from "./components/tables/UserTable.vue";
+import UserTable from "./components/tables/UserTable.vue";
 import RecentAct from "./components/RecentAct.vue";
 import NotificationBell from "./components/NotificationBell.vue";
 
@@ -73,7 +73,7 @@ if (categoryTableEl) {
 // User Table
 const userTableEl = document.getElementById("user-table");
 if (userTableEl) {
-    createApp(UsersTable).mount(userTableEl);
+    createApp(UserTable).mount(userTableEl);
 }
 
 // Notification Bell

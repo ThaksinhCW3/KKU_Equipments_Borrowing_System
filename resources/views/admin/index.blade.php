@@ -134,27 +134,6 @@
             </div>
         </div>
 
-        <!-- Frequent Users -->
-        <div class="lg:col-span-4 bg-white rounded-lg border p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">ผู้ใช้ที่ส่งคำขอบ่อย</h3>
-            <div class="space-y-3">
-                @forelse($frequentUsers as $index => $item)
-                    <a href="{{ route('admin.requests.index') }}?user_email={{ urlencode($item['user']->email ?? '') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div class="flex-1">
-                            <div class="font-medium text-sm text-blue-600 hover:text-blue-800">{{ $item['user']->name ?? 'ไม่ระบุชื่อ' }}</div>
-                            <div class="text-xs text-gray-500">{{ $item['user']->email ?? 'ไม่ระบุอีเมล' }} • ผู้ขอยืม</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold text-blue-600">{{ $item['request_count'] }}</div>
-                            <div class="text-xs text-gray-500">ครั้ง</div>
-                        </div>
-                    </a>
-                @empty
-                    <div class="text-center text-gray-500 py-8">ไม่มีข้อมูลผู้ใช้</div>
-                @endforelse
-            </div>
-        </div>
-
         <!-- Pending Verifications -->
         <div class="lg:col-span-4 bg-white rounded-lg border p-6">
             <div class="flex justify-between items-center mb-4">

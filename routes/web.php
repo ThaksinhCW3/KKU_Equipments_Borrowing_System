@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BorrowRequestController;
 use App\Http\Controllers\Admin\ReportExportController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
@@ -75,6 +76,11 @@ Route::middleware('auth')->group(function () {
         Route::prefix('admin/report')->group(function () {
             Route::get('/{type}', [ReportController::class, 'index'])->name('admin.report.index');
             Route::get('/export/{type}', [ReportExportController::class, 'export'])->name('admin.report.export');
+        });
+
+        // User management
+        Route::prefix('admin/users')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
         });
 
         // Requests

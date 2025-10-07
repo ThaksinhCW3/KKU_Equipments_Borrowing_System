@@ -22,7 +22,7 @@
                         <h3 class="text-lg font-medium text-gray-900 mb-3">ข้อมูลผู้ใช้</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">ชื่อ-นามสกุน</p>
+                                <p class="text-sm text-gray-500">ชื่อ-นามสกุล</p>
                                 <p class="text-sm font-medium text-gray-900">{{ $verificationRequest->user->name }}</p>
                             </div>
                             <div>

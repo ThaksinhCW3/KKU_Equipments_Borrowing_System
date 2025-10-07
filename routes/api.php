@@ -19,6 +19,12 @@ Route::get('/users', function () {
     return User::all();
 });
 
+// User CRUD routes
+Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store']);
+Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show']);
+Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update']);
+Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy']);
+
 
 
 // Logs API route

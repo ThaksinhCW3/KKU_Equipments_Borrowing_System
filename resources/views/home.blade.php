@@ -36,12 +36,12 @@
                                 @elseif ($equipment->available_quantity > 0)
                                     <span
                                         class="absolute top-2 right-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">
-                                        Available
+                                        พร้อมให้ยืม
                                     </span>
                                 @else
                                     <span
                                         class="absolute top-2 right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded">
-                                        Unavailable
+                                        ไม่พร้อมให้ยืม
                                     </span>
                                 @endif
                             </div>
@@ -57,11 +57,11 @@
                                 <div class="flex justify-between items-center">
                                     <div class="text-xs text-gray-500">
                                         <span class="inline-block px-2 py-1 rounded-full mr-1 {{ $equipment->available_quantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            Available: {{ $equipment->available_quantity }}
+                                            พร้อมใช้งาน: {{ $equipment->available_quantity }}
                                         </span>
                                         @if($equipment->total_quantity > 1)
                                             <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                                Total: {{ $equipment->total_quantity }}
+                                                ทั้งหมด: {{ $equipment->total_quantity }}
                                             </span>
                                         @endif
                                     </div>
@@ -96,7 +96,7 @@
                             $activeFilters[] = 'ความพร้อมใช้งาน: ' . ($availabilityLabels[request('availability')] ?? request('availability'));
                         }
                         if(request('name')) {
-                            $activeFilters[] = 'ชื่อ-นามสกุน: "' . request('name') . '"';
+                            $activeFilters[] = 'ชื่อ-นามสกุล: "' . request('name') . '"';
                         }
                     @endphp
                     

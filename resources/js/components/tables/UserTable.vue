@@ -1,451 +1,254 @@
 <template>
-    <div class="bg-white p-6 rounded-lg shadow">
-        <div class="relative mb-4">
-            <input type="text" v-model="searchQuery" placeholder="Search"
-                class="pl-10 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-            </svg>
-        </div>
-
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-            <h2 class="text-lg font-semibold">
-                อุปกรณ์รวมกันทั้งหมด: {{ filteredEquipments.length }} ชิ้น
-            </h2>
-            <button @click="toggleSort"
-                class="border border-gray-300 rounded-md px-5 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 w-35">
-                Date: {{ sortDirection.toUpperCase() }}
-            </button>
-            <button v-if="userRole === 'admin'" @click="openCreateModal"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                เพิ่มอุปกรณ์ใหม่
-            </button>
-
-            <!-- Dropdown panel -->
-            <div v-if="filtersOpen" class="absolute right-0 top-10 z-10 bg-white border rounded shadow p-3 w-72">
-                <div class="mb-2">
-                    <div class="text-sm font-semibold mb-1">สถานะ</div>
-                    <select v-model="filterStatus" class="w-full px-2 py-1 border rounded">
-                        <option value="">
-                            ทั้งหมด ({{ statusCounts.all }})
-                        </option>
-                        <option v-for="s in statuses" :key="s" :value="s">
-                            {{ capitalize(s) }} ({{ statusCounts[s] || 0 }})
-                        </option>
-                    </select>
+    <BaseTable :data="users" :columns="columns" :title="'รายการผู้ใช้'"
+        :search-placeholder="'ค้นหาด้วยชื่อ, อีเมล, หรือหมายเลขโทรศัพท์...'" :add-button-text="'เพิ่มผู้ใช้ใหม่'"
+        :user-role="userRole" :available-filters="availableFilters"
+        :search-fields="['name', 'email', 'phonenumber', 'uid', 'role']" :loading="loading" @create="openCreateModal"
+        @edit="openModal" @delete="deleteUser">
+        <!-- Custom row template -->
+        <template #rows="{ item: user, actions }">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <div class="text-sm font-semibold mb-1">หมวดหมู่</div>
-                    <select v-model="filterCategoryId" class="w-full px-2 py-1 border rounded">
-                        <option value="">
-                            ทุกหมวดหมู่ ({{ categoryCounts.all }})
-                        </option>
-                        <option v-for="c in validCategories" :key="c.id" :value="String(c.id)">
-                            {{ c.name }} ({{
-                                categoryCounts[String(c.id)] || 0
-                            }})
-                        </option>
-                    </select>
-                </div>
-                <div class="flex justify-between">
-                    <button class="px-3 py-1 border rounded" @click="clearFilters">
-                        ล้างตัวกรอง
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                <div class="text-sm text-gray-500">{{ user.uid }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ user.email }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ user.phonenumber || 'ไม่ระบุ' }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" :class="getRoleClass(user.role)">
+                    {{ getRoleLabel(user.role) }}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(user.created_at) }}
+            </td>
+            <td v-if="userRole === 'admin'" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                    <button @click="actions.edit"
+                        class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                        แก้ไข
                     </button>
-                    <button class="px-3 py-1 bg-gray-900 text-white rounded" @click="filtersOpen = false">
-                        เสร็จสิ้น
+                    <button @click="actions.delete"
+                        class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                        ลบ
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
+            </td>
+        </template>
+    </BaseTable>
 
-    <table class="min-w-full text-sm">
-        <thead class="bg-gray-50 border-b">
-            <tr>
-                <th class="px-4 py-2 text-left">รูป</th>
-                <th class="px-4 py-2 text-left">ID</th>
-                <th class="px-4 py-2 text-left">ชื่ออุปกรณ์</th>
-                <th class="px-4 py-2 text-left">รายละเอียด</th>
-                <th class="px-4 py-2 text-left">หมวดหมู่</th>
-                <th class="px-4 py-2 text-left">สถานะ</th>
-                <th class="px-4 py-2 text-left" v-if="userRole === 'admin'">
-                    แอคชั่น
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="equipment in paginatedEquipments" :key="equipment.id" class="border-b">
-                <td class="px-4 py-2 flex items-center space-x-2">
-                    <img v-if="getFirstPhoto(equipment)" :src="getFirstPhoto(equipment)" alt="Equipment Photo"
-                        class="w-8 h-8 object-cover rounded cursor-pointer"
-                        @click="openPhotoModal(getFirstPhoto(equipment))" />
-                </td>
-                <td class="px-4 py-2">{{ equipment.code }}</td>
-                <td class="px-4 py-2">{{ equipment.name }}</td>
-                <td class="px-4 py-2 max-w-[200px] truncate">
-                    {{ equipment.description }}
-                </td>
-                <td class="px-4 py-2">
-                    {{ equipment.category?.name || "N/A" }}
-                </td>
-                <td class="px-4 py-2">
-                    {{ capitalize(equipment.status) }}
-                </td>
-                <td class="px-4 py-2 space-x-2">
-                    <button v-if="userRole === 'admin'" @click="openModal(equipment)"
-                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
-                        แก้ไขข้อมูล
-                    </button>
-                    <button v-if="userRole === 'admin'" @click="deleteEquipment(equipment)"
-                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-                        ลบรายการ
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-600">
-            แสดง {{ pageStart + 1 }} - {{ pageEnd }} จากทั้งหมด
-            {{ filteredEquipments.length }} รายการ
-        </div>
-        <div class="flex items-center space-x-1">
-            <button class="px-3 py-1 border rounded disabled:opacity-50" :disabled="currentPage === 1"
-                @click="prevPage">
-                ก่อนหน้า
-            </button>
-            <button v-for="p in pageCount" :key="p" class="px-3 py-1 border rounded"
-                :class="{ 'bg-blue-600 text-white': currentPage === p }" @click="goToPage(p)">
-                {{ p }}
-            </button>
-            <button class="px-3 py-1 border rounded disabled:opacity-50"
-                :disabled="currentPage === pageCount || pageCount === 0" @click="nextPage">
-                ถัดไป
-            </button>
-        </div>
-    </div>
-
-    <EquipmentModal 
-        :isOpen="isOpen" 
-        :mode="modalMode"
-        :equipment="selectedEquipment" 
-        :categories="categories" 
-        :statuses="statuses"
-        :user-role="'admin'"
-        @close="closeModal" 
-        @save="updateEquipment"
-        @create="createEquipment"
-    />
-
-    <PhotoModal :isOpen="photoModal.isOpen" :url="photoModal.url" @close="closePhotoModal" />
+    <!-- User Modal -->
+    <UserModal :isOpen="isOpen" :mode="modalMode" :user="selectedUser" :user-role="userRole" @close="closeModal"
+        @save="updateUser" @create="createUser" />
 </template>
 
 <script>
-import EquipmentModal from "../modals/EquipmentModal.vue";
-import PhotoModal from "../modals/PhotoModal.vue";
+import BaseTable from "./BaseTable.vue";
+import UserModal from "../modals/UserModal.vue";
+import api from "../../api";
 
 export default {
-    name: "EquipmentTable",
+    name: "UserTable",
     components: {
-        EquipmentModal,
-        PhotoModal,
+        BaseTable,
+        UserModal,
     },
     data() {
-        const el = document.getElementById("equipment-table");
+        const el = document.getElementById("user-table");
         return {
-            userRole: el?.dataset?.role || "",
-            equipments: JSON.parse(el.dataset.equipments || "[]"),
-            categories: JSON.parse(el.dataset.categories || "[]"),
-            sortDirection: "asc",
-            statuses: ["available", "retired", "maintenance"],
-            searchQuery: "",
-            currentPage: 1,
-            pageSize: 15,
-            // filters
-            filtersOpen: false,
-            filterStatus: "",
-            filterCategoryId: "",
-            isOpen: false,
-            modalMode: 'edit', // 'edit' or 'create'
-            selectedEquipment: {},
-            selectedCategoryId: null,
-            selectedImageFile: null,
+            userRole: el?.dataset?.role || "admin",
+            users: [],
+            loading: false,
 
-            photoModal: {
-                isOpen: false,
-                url: "",
-            },
+            // Modal state
+            isOpen: false,
+            modalMode: 'edit',
+            selectedUser: null,
         };
     },
     computed: {
-        statusCounts() {
-            const counts = { all: (this.equipments || []).length };
-            for (const e of this.equipments || []) {
-                const k = e?.status || "unknown";
-                counts[k] = (counts[k] || 0) + 1;
-            }
-            return counts;
-        },
-        categoryCounts() {
-            const counts = { all: (this.equipments || []).length };
-            for (const e of this.equipments || []) {
-                const id = String(e?.categories_id || e?.category?.id || "");
-                if (!id) continue;
-                counts[id] = (counts[id] || 0) + 1;
-            }
-            return counts;
-        },
-        validCategories() {
-            return (this.categories || []).filter((c) => c && c.id != null);
-        },
-        filteredEquipments() {
-            const q = (this.searchQuery || "").toLowerCase();
-            const catId = this.filterCategoryId
-                ? String(this.filterCategoryId)
-                : "";
-            const status = this.filterStatus;
-            let list = (this.equipments || []).filter((e) => {
-                const matchesSearch =
-                    !q ||
-                    String(e?.name || "")
-                        .toLowerCase()
-                        .includes(q) ||
-                    String(e?.category?.name || "")
-                        .toLowerCase()
-                        .includes(q) ||
-                    String(e?.status || "")
-                        .toLowerCase()
-                        .includes(q) ||
-                    String(e?.code || e?.id || "").includes(q);
-                const matchesStatus =
-                    !status || String(e?.status || "") === status;
-                const matchesCategory =
-                    !catId ||
-                    String(e?.categories_id || e?.category?.id || "") === catId;
-                return matchesSearch && matchesStatus && matchesCategory;
-            });
-            list.sort((a, b) => {
-                const da = new Date(a.created_at);
-                const db = new Date(b.created_at);
-                return this.sortDirection === "asc" ? da - db : db - da;
-            });
+        columns() {
+            const baseColumns = [
+                { key: 'avatar', label: 'รูป' },
+                { key: 'name', label: 'ชื่อผู้ใช้' },
+                { key: 'email', label: 'อีเมล' },
+                { key: 'phonenumber', label: 'เบอร์โทร' },
+                { key: 'role', label: 'บทบาท' },
+                { key: 'created_at', label: 'วันที่สมัคร' },
+            ];
 
-            return list;
+            if (this.userRole === 'admin') {
+                baseColumns.push({ key: 'actions', label: 'การดำเนินการ' });
+            }
+
+            return baseColumns;
         },
-        pageCount() {
-            return (
-                Math.ceil(this.filteredEquipments.length / this.pageSize) || 0
-            );
-        },
-        pageStart() {
-            return (this.currentPage - 1) * this.pageSize;
-        },
-        pageEnd() {
-            const end = this.pageStart + this.pageSize;
-            return Math.min(end, this.filteredEquipments.length);
-        },
-        paginatedEquipments() {
-            return this.filteredEquipments.slice(this.pageStart, this.pageEnd);
-        },
+
+        availableFilters() {
+            return [
+                {
+                    key: 'role',
+                    label: 'บทบาท',
+                    type: 'select',
+                    placeholder: 'เลือกบทบาท',
+                    options: [
+                        { value: 'admin', label: 'ผู้ดูแลระบบ' },
+                        { value: 'borrower', label: 'ผู้ยืม' },
+                        { value: 'staff', label: 'เจ้าหน้าที่' }
+                    ]
+                }
+            ];
+        }
     },
     methods: {
-        capitalize(str) {
-            if (!str) return "";
-            return str.charAt(0).toUpperCase() + str.slice(1);
+        // Data fetching
+        async fetchUsers() {
+            this.loading = true;
+            try {
+                const response = await api.get('/api/users');
+                this.users = response.data || [];
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+                this.users = [];
+                this.showError('ไม่สามารถโหลดข้อมูลผู้ใช้ได้');
+            } finally {
+                this.loading = false;
+            }
         },
-        statusClass(status) {
-            switch (status) {
-                case "available":
-                    return "bg-green-100 text-green-800";
-                case "retired":
+
+        // Role helpers
+        getRoleClass(role) {
+            switch (role) {
+                case "admin":
                     return "bg-red-100 text-red-800";
-                case "maintenance":
+                case "borrower":
+                    return "bg-green-100 text-green-800";
+                case "staff":
                     return "bg-yellow-100 text-yellow-800";
                 default:
                     return "bg-gray-100 text-gray-800";
             }
         },
-        getFirstPhoto(equipment) {
-            if (!equipment.photo_path) return null;
-            try {
-                const photos = JSON.parse(equipment.photo_path);
-                return Array.isArray(photos) && photos.length > 0
-                    ? photos[0]
-                    : null;
-            } catch (e) {
-                return equipment.photo_path;
+
+        getRoleLabel(role) {
+            switch (role) {
+                case "admin":
+                    return "ผู้ดูแลระบบ";
+                case "staff":
+                    return "เจ้าหน้าที่";
+                case "borrower":
+                    return "ผู้ยืม";
+                default:
+                    return "ไม่ระบุ";
             }
         },
-        toggleSort() {
-            this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+
+        // Date formatting
+        formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return 'ไม่ระบุ';
+            }
         },
-        goToPage(p) {
-            this.currentPage = p;
-        },
-        nextPage() {
-            if (this.currentPage < this.pageCount) this.currentPage += 1;
-        },
-        prevPage() {
-            if (this.currentPage > 1) this.currentPage -= 1;
-        },
+
+        // Modal methods
         openCreateModal() {
             this.modalMode = 'create';
-            this.selectedEquipment = null;
-            this.selectedCategoryId = null;
+            this.selectedUser = null;
             this.isOpen = true;
         },
-        openModal(equipment) {
+
+        openModal(user) {
             this.modalMode = 'edit';
-            this.selectedEquipment = { ...equipment };
-            this.selectedCategoryId = equipment.category
-                ? equipment.category.id
-                : null;
+            this.selectedUser = { ...user };
             this.isOpen = true;
         },
+
         closeModal() {
             this.isOpen = false;
-            this.selectedEquipment = null;
-            this.selectedCategoryId = null;
+            this.selectedUser = null;
         },
-        onEditImageChange(event) {
-            const files = event.target.files;
-            this.selectedImageFile = files && files[0] ? files[0] : null;
-        },
-        updateEquipment(payload) {
-            const formData = new FormData();
-            formData.append("code", payload.code || "");
-            formData.append("name", payload.name || "");
-            formData.append("description", payload.description || "");
-            formData.append(
-                "categories_id",
-                String(payload.categories_id ?? "")
-            );
-            formData.append("status", payload.status || "available");
 
-            if (payload.imagesToDelete && payload.imagesToDelete.length > 0) {
-                payload.imagesToDelete.forEach((url) => {
-                    formData.append("images_to_delete[]", url);
-                });
-            }
-            if (payload.newImageFiles && payload.newImageFiles.length > 0) {
-                payload.newImageFiles.forEach((file) => {
-                    formData.append("images[]", file);
-                });
-            }
-            if (payload.selectedMainIdentifier) {
-                formData.append(
-                    "selected_main_identifier",
-                    payload.selectedMainIdentifier
-                );
-            }
+        // API methods
+        async updateUser(payload) {
+            try {
+                const response = await api.put(`/api/users/${payload.id}`, payload);
+                const updated = response.data;
 
-            formData.append("_method", "PUT");
-            fetch(`/admin/equipment/update/${payload.id}`, {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
-                    Accept: "application/json",
-                },
-                body: formData,
-            })
-                .then(async (res) => {
-                    if (!res.ok) {
-                        let msg = "Update failed";
-                        try {
-                            const errorData = await res.json();
-                            msg =
-                                errorData.message ||
-                                JSON.stringify(errorData.errors || errorData);
-                        } catch (e) {
-                            msg = `HTTP ${res.status}: ${res.statusText}`;
-                        }
-                        throw new Error(msg);
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    const updated = data.data;
-                    const idx = this.equipments.findIndex(
-                        (e) => e.id === updated.id
-                    );
-                    if (idx !== -1) {
-                        this.equipments.splice(idx, 1, updated);
-                    }
-                    this.closeModal();
-                    this.ensureSwal().then(() => {
-                        window.Swal.fire({
-                            title: "อัปเดตสำเร็จ",
-                            text: `ทำการอัพเดทเรียบร้อย ${payload.name} (ID: ${payload.code})`,
-                            icon: "success",
-                            timer: 1200,
-                            showConfirmButton: false,
-                        });
-                    });
-                })
-                .catch((err) => {
-                    this.notifyError(err.message || "ไม่สามารถอัปเดตได้");
-                });
+                const idx = this.users.findIndex((u) => u.id === updated.id);
+                if (idx !== -1) {
+                    this.users.splice(idx, 1, updated);
+                }
+
+                this.closeModal();
+                this.showSuccess(`อัปเดตสำเร็จ: ${payload.name}`);
+            } catch (error) {
+                console.error('Update user failed:', error);
+                this.showError(error.response?.data?.message || 'ไม่สามารถอัปเดตผู้ใช้ได้');
+            }
         },
-        deleteEquipment(equipment) {
+
+        async createUser(payload) {
+            try {
+                const response = await api.post('/api/users', payload);
+                const created = response.data;
+
+                this.users.unshift(created);
+                this.closeModal();
+                this.showSuccess(`เพิ่มผู้ใช้สำเร็จ: ${payload.name}`);
+            } catch (error) {
+                console.error('Create user failed:', error);
+                this.showError(error.response?.data?.message || 'ไม่สามารถเพิ่มผู้ใช้ได้');
+            }
+        },
+
+        deleteUser(user) {
             this.ensureSwal().then(() => {
                 window.Swal.fire({
-                    title: "ลบรายการ?",
-                    text: `คุณกำลังจะลบ: ${equipment.name} (ID: ${equipment.code})`,
+                    title: "ลบผู้ใช้?",
+                    text: `คุณกำลังจะลบ: ${user.name} (${user.email})`,
                     icon: "warning",
-                    imageUrl: this.getFirstPhoto(equipment),
-                    imageWidth: 120,
-                    imageHeight: 120,
-                    imageAlt: equipment.name,
                     showCancelButton: true,
                     confirmButtonText: "ลบ",
                     cancelButtonText: "ยกเลิก",
                     confirmButtonColor: "#ef4444",
-                }).then((result) => {
+                }).then(async (result) => {
                     if (result.isConfirmed) {
-                        fetch(`/admin/equipment/destroy/${equipment.id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]'
-                                ).content,
-                                Accept: "application/json",
-                            },
-                        })
-                            .then(async (res) => {
-                                if (!res.ok) {
-                                    let msg = "Delete failed";
-                                    try {
-                                        const j = await res.json();
-                                        msg = j.message || JSON.stringify(j);
-                                    } catch (e) { }
-                                    throw new Error(msg);
-                                }
-                                return res.json();
-                            })
-                            .then(() => {
-                                this.equipments = this.equipments.filter(
-                                    (e) => e.id !== equipment.id
-                                );
-                                window.Swal.fire({
-                                    title: "ลบแล้ว",
-                                    text: `${equipment.name} ถูกลบเรียบร้อย`,
-                                    icon: "success",
-                                    timer: 1200,
-                                    showConfirmButton: false,
-                                });
-                            })
-                            .catch((err) => {
-                                this.notifyError(err.message || "ลบไม่สำเร็จ");
-                            });
+                        try {
+                            await api.delete(`/api/users/${user.id}`);
+                            this.users = this.users.filter((u) => u.id !== user.id);
+                            this.showSuccess(`${user.name} ถูกลบเรียบร้อย`);
+                        } catch (error) {
+                            console.error('Delete user failed:', error);
+                            this.showError(error.response?.data?.message || 'ลบผู้ใช้ไม่สำเร็จ');
+                        }
                     }
                 });
             });
         },
+
+        // Utility methods
         ensureSwal() {
             return new Promise((resolve) => {
                 if (window.Swal) return resolve();
@@ -455,116 +258,32 @@ export default {
                 document.head.appendChild(script);
             });
         },
-        notifyError(message) {
-            let errorMessage = message;
-            if (typeof message === "object") {
-                if (message.message) {
-                    errorMessage = message.message;
-                } else {
-                    errorMessage = JSON.stringify(message);
-                }
-            }
 
-            if (window.Swal) {
+        showSuccess(message) {
+            this.ensureSwal().then(() => {
+                window.Swal.fire({
+                    title: "สำเร็จ",
+                    text: message,
+                    icon: "success",
+                    timer: 1200,
+                    showConfirmButton: false,
+                });
+            });
+        },
+
+        showError(message) {
+            this.ensureSwal().then(() => {
                 window.Swal.fire({
                     title: "เกิดข้อผิดพลาด",
-                    text: errorMessage,
+                    text: message,
                     icon: "error",
                 });
-            } else {
-                alert(errorMessage);
-            }
-        },
-        createEquipment(payload) {
-            const formData = new FormData();
-            formData.append("code", payload.code || "");
-            formData.append("name", payload.name || "");
-            formData.append("description", payload.description || "");
-            formData.append("categories_id", payload.categories_id || "");
-            formData.append("status", payload.status || "available");
-
-            if (payload.imageFiles && payload.imageFiles.length > 0) {
-                for (const file of payload.imageFiles) {
-                    formData.append("images[]", file);
-                }
-            }
-            if (
-                payload.selectedProfileImage !== null &&
-                payload.selectedProfileImage !== undefined
-            ) {
-                formData.append(
-                    "selectedProfileImage",
-                    payload.selectedProfileImage
-                );
-            }
-
-            fetch(`/admin/equipment/store`, {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
-                    Accept: "application/json",
-                },
-                body: formData,
-            })
-                .then(async (res) => {
-                    if (!res.ok) {
-                        let msg = "Create failed";
-                        try {
-                            const j = await res.json();
-                            msg = j.message || JSON.stringify(j);
-                        } catch (e) { }
-                        throw new Error(msg);
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    let created = data.data;
-                    if (!created.category && created.categories_id) {
-                        const found = this.categories.find(
-                            (c) => c.id === created.categories_id
-                        );
-                        if (found) {
-                            created = { ...created, category: found };
-                        }
-                    }
-                    this.equipments.unshift(created);
-                    this.closeModal();
-                    this.ensureSwal().then(() => {
-                        window.Swal.fire({
-                            title: "เพิ่มข้อมูลสำเร็จ",
-                            text: `ทำการเพี่มข้อมูลเรียบร้อย ${payload.name} (ID: ${payload.code})`,
-                            icon: "success",
-                            timer: 1200,
-                            showConfirmButton: false,
-                        });
-                    });
-                })
-                .catch((err) => {
-                    this.notifyError(err.message || "ไม่สามารถเพิ่มข้อมูลได้");
-                });
-        },
-        openPhotoModal(url) {
-            this.photoModal.url = url;
-            this.photoModal.isOpen = true;
-        },
-        closePhotoModal() {
-            this.photoModal.url = "";
-            this.photoModal.isOpen = false;
-        },
+            });
+        }
     },
+
     mounted() {
-        this._onClickOutside = (e) => {
-            const wrap = this.$refs.filtersWrap;
-            if (!wrap) return;
-            if (this.filtersOpen && !wrap.contains(e.target))
-                this.filtersOpen = false;
-        };
-        document.addEventListener("click", this._onClickOutside);
-    },
-    beforeUnmount() {
-        document.removeEventListener("click", this._onClickOutside);
-    },
+        this.fetchUsers();
+    }
 };
 </script>

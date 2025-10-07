@@ -24,6 +24,54 @@
                     <span class="text-xl font-semibold text-gray-800">Borrow</span>
                 </a>
             </div>
+            
+            <!-- Navigation Links moved here -->
+            <div class="hidden md:flex space-x-8">
+                <a href="{{ route('home') }}"
+                    class="{{ request()->routeIs('home') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                    หน้าหลัก
+                </a>
+
+                <!-- Dropdown -->
+                <div class="relative group">
+                    <button
+                        class="flex items-center {{ request()->is('category*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                        หมวดหมู่
+                        <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
+                            111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
+                            010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        @foreach ($categories ?? [] as $cat)
+                            @if (is_object($cat))
+                                <a href="/?category={{ $cat->cate_id }}"
+                                    class="block px-4 py-2 text-sm {{ request('category') == $cat->cate_id ? 'text-blue-600 font-medium bg-gray-50' : 'text-gray-700 hover:bg-gray-100' }}">
+                                    {{ $cat->name }}
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @php
+                    $user = Auth::user();
+                @endphp
+
+                @auth
+                    @if ($user && in_array($user->role, ['admin', 'staff']))
+                        <a href="{{ route('admin.index') }}"
+                    class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-gray-900' }}">
+                    แอดมิน
+                </a>
+                    @endif
+                @endauth
+                <a href="{{ route('borrower.equipments.myreq') }}"
+                    class="{{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                    คำขอของฉัน
+                </a>
+            </div>
             <!-- User Authentication - Hidden on mobile -->
             <div class="flex">
                 @auth
@@ -181,59 +229,9 @@
 
     <!-- Search Bar Section (Vue mount) -->
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-        <div id="header-search">
-        </div>
-        <!-- Navigation Links - Hidden on mobile -->
-        <!-- Desktop Menu -->
-        <div class="hidden md:flex justify-end space-x-8">
-            <a href="{{ route('home') }}"
-                class="{{ request()->routeIs('home') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
-                หน้าหลัก
-            </a>
-
-            <!-- Dropdown -->
-            <div class="relative group">
-                <button
-                    class="flex items-center {{ request()->is('category*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
-                    หมวดหมู่
-                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
-                        111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
-                        010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <div
-                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    @foreach ($categories ?? [] as $cat)
-                        @if (is_object($cat))
-                            <a href="/?category={{ $cat->cate_id }}"
-                                class="block px-4 py-2 text-sm {{ request('category') == $cat->cate_id ? 'text-blue-600 font-medium bg-gray-50' : 'text-gray-700 hover:bg-gray-100' }}">
-                                {{ $cat->name }}
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-                @php
-                    $user = Auth::user();
-                @endphp
-
-                @auth
-                    @if ($user && in_array($user->role, ['admin', 'staff']))
-                        <a href="{{ route('admin.index') }}"
-                    class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-gray-900' }}">
-                    แอดมิน
-                </a>
-                    @endif
-                @endauth
-                <a href="{{ route('borrower.equipments.myreq') }}"
-                    class="{{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
-                    คำขอของฉัน
-                </a>
-        </div>
-
-        {{-- Breadcrumb --}}
-        <nav class="flex items-center text-sm text-gray-500 space-x-1 mb-4" aria-label="Breadcrumb">
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center text-sm text-gray-500 space-x-1" aria-label="Breadcrumb">
             {{-- Home --}}
             <a href="{{ route('home') }}"
                 class="flex items-center hover:text-blue-600 {{ request()->routeIs('home') ? 'text-blue-600 font-medium' : '' }}">
@@ -266,8 +264,18 @@
             @if (request()->routeIs('borrower.equipments.reqdetail'))
                 <span class="text-gray-700 font-medium">รายละเอียดคำขอ</span>
             @endif
-        </nav>
-
+            </nav>
+            
+            <!-- Filter and Search Bar -->
+            <div class="flex items-center gap-3">
+                <!-- Existing Blue Filter Component -->
+                <x-filter />
+                
+                <!-- Search Bar -->
+                <div id="header-search" class="flex-1 max-w-md">
+                </div>
+            </div>
+        </div>
     </div>
 </header>
 

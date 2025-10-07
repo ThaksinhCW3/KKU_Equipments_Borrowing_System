@@ -171,7 +171,8 @@ export default {
         { key: 'name', label: 'ชื่ออุปกรณ์' },
         { key: 'description', label: 'รายละเอียด' },
         { key: 'category.name', label: 'หมวดหมู่' },
-        { key: 'status', label: 'สถานะ' }
+        { key: 'status', label: 'สถานะ' },
+        { key: 'actions', label: 'จัดการ' }
       ],
       availableFilters: [
         {
