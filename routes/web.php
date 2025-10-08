@@ -29,8 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-read/{id}', [NotificationController::class, 'markRead']);
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
 
-    // Borrower area
-    Route::prefix('/borrower')->group(function () {
+    // Borrower area - protected by ban check
+    Route::prefix('/borrower')->middleware('check.banned')->group(function () {
         Route::post('/borrow_request', [BorrowerCtrl::class, 'myRequests'])->name('borrower.borrow_request');
         Route::get('/myrequest', [BorrowerCtrl::class, 'myreq'])->name('borrower.equipments.myreq');
         Route::get('/myrequest/paginated', [BorrowerCtrl::class, 'myreqPaginated'])->name('borrower.equipments.myreq.paginated');
@@ -39,10 +39,17 @@ Route::middleware('auth')->group(function () {
         Route::patch('/requests/{id}/cancel', [BorrowerCtrl::class, 'cancel'])->name('borrower.requests.cancel');
     });
 
-    // Verification routes
-    Route::get('/profile/verification', [VerificationController::class, 'index'])->name('verification.index');
-    Route::post('/verification', [VerificationController::class, 'store'])->name('verification.store');
-    Route::put('/verification', [VerificationController::class, 'update'])->name('verification.update');
+    // Verification routes - protected by ban check
+    Route::middleware('check.banned')->group(function () {
+        Route::get('/profile/verification', [VerificationController::class, 'index'])->name('verification.index');
+        Route::post('/verification', [VerificationController::class, 'store'])->name('verification.store');
+        Route::put('/verification', [VerificationController::class, 'update'])->name('verification.update');
+    });
+    
+    // Banned user page
+    Route::get('/banned', function () {
+        return view('banned');
+    })->name('banned');
 
     // Admin-only routes
     Route::middleware('role:admin')->group(function () {
@@ -99,6 +106,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
             Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
             Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
+            Route::post('/{id}/ban', [AdminVerificationController::class, 'banUser'])->name('admin.verification.ban');
+            Route::post('/{id}/unban', [AdminVerificationController::class, 'unbanUser'])->name('admin.verification.unban');
         });
 
         // Category and Equipment index pages

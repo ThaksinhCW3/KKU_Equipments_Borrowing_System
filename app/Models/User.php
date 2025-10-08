@@ -18,6 +18,10 @@ class User extends Authenticatable
         'phonenumber',
         'password',
         'role',
+        'is_banned',
+        'ban_reason',
+        'banned_at',
+        'banned_by',
     ];
 
     public function borrowRequests()
@@ -28,6 +32,37 @@ class User extends Authenticatable
     public function verificationRequest()
     {
         return $this->hasOne(VerificationRequest::class, 'users_id');
+    }
+
+    public function bannedBy()
+    {
+        return $this->belongsTo(User::class, 'banned_by');
+    }
+
+    // Ban-related methods
+    public function isBanned()
+    {
+        return $this->is_banned == 1;
+    }
+
+    public function ban($reason, $bannedBy)
+    {
+        $this->update([
+            'is_banned' => 1,
+            'ban_reason' => $reason,
+            'banned_at' => now(),
+            'banned_by' => $bannedBy,
+        ]);
+    }
+
+    public function unban()
+    {
+        $this->update([
+            'is_banned' => 0,
+            'ban_reason' => null,
+            'banned_at' => null,
+            'banned_by' => null,
+        ]);
     }
 
     protected static function boot()
@@ -52,6 +87,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'banned_at' => 'datetime',
         ];
     }
 }
