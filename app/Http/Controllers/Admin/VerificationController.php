@@ -147,4 +147,112 @@ class VerificationController extends Controller
 
         return redirect()->back()->with('success', 'ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว');
     }
+
+    public function banUser(Request $request, $id)
+    {
+        $request->validate([
+            'ban_reason' => 'required|string|max:1000',
+        ]);
+
+        $verificationRequest = VerificationRequest::findOrFail($id);
+
+        // Only allow banning of approved verifications
+        if ($verificationRequest->status !== VerificationRequest::STATUS_APPROVED) {
+            return response()->json(['error' => 'Can only ban users with approved verifications'], 400);
+        }
+
+        $user = $verificationRequest->user;
+        
+        // Ban the user
+        $user->ban($request->ban_reason, Auth::id());
+
+        // Revoke verification status when user is banned
+        $verificationRequest->update([
+            'status' => VerificationRequest::STATUS_REJECTED,
+            'reject_note' => "ผู้ใช้ถูกแบน: {$request->ban_reason}",
+            'processed_by' => Auth::id(),
+            'process_at' => now(),
+        ]);
+
+        // Log the user ban
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user_banned',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+            'target_name' => $user->name,
+            'description' => "แบนผู้ใช้ {$user->name} เนื่องจาก: {$request->ban_reason}",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Log the verification revocation
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'verification_revoked_due_to_ban',
+            'target_type' => 'verification_request',
+            'target_id' => $verificationRequest->id,
+            'target_name' => $user->name,
+            'description' => "ยกเลิกการยืนยันตัวตนของผู้ใช้ {$user->name} เนื่องจากถูกแบน",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return response()->json(['success' => true, 'message' => 'แบนผู้ใช้เรียบร้อยแล้ว']);
+    }
+
+    public function unbanUser(Request $request, $id)
+    {
+        $verificationRequest = VerificationRequest::findOrFail($id);
+
+        // Only allow unbanning of banned users
+        if (!$verificationRequest->user->isBanned()) {
+            return response()->json(['error' => 'User is not banned'], 400);
+        }
+
+        $user = $verificationRequest->user;
+        
+        // Unban the user
+        $user->unban();
+
+        // Restore verification status when user is unbanned
+        $verificationRequest->update([
+            'status' => VerificationRequest::STATUS_APPROVED,
+            'reject_note' => null,
+            'processed_by' => Auth::id(),
+            'process_at' => now(),
+        ]);
+
+        // Log the user unban
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user_unbanned',
+            'target_type' => 'user',
+            'target_id' => $user->id,
+            'target_name' => $user->name,
+            'description' => "ยกเลิกการแบนผู้ใช้ {$user->name}",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Log the verification restoration
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'verification_restored_due_to_unban',
+            'target_type' => 'verification_request',
+            'target_id' => $verificationRequest->id,
+            'target_name' => $user->name,
+            'description' => "คืนสถานะการยืนยันตัวตนของผู้ใช้ {$user->name} เนื่องจากยกเลิกการแบน",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return response()->json(['success' => true, 'message' => 'ยกเลิกการแบนผู้ใช้เรียบร้อยแล้ว']);
+    }
 }

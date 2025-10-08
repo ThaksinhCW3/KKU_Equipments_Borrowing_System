@@ -9,6 +9,28 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        @auth
+        <script>
+            // Check if user is banned
+            document.addEventListener('DOMContentLoaded', function() {
+                @if(auth()->user()->isBanned())
+                    Swal.fire({
+                        title: 'คุณถูกแบนจากระบบ',
+                        text: 'บัญชีของคุณถูกระงับการใช้งาน',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: true,
+                        confirmButtonColor: '#dc2626'
+                    }).then(() => {
+                        window.location.href = '/banned';
+                    });
+                @endif
+            });
+        </script>
+        @endauth
     </head>
     <body class="font-noto-sans-thai antialiased ">
         <div class="bg-gray-10 sticky">   
