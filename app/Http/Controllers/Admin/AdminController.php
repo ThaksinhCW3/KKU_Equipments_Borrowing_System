@@ -25,6 +25,7 @@ class AdminController extends Controller
         $data = Cache::remember($cacheKey, 300, function () use ($year, $month) {
             $query = BorrowRequest::query();
             $query->whereYear('created_at', $year);
+            $query->where('status', '!=', 'cancelled'); // Exclude cancelled requests
 
             if ($month) {
                 $query->whereMonth('created_at', $month);
@@ -37,7 +38,6 @@ class AdminController extends Controller
                 'Approved' => (clone $query)->where('status', 'approved')->count(),
                 'Rejected' => (clone $query)->where('status', 'rejected')->count(),
                 'Pending' => (clone $query)->where('status', 'pending')->count(),
-                'Cancelled' => (clone $query)->where('status', 'cancelled')->count(),
             ];
 
             // Equipment stats
@@ -52,9 +52,10 @@ class AdminController extends Controller
             if ($month) {
                 $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
-                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected, SUM(status="cancelled") as cancelled')
+                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
                     ->whereYear('created_at', $year)
                     ->whereMonth('created_at', $month)
+                    ->where('status', '!=', 'cancelled')
                     ->groupBy('day')
                     ->orderBy('day')
                     ->get()
@@ -67,7 +68,6 @@ class AdminController extends Controller
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
-                    'Cancelled' => [],
                 ];
 
                 for ($d = 1; $d <= $daysInMonth; $d++) {
@@ -76,13 +76,13 @@ class AdminController extends Controller
                     $chartData['checkinReq'][] = $dailyData[$d]->checkin ?? 0;
                     $chartData['Pending'][] = $dailyData[$d]->pending ?? 0;
                     $chartData['Rejected'][] = $dailyData[$d]->rejected ?? 0;
-                    $chartData['Cancelled'][] = $dailyData[$d]->cancelled ?? 0;
                 }
             } else {
                 $months = range(1, 12);
 
-                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected, SUM(status="cancelled") as cancelled')
+                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
                     ->whereYear('created_at', $year)
+                    ->where('status', '!=', 'cancelled')
                     ->groupBy('month')
                     ->orderBy('month')
                     ->get()
@@ -95,7 +95,6 @@ class AdminController extends Controller
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
-                    'Cancelled' => [],
                 ];
 
                 foreach ($months as $m) {
@@ -104,7 +103,6 @@ class AdminController extends Controller
                     $chartData['checkinReq'][] = $monthlyData[$m]->checkin ?? 0;
                     $chartData['Pending'][] = $monthlyData[$m]->pending ?? 0;
                     $chartData['Rejected'][] = $monthlyData[$m]->rejected ?? 0;
-                    $chartData['Cancelled'][] = $monthlyData[$m]->cancelled ?? 0;
                 }
             }
 

@@ -1,10 +1,9 @@
 <x-app-layout>
     <div class=" ">
-        <div id="header-search"></div>
+        <div id="header-search" class="pt-3"></div>
         <x-filter />
-        <hr>
     </div>
-    <div class="max-w-screen-2xl mx-auto py-6 px-3 sm:px-6 lg:px-8">
+    <div class="max-w-screen-2xl mx-auto py-2 px-3 sm:px-6 lg:px-8">
         @if($equipments->count() > 0)
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-6 lg:gap-5 my-5">
                 @foreach ($equipments as $equipment)

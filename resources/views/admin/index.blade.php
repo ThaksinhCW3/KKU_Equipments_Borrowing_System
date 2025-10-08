@@ -101,7 +101,18 @@
 
         <!-- Category Chart -->
         <div class="lg:col-span-5 bg-white rounded-lg border p-4">
-            <div class="text-sm font-medium mb-4">สถานะอุปกรณ์ตามหมวดหมู่</div>
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-sm font-medium">สถานะอุปกรณ์ตามหมวดหมู่</div>
+                <div class="flex items-center space-x-2">
+                    <label for="categoryFilter" class="text-xs text-gray-600">แสดงหมวดหมู่:</label>
+                    <select id="categoryFilter" class="text-xs border border-gray-300 rounded px-2 py-1">
+                        <option value="all">ทั้งหมด</option>
+                        @foreach($categoryCounts as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div style="height: 300px; width: 100%;">
                 <canvas id="categoryBar"></canvas>
                 @if($categoryCounts->isEmpty())
@@ -198,61 +209,106 @@
         document.addEventListener('DOMContentLoaded', function () {
             // ---------- Category Chart ----------
             const barEl = document.getElementById('categoryBar');
+            const categoryFilter = document.getElementById('categoryFilter');
+            let categoryChart = null;
+            
             if (barEl && @json($categoryCounts->count()) > 0) {
-                new Chart(barEl, {
-                    type: 'bar',
-                    data: {
-                        labels: @json($categoryCounts->pluck('name')),
-                        datasets: [
-                            {
-                                label: 'อุปกรณ์ทั้งหมด',
-                                data: @json($categoryCounts->pluck('equipments_count')),
-                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                                borderColor: '#3b82f6',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'พร้อมใช้งาน',
-                                data: @json($categoryCounts->pluck('available_equipments_count')),
-                                backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                                borderColor: '#22c55e',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'ถูกยืม',
-                                data: @json($categoryCounts->pluck('borrowed_equipments_count')),
-                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                                borderColor: '#ef4444',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'ซ่อมบำรุง',
-                                data: @json($categoryCounts->pluck('maintenance_equipments_count')),
-                                backgroundColor: 'rgba(249, 115, 22, 0.8)',
-                                borderColor: '#f97316',
-                                borderWidth: 1
-                            }
-                        ]
-                    },
-                    options: { 
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { 
-                                display: true,
-                                position: 'bottom'
-                            } 
+                // Store original data
+                const originalData = {
+                    categories: @json($categoryCounts),
+                    labels: @json($categoryCounts->pluck('name')),
+                    allCounts: @json($categoryCounts->pluck('equipments_count')),
+                    availableCounts: @json($categoryCounts->pluck('available_equipments_count')),
+                    borrowedCounts: @json($categoryCounts->pluck('borrowed_equipments_count')),
+                    maintenanceCounts: @json($categoryCounts->pluck('maintenance_equipments_count'))
+                };
+
+                function updateCategoryChart(selectedCategoryId) {
+                    let filteredData = originalData;
+                    
+                    if (selectedCategoryId !== 'all') {
+                        const selectedIndex = originalData.categories.findIndex(cat => cat.id == selectedCategoryId);
+                        if (selectedIndex !== -1) {
+                            filteredData = {
+                                categories: [originalData.categories[selectedIndex]],
+                                labels: [originalData.labels[selectedIndex]],
+                                allCounts: [originalData.allCounts[selectedIndex]],
+                                availableCounts: [originalData.availableCounts[selectedIndex]],
+                                borrowedCounts: [originalData.borrowedCounts[selectedIndex]],
+                                maintenanceCounts: [originalData.maintenanceCounts[selectedIndex]]
+                            };
+                        }
+                    }
+
+                    if (categoryChart) {
+                        categoryChart.destroy();
+                    }
+
+                    categoryChart = new Chart(barEl, {
+                        type: 'bar',
+                        data: {
+                            labels: filteredData.labels,
+                            datasets: [
+                                {
+                                    label: 'อุปกรณ์ทั้งหมด',
+                                    data: filteredData.allCounts,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                    borderColor: '#3b82f6',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'พร้อมใช้งาน',
+                                    data: filteredData.availableCounts,
+                                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                                    borderColor: '#22c55e',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'ถูกยืม',
+                                    data: filteredData.borrowedCounts,
+                                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                    borderColor: '#ef4444',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'ซ่อมบำรุง',
+                                    data: filteredData.maintenanceCounts,
+                                    backgroundColor: 'rgba(249, 115, 22, 0.8)',
+                                    borderColor: '#f97316',
+                                    borderWidth: 1
+                                }
+                            ]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
+                        options: { 
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { 
+                                legend: { 
+                                    display: true,
+                                    position: 'bottom'
+                                } 
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
+
+                // Initialize chart with all categories
+                updateCategoryChart('all');
+
+                // Add event listener for category filter
+                if (categoryFilter) {
+                    categoryFilter.addEventListener('change', function() {
+                        updateCategoryChart(this.value);
+                    });
+                }
             }
 
             // ---------- Dashboard Chart ----------
@@ -272,7 +328,6 @@
                         { label: 'การยืมที่สำเร็จ', data: chartData.checkinReq, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#a855f7', borderWidth: 1 },
                         { label: 'คำขอที่รออนุมัติ', data: chartData.Pending, backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: '#fbbf24', borderWidth: 1 },
                         { label: 'คำขอที่ถูกปฏิเสธ', data: chartData.Rejected, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 1 },
-                        { label: 'คำขอที่ยกเลิก', data: chartData.Cancelled, backgroundColor: 'rgba(107, 114, 128, 0.6)', borderColor: '#6b7280', borderWidth: 1 },
                     ]
                 },
                 options: { 

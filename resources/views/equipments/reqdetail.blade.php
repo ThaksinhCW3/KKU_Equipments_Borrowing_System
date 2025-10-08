@@ -47,6 +47,23 @@
                         </div>
                     @elseif ($req->status === 'approved')
                         @if ($req->pickup_deadline && $req->pickup_deadline > now())
+                                            <div class="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start space-x-2">
+                        <div class="text-yellow-600 mt-0.5">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        
+                        <div class="text-xs text-yellow-800">
+                            <p class="font-medium mb-0.5"> เวลารับอุปกรณ์</p>
+                            <p class="text-xs leading-relaxed">
+                                หลังจากได้รับการอนุมัติ กรุณามารับอุปกรณ์ภายในเวลาที่กำหนด<br>
+                                <span class="font-medium">เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
                             <div class="mb-4 p-4 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor"
@@ -54,6 +71,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
+
                                     <div>
                                         <h3 class="text-sm font-medium text-green-800">คำขอของคุณได้รับการอนุมัติแล้ว!
                                         </h3>
@@ -110,6 +128,52 @@
                                 </div>
                             </div>
                         </div>
+                    @elseif ($req->status === 'check_out')
+                        <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-medium text-blue-800">คุณได้รับอุปกรณ์แล้ว</h3>
+                                    <p class="text-sm text-blue-700 mt-1">กรุณาคืนอุปกรณ์ภายในวันที่กำหนด
+                                        เพื่อหลีกเลี่ยงค่าปรับ</p>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif ($req->status === 'check_in')
+                        <div class="mb-4 p-4 bg-purple-50 border-l-4 border-purple-400 rounded-r-lg">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-purple-400 mr-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-medium text-purple-800">การยืมเสร็จสิ้น</h3>
+                                    <p class="text-sm text-purple-700 mt-1">คุณได้คืนอุปกรณ์เรียบร้อยแล้ว
+                                        ขอบคุณที่ใช้งานระบบยืมอุปกรณ์</p>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mb-4 p-4 bg-gray-50 border-l-4 border-gray-400 rounded-r-lg">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-800">สถานะ: {{ ucfirst($req->status) }}
+                                    </h3>
+                                    <p class="text-sm text-gray-700 mt-1">
+                                        กรุณาติดต่อเจ้าหน้าที่หากต้องการข้อมูลเพิ่มเติม</p>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                     <!-- Header -->
                     <div class="flex justify-between items-center border-b pb-4 mb-4">
@@ -125,6 +189,8 @@
                                 @elseif($req->status === 'approved') bg-green-50 text-green-800 border-green-300
                                 @elseif($req->status === 'rejected') bg-red-50 text-red-800 border-red-300
                                 @elseif($req->status === 'cancelled') bg-gray-50 text-gray-800 border-gray-300
+                                @elseif($req->status === 'check_out') bg-blue-50 text-blue-800 border-blue-300
+                                @elseif($req->status === 'check_in') bg-purple-50 text-purple-800 border-purple-300
                                 @else bg-gray-50 text-gray-800 border-gray-300 @endif">
                             @if ($req->status === 'pending')
                                 <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>รออนุมัติ
@@ -134,9 +200,13 @@
                                 <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>ปฏิเสธ
                             @elseif($req->status === 'cancelled')
                                 <span class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>ยกเลิกแล้ว
+                            @elseif($req->status === 'check_out')
+                                <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>รับแล้ว
+                            @elseif($req->status === 'check_in')
+                                <span class="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>คืนแล้ว
                             @else
                                 <span
-                                    class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>{{ $req->status }}
+                                    class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>{{ ucfirst($req->status) }}
                             @endif
                         </span>
                     </div>
@@ -249,7 +319,7 @@
                     </div>
 
                     <!-- Check Out/In Status -->
-                    @if ($req->transaction)
+                    @if ($req->transaction && !in_array($req->status, ['cancelled', 'rejected']))
                         <div class="mb-4">
                             <h3 class="font-semibold text-gray-700">สถานะการยืม</h3>
                             @if ($req->transaction->checked_out_at)

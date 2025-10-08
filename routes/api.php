@@ -67,7 +67,9 @@ Route::get('/logs', function (Request $request) {
 
 
 route::get('/requests', function () {
-    return BorrowRequest::with('user', 'equipment')->get()->map(function ($req) {
+    return BorrowRequest::with('user', 'equipment')
+        ->where('status', '!=', 'cancelled')
+        ->get()->map(function ($req) {
         return [
             'id' => $req->id,
             'req_id' => $req->req_id,

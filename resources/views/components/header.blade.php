@@ -96,13 +96,13 @@
                     <div class="w-px h-6 bg-gray-300"></div>
                     @auth
                         <div class="flex items-center space-x-3">
-                            <div class="flex items-center  font-medium">
+                            <a href="{{ route('profile.show') }}" class="flex items-center font-medium hover:text-blue-600 transition-colors">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <span>{{ Auth::user()->name }}</span>
-                            </div>
+                            </a>
                             @if(!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
                                 <a href="{{ route('verification.index') }}" 
                                    class="inline-flex items-center px-2 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-md transition min-w-0">
@@ -189,19 +189,21 @@
 
                     <a href="{{ route('borrower.equipments.myreq') }}"
                         class="block text-gray-700 hover:text-gray-900 font-medium py-2">คำขอของฉัน</a>
+                    <a href="{{ route('profile.show') }}"
+                        class="block text-gray-700 hover:text-gray-900 font-medium py-2">ข้อมูลส่วนตัว</a>
             </div>
 
             <!-- Mobile User Authentication -->
             <div class="pt-4 border-t border-gray-200">
                 @auth
                     <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center font-medium text-gray-700">
+                        <a href="{{ route('profile.show') }}" class="flex items-center font-medium text-gray-700 hover:text-blue-600 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span>{{ Auth::user()->name }}</span>
-                        </div>
+                        </a>
                         <!-- Mobile Notification Bell -->
                         <notification-bell></notification-bell>
                     </div>
@@ -228,7 +230,7 @@
     </div>
 
     <!-- Search Bar Section (Vue mount) -->
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between gap-4 mb-4">
             <!-- Breadcrumb -->
             <nav class="flex items-center text-sm text-gray-500 space-x-1" aria-label="Breadcrumb">
@@ -264,18 +266,22 @@
             @if (request()->routeIs('borrower.equipments.reqdetail'))
                 <span class="text-gray-700 font-medium">รายละเอียดคำขอ</span>
             @endif
+            @if (request()->routeIs('profile.show'))
+                <span class="text-gray-700 font-medium">ข้อมูลส่วนตัว</span>
+            @endif
             </nav>
             
             <!-- Filter and Search Bar -->
             <div class="flex items-center gap-3">
                 <!-- Existing Blue Filter Component -->
-                <x-filter />
+                
                 
                 <!-- Search Bar -->
                 <div id="header-search" class="flex-1 max-w-md">
                 </div>
             </div>
         </div>
+
     </div>
 </header>
 
