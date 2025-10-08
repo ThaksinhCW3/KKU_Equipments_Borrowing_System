@@ -22,7 +22,7 @@ class User extends Authenticatable
 
     public function borrowRequests()
     {
-        return $this->hasMany(BorrowRequest::class);
+        return $this->hasMany(BorrowRequest::class, 'users_id');
     }
 
     public function verificationRequest()
@@ -35,8 +35,8 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-
-            if (request()) {
+            // Only set ip_address if the field exists in the database
+            if (request() && in_array('ip_address', $model->getFillable())) {
                 $model->ip_address = request()->ip();
             }
         });
