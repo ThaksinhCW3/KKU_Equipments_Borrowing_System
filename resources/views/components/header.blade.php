@@ -55,6 +55,7 @@
                         @endforeach
                     </div>
                 </div>
+
                 @php
                     $user = Auth::user();
                 @endphp
@@ -62,15 +63,11 @@
                 @auth
                     @if ($user && in_array($user->role, ['admin', 'staff']))
                         <a href="{{ route('admin.index') }}"
-                    class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-gray-900' }}">
-                    แอดมิน
-                </a>
+                            class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                            แอดมิน
+                        </a>
                     @endif
                 @endauth
-                <a href="{{ route('borrower.equipments.myreq') }}"
-                    class="{{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
-                    คำขอของฉัน
-                </a>
             </div>
             <!-- User Authentication - Hidden on mobile -->
             <div class="flex">
@@ -95,33 +92,61 @@
                 <div class="hidden md:flex items-center space-x-4">
                     <div class="w-px h-6 bg-gray-300"></div>
                     @auth
-                        <div class="flex items-center space-x-3">
-                            <a href="{{ route('profile.show') }}" class="flex items-center font-medium hover:text-blue-600 transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- User Dropdown -->
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 font-medium hover:text-blue-600 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <span>{{ Auth::user()->name }}</span>
-                            </a>
-                            @if(!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
-                                <a href="{{ route('verification.index') }}" 
-                                   class="inline-flex items-center px-2 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-md transition min-w-0">
-                                    <span class="flex items-center space-x-1 w-full">
-                                        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                        <span class="truncate">ยังไม่ได้ยืนยันตัวตน</span>
-                                    </span>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
+                                    111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
+                                    010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <a href="{{ route('profile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    ข้อมูลส่วนตัว
                                 </a>
-                            @endif
-                            <form method="POST" action="{{ route('logout') }}" class="logout-form">
-                                @csrf
-                                <button type="submit"
-                                    class="inline-flex items-center px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition">
-                                    ออกจากระบบ
-                                </button>
-                            </form>
+                                <a href="{{ route('borrower.equipments.myreq') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    คำขอของฉัน
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                                    @csrf
+                                    <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        ออกจากระบบ
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+                        
+                        <!-- Verification Badge -->
+                        @if(!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
+                            <a href="{{ route('verification.index') }}" 
+                               class="inline-flex items-center px-2 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-md transition min-w-0 ml-3">
+                                <span class="flex items-center space-x-1 w-full">
+                                    <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="truncate">ยังไม่ได้ยืนยันตัวตน</span>
+                                </span>
+                            </a>
+                        @endif
                     @else
                         <a href="{{ route('login') }}"
                             class="flex items-center text-gray-700 hover:text-gray-900 font-medium">
@@ -161,7 +186,7 @@
         <div class="px-4 py-6 space-y-4">
             <!-- Mobile Navigation Links -->
             <div class="space-y-3">
-                <a href="#" class="block text-blue-600 hover:text-blue-700 font-medium py-2">หน้าหลัก</a>
+                <a href="{{ route('home') }}" class="block text-blue-600 hover:text-blue-700 font-medium py-2">หน้าหลัก</a>
                 <div class="space-y-2">
                     <div class="text-gray-700 font-medium py-2">หมวดหมู่</div>
                     <div class="pl-4 space-y-2">
@@ -173,47 +198,69 @@
                         @endforeach
                     </div>
                 </div>
-                <a href="#" class="block text-gray-700 hover:text-gray-900 font-medium py-2">ติดต่อ</a>
-                                @php
+                
+                @php
                     $user = Auth::user();
                 @endphp
 
                 @auth
                     @if ($user && in_array($user->role, ['admin', 'staff']))
                         <a href="{{ route('admin.index') }}"
-                    class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-gray-900' }}">
-                    แอดมิน
-                </a>
+                            class="block text-gray-700 hover:text-gray-900 font-medium py-2">แอดมิน</a>
                     @endif
                 @endauth
-
-                    <a href="{{ route('borrower.equipments.myreq') }}"
-                        class="block text-gray-700 hover:text-gray-900 font-medium py-2">คำขอของฉัน</a>
-                    <a href="{{ route('profile.show') }}"
-                        class="block text-gray-700 hover:text-gray-900 font-medium py-2">ข้อมูลส่วนตัว</a>
             </div>
 
             <!-- Mobile User Authentication -->
             <div class="pt-4 border-t border-gray-200">
                 @auth
                     <div class="flex items-center justify-between mb-3">
-                        <a href="{{ route('profile.show') }}" class="flex items-center font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                        <div class="flex items-center font-medium text-gray-700">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span>{{ Auth::user()->name }}</span>
-                        </a>
+                        </div>
                         <!-- Mobile Notification Bell -->
                         <notification-bell></notification-bell>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="logout-form">
-                        @csrf
-                        <button type="submit"
-                            class="w-full text-left inline-flex items-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition">
-                            ออกจากระบบ
-                        </button>
-                    </form>
+                    
+                    <!-- Mobile User Menu -->
+                    <div class="space-y-2">
+                        <a href="{{ route('profile.show') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            ข้อมูลส่วนตัว
+                        </a>
+                        <a href="{{ route('borrower.equipments.myreq') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            คำขอของฉัน
+                        </a>
+                        @if(!auth()->user()->verificationRequest || auth()->user()->verificationRequest->status !== 'approved')
+                            <a href="{{ route('verification.index') }}" class="flex items-center px-3 py-2 text-sm text-orange-700 hover:bg-orange-50 rounded-md">
+                                <svg class="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>ยังไม่ได้ยืนยันตัวตน</span>
+                            </a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                            @csrf
+                            <button type="submit" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                ออกจากระบบ
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <div class="space-y-2">
                         <a href="{{ route('login') }}" class="block text-gray-700 hover:text-gray-900 font-medium py-2">
@@ -268,6 +315,41 @@
             @endif
             @if (request()->routeIs('profile.show'))
                 <span class="text-gray-700 font-medium">ข้อมูลส่วนตัว</span>
+            @endif
+            
+            {{-- Verification breadcrumb --}}
+            @if (request()->routeIs('verification.index'))
+                <span class="text-gray-700 font-medium">ยืนยันตัวตน</span>
+            @endif
+            
+            {{-- Category breadcrumb --}}
+            @if (request()->filled('category'))
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <a href="{{ route('home') }}" class="hover:text-blue-600 text-gray-700">
+                    หมวดหมู่
+                </a>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                @php
+                    $categoryCode = request()->get('category');
+                    $category = $categories->where('cate_id', $categoryCode)->first();
+                @endphp
+                <span class="text-gray-700 font-medium">
+                    {{ $category->name ?? 'หมวดหมู่' }}
+                </span>
+            @endif
+            
+            {{-- Equipment detail breadcrumb --}}
+            @if (request()->routeIs('equipments.show') && isset($equipment))
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <span class="text-gray-700 font-medium">
+                    {{ $equipment->name ?? 'รายละเอียดอุปกรณ์' }}
+                </span>
             @endif
             </nav>
             

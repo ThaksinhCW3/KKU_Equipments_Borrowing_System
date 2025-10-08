@@ -12,7 +12,7 @@
 </head>
 
 <body
-    class="font-noto-sans-thai min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+    class="font-noto-sans-thai min-h-screen flex items-center justify-center bg-white">
     <div class="bg-white rounded-2xl p-10 shadow-2xl text-center max-w-lg w-11/12">
         <div class="text-7xl text-red-600 mb-5">🚫</div>
         <h1 class="text-red-600 text-2xl md:text-3xl font-bold mb-4">คุณถูกแบนจากระบบ</h1>
