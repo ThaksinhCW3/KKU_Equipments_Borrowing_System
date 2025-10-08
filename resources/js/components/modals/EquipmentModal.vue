@@ -271,10 +271,11 @@
                     {{ existingImages.length + newImageFiles.length }}/10 รูป
                   </span>
                 </div>
-                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || (existingImages.length + newImageFiles.length >= 10)"/>
+                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || (existingImages.length + newImageFiles.length >= 10)"/>
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
                 <p v-if="existingImages.length + newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
+                <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: JPG, PNG, WebP (ขนาดไม่เกิน 5MB)</p>
 
                 <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
@@ -298,10 +299,11 @@
                     {{ newImageFiles.length }}/10 รูป
                   </span>
                 </div>
-                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || newImageFiles.length >= 10"/>
+                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || newImageFiles.length >= 10"/>
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
                 <p v-if="newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
+                <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: JPG, PNG, WebP (ขนาดไม่เกิน 5MB)</p>
 
                 <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
@@ -643,13 +645,27 @@ export default {
         return;
       }
       
+      // Allowed image types
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      
       const resizePromises = [];
       for (const file of files) {
+        // Check file type
+        if (!allowedTypes.includes(file.type.toLowerCase())) {
+          this.imageError = `ไฟล์ '${file.name}' ไม่ใช่รูปแบบรูปภาพที่รองรับ (รองรับเฉพาะ: JPG, PNG, WebP)`;
+          this.processingImages = false;
+          event.target.value = null;
+          return;
+        }
+        
+        // Check file size
         if (file.size > 5 * 1024 * 1024) {
           this.imageError = `ไฟล์ '${file.name}' ใหญ่เกินไป (จำกัด 5MB)`;
           this.processingImages = false;
+          event.target.value = null;
           return;
         }
+        
         resizePromises.push(this.resizeImage(file));
       }
       try {
