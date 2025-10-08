@@ -36,22 +36,25 @@ class BorrowRequestController extends Controller
             $query->where('status', $request->status);
         }
 
-        $requests = $query->latest()->get()->map(function ($r) {
-            return [
-                'id' => $r->id,
-                'req_id' => $r->req_id,
-                'uid' => $r->user->uid,
-                'user_name' => $r->user->name ?? 'N/A',
-                'user_email' => $r->user->email ?? 'N/A',
-                'equipment_name' => $r->equipment->name ?? 'N/A',
-                'equipment_photo' => $r->equipment->photo_path ?? null,
-                'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
-                'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
-                'date' => $r->created_at->format('d-m-Y'),
-                'status' => ucfirst($r->status),
-                'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
-            ];
-        });
+        $requests = $query->latest() 
+    ->get()
+    ->map(function ($r) {
+        return [
+            'id' => $r->id,
+            'req_id' => $r->req_id,
+            'uid' => $r->user->uid,
+            'user_name' => $r->user->name ?? 'N/A',
+            'user_email' => $r->user->email ?? 'N/A',
+            'equipment_name' => $r->equipment->name ?? 'N/A',
+            'equipment_photo' => $r->equipment->photo_path ?? null,
+            'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
+            'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
+            'date' => $r->created_at->format('d-m-Y'),
+            'status' => ucfirst($r->status),
+            'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
+        ];
+    });
+
 
         return view('admin.request.index', compact('requests'));
     }

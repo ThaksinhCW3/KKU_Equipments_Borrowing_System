@@ -35,6 +35,7 @@ class AdminController extends Controller
             $borrowStatus = [
                 'TotalRequests' => (clone $query)->count(),
                 'checkinReq' => (clone $query)->where('status', 'check_in')->count(),
+                'checkoutReq' => (clone $query)->where('status', 'check_out')->count(),
                 'Approved' => (clone $query)->where('status', 'approved')->count(),
                 'Rejected' => (clone $query)->where('status', 'rejected')->count(),
                 'Pending' => (clone $query)->where('status', 'pending')->count(),
@@ -52,7 +53,7 @@ class AdminController extends Controller
             if ($month) {
                 $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
-                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
+                $dailyData = BorrowRequest::selectRaw('DAY(created_at) as day, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_out") as checkout, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
                     ->whereYear('created_at', $year)
                     ->whereMonth('created_at', $month)
                     ->where('status', '!=', 'cancelled')
@@ -65,6 +66,7 @@ class AdminController extends Controller
                     'labels' => array_map(fn($d) => "Day $d", range(1, $daysInMonth)),
                     'TotalRequests' => [],
                     'Approved' => [],
+                    'checkoutReq' => [],
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
@@ -73,6 +75,7 @@ class AdminController extends Controller
                 for ($d = 1; $d <= $daysInMonth; $d++) {
                     $chartData['TotalRequests'][] = $dailyData[$d]->total ?? 0;
                     $chartData['Approved'][] = $dailyData[$d]->approved ?? 0;
+                    $chartData['checkoutReq'][] = $dailyData[$d]->checkout ?? 0;
                     $chartData['checkinReq'][] = $dailyData[$d]->checkin ?? 0;
                     $chartData['Pending'][] = $dailyData[$d]->pending ?? 0;
                     $chartData['Rejected'][] = $dailyData[$d]->rejected ?? 0;
@@ -80,7 +83,7 @@ class AdminController extends Controller
             } else {
                 $months = range(1, 12);
 
-                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
+                $monthlyData = BorrowRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total, SUM(status="approved") as approved, SUM(status="check_out") as checkout, SUM(status="check_in") as checkin, SUM(status="pending") as pending, SUM(status="rejected") as rejected')
                     ->whereYear('created_at', $year)
                     ->where('status', '!=', 'cancelled')
                     ->groupBy('month')
@@ -92,6 +95,7 @@ class AdminController extends Controller
                     'labels' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
                     'TotalRequests' => [],
                     'Approved' => [],
+                    'checkoutReq' => [],
                     'checkinReq' => [],
                     'Pending' => [],
                     'Rejected' => [],
@@ -100,6 +104,7 @@ class AdminController extends Controller
                 foreach ($months as $m) {
                     $chartData['TotalRequests'][] = $monthlyData[$m]->total ?? 0;
                     $chartData['Approved'][] = $monthlyData[$m]->approved ?? 0;
+                    $chartData['checkoutReq'][] = $monthlyData[$m]->checkout ?? 0;
                     $chartData['checkinReq'][] = $monthlyData[$m]->checkin ?? 0;
                     $chartData['Pending'][] = $monthlyData[$m]->pending ?? 0;
                     $chartData['Rejected'][] = $monthlyData[$m]->rejected ?? 0;
@@ -173,6 +178,16 @@ class AdminController extends Controller
 
         // Add pending verifications to the data array
         $data['pendingVerifications'] = $pendingVerifications;
+
+        // Safety check: ensure checkoutReq exists in borrowStatus
+        if (!isset($data['borrowStatus']['checkoutReq'])) {
+            $data['borrowStatus']['checkoutReq'] = 0;
+        }
+
+        // Safety check: ensure checkoutReq exists in chartData
+        if (!isset($data['chartData']['checkoutReq'])) {
+            $data['chartData']['checkoutReq'] = array_fill(0, count($data['chartData']['TotalRequests']), 0);
+        }
 
         return view('admin.index', $data);
     }
