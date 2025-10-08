@@ -18,45 +18,69 @@
                 </div>
         </div>
         <!-- KPI Cards -->
-        <div class="lg:col-span-12 space-y-4">
-            <!-- Equipment Cards Row -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="{{ route('admin.equipment.index') }}" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-purple-600">{{ $equipmentStats['TotalEquipment'] }}</div>
-                    <div class="text-xs text-gray-500">อุปกรณ์ทั้งหมด</div>
-                </a>
-                <a href="{{ route('admin.equipment.index') }}?status=available" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-green-600">{{ $equipmentStats['AvailableEquipment'] }}</div>
-                    <div class="text-xs text-gray-500">อุปกรณ์ที่พร้อมใช้งาน</div>
-                </a>
-                <a href="{{ route('admin.equipment.index') }}?status=unavailable" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-blue-600">{{ $equipmentStats['BorrowedEquipment'] }}</div>
-                    <div class="text-xs text-gray-500">อุปกรณ์ที่ถูกยืม</div>
-                </a>
-                <a href="{{ route('admin.equipment.index') }}?status=maintenance" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-orange-600">{{ $equipmentStats['MaintenanceEquipment'] }}</div>
-                    <div class="text-xs text-gray-500">อุปกรณ์ที่ซ่อมบำรุง</div>
-                </a>
+        <div class="lg:col-span-12 space-y-6">
+            <!-- Equipment Section -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <h2 class="text-lg font-semibold text-gray-800">สถิติอุปกรณ์</h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <a href="{{ route('admin.equipment.index') }}" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-purple-600">{{ $equipmentStats['TotalEquipment'] }}</div>
+                        <div class="text-xs text-gray-500">อุปกรณ์ทั้งหมด</div>
+                    </a>
+                    <a href="{{ route('admin.equipment.index') }}?status=available" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-green-600">{{ $equipmentStats['AvailableEquipment'] }}</div>
+                        <div class="text-xs text-gray-500">อุปกรณ์ที่พร้อมใช้งาน</div>
+                    </a>
+                    <a href="{{ route('admin.equipment.index') }}?status=unavailable" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-blue-600">{{ $equipmentStats['BorrowedEquipment'] }}</div>
+                        <div class="text-xs text-gray-500">อุปกรณ์ที่ถูกยืม</div>
+                    </a>
+                    <a href="{{ route('admin.equipment.index') }}?status=maintenance" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-orange-600">{{ $equipmentStats['MaintenanceEquipment'] }}</div>
+                        <div class="text-xs text-gray-500">อุปกรณ์ที่ซ่อมบำรุง</div>
+                    </a>
+                </div>
             </div>
             
-            <!-- Request Cards Row -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="{{ route('admin.requests.index') }}" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-blue-600">{{ $borrowStatus['TotalRequests'] }}</div>
-                    <div class="text-xs text-gray-500">คำขอทั้งหมด</div>
-                </a>
-                <a href="{{ route('admin.requests.index') }}?status=check_in" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-purple-600">{{ $borrowStatus['checkinReq'] }}</div>
-                    <div class="text-xs text-gray-500">การยืมที่สำเร็จ</div>
-                </a>
-                <a href="{{ route('admin.requests.index') }}?status=pending" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-yellow-600">{{ $borrowStatus['Pending'] }}</div>
-                    <div class="text-xs text-gray-500">คำขอที่รออนุมัติ</div>
-                </a>
-                <a href="{{ route('admin.requests.index') }}?status=rejected" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                    <div class="text-2xl font-semibold mt-1 text-red-600">{{ $borrowStatus['Rejected'] }}</div>
-                    <div class="text-xs text-gray-500">คำขอที่ถูกปฏิเสธ</div>
-                </a>
+            <!-- Request Section -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        <h2 class="text-lg font-semibold text-gray-800">สถิติคำขอ</h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <a href="{{ route('admin.requests.index') }}" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-blue-600">{{ $borrowStatus['TotalRequests'] }}</div>
+                        <div class="text-xs text-gray-500">คำขอทั้งหมด</div>
+                    </a>
+                    <a href="{{ route('admin.requests.index') }}?status=check_out" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-indigo-600">{{ $borrowStatus['checkoutReq'] }}</div>
+                        <div class="text-xs text-gray-500">การยืมที่รับแล้ว</div>
+                    </a>
+                    <a href="{{ route('admin.requests.index') }}?status=check_in" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-purple-600">{{ $borrowStatus['checkinReq'] }}</div>
+                        <div class="text-xs text-gray-500">การยืมที่สำเร็จ</div>
+                    </a>
+                    <a href="{{ route('admin.requests.index') }}?status=pending" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-yellow-600">{{ $borrowStatus['Pending'] }}</div>
+                        <div class="text-xs text-gray-500">คำขอที่รออนุมัติ</div>
+                    </a>
+                    <a href="{{ route('admin.requests.index') }}?status=rejected" class="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="text-2xl font-semibold mt-1 text-red-600">{{ $borrowStatus['Rejected'] }}</div>
+                        <div class="text-xs text-gray-500">คำขอที่ถูกปฏิเสธ</div>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -129,7 +153,7 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">อุปกรณ์ยอดนิยม</h3>
             <div class="space-y-3">
                 @forelse($popularEquipment as $index => $equipment)
-                    <a href="{{ route('admin.equipment.index') }}?search={{ urlencode($equipment['equipment_name']) }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <a href="{{ route('admin.equipment.index') }}?search={{ urlencode($equipment['equipment_code']) }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                         <div class="flex-1">
                             <div class="font-medium text-sm text-blue-600 hover:text-blue-800">{{ $equipment['equipment_name'] }}</div>
                             <div class="text-xs text-gray-500">{{ $equipment['equipment_code'] }} • {{ $equipment['category'] }}</div>
@@ -325,6 +349,7 @@
                     datasets: [
                         { label: 'คำขอทั้งหมด', data: chartData.TotalRequests, backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: '#3b82f6', borderWidth: 1 },
                         { label: 'คำขอที่ถูกตอบรับแล้ว', data: chartData.Approved, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22c55e', borderWidth: 1 },
+                        { label: 'การยืมที่รับแล้ว', data: chartData.checkoutReq, backgroundColor: 'rgba(99, 102, 241, 0.6)', borderColor: '#6366f1', borderWidth: 1 },
                         { label: 'การยืมที่สำเร็จ', data: chartData.checkinReq, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#a855f7', borderWidth: 1 },
                         { label: 'คำขอที่รออนุมัติ', data: chartData.Pending, backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: '#fbbf24', borderWidth: 1 },
                         { label: 'คำขอที่ถูกปฏิเสธ', data: chartData.Rejected, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 1 },

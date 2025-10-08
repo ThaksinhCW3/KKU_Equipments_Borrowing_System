@@ -15,13 +15,6 @@
           <span>{{ status.label }}: {{ status.count }}</span>
         </button>
       </div>
-
-      <div class="flex items-center space-x-2">
-        <button @click="toggleSort"
-          class="border border-gray-300 rounded-md px-5 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 w-35">
-          Date: {{ sortDirection.toUpperCase() }}
-        </button>
-      </div>
     </div>
     
      <div class="flex items-center space-x-4 mb-4">

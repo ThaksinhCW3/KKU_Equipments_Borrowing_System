@@ -266,7 +266,7 @@
 
                             {{-- Buttons --}}
                             @if (!in_array($requests->status, ['check_in', 'rejected', 'cancelled']))
-                                <div class="absolute bottom-[-20px] right-4 flex gap-2">
+                                <div class="absolute bottom-[-40px] right-4 flex gap-2">
                             @if ($requests->status == 'pending')
                                         {{-- Pending: Approve or Reject --}}
                                 <button type="button"
