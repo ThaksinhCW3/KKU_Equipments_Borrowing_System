@@ -77,7 +77,11 @@
                                 <div x-ref="thumbnails" class="absolute inset-0 overflow-auto scrollbar-hide pt-10 pb-10">
                                     <div class="flex flex-col items-center gap-2">
                                         <template x-for="(photo, index) in photos" :key="index">
-                                            <div class="flex-shrink-0"><img :src="photo" :x-ref="`thumb-desktop-${index}`" alt="Thumbnail" class="w-16 h-16 object-cover rounded-lg border-2 cursor-pointer transition-all" :class="currentIndex === index ? 'border-blue-500 shadow-md scale-110' : 'border-transparent hover:border-gray-300'" @click="setActive(index)" /></div>
+                                            <div class="flex-shrink-0">
+                                                <div class="w-16 h-16 relative overflow-hidden rounded-lg border-2 cursor-pointer transition-all" :class="currentIndex === index ? 'border-blue-500 shadow-md scale-110' : 'border-transparent hover:border-gray-300'" @click="setActive(index)">
+                                                    <img :src="photo" :x-ref="`thumb-desktop-${index}`" alt="Thumbnail" class="absolute inset-0 w-full h-full object-cover" />
+                                                </div>
+                                            </div>
                                         </template>
                                     </div>
                                 </div>
@@ -86,7 +90,11 @@
                             <div class="w-full flex-grow relative overflow-hidden bg-gray-100 rounded-lg shadow-inner">
                                 <div class="flex transition-transform duration-500 ease-in-out" :style="`transform: translateX(-${currentIndex * 100}%)`">
                                     <template x-for="(photo, index) in photos" :key="index">
-                                        <div class="w-full flex-shrink-0"><div class="aspect-w-4 aspect-h-3"><img :src="photo" alt="Equipment Image" class="w-full h-full object-contain" /></div></div>
+                                        <div class="w-full flex-shrink-0">
+                                            <div class="w-full h-96 relative">
+                                                <img :src="photo" alt="Equipment Image" class="absolute inset-0 w-full h-full object-contain bg-white" />
+                                            </div>
+                                        </div>
                                     </template>
                                 </div>
                                 <template x-if="photos.length > 1">
@@ -106,9 +114,9 @@
                                     :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
                                     <template x-for="(photo, index) in photos" :key="index">
                                         <div class="w-full flex-shrink-0">
-                                            <div class="aspect-w-4 aspect-h-3">
+                                            <div class="w-full h-64 relative">
                                                 <img :src="photo" alt="Equipment Image"
-                                                    class="w-full h-full object-cover pointer-events-none">
+                                                    class="absolute inset-0 w-full h-full object-contain bg-white pointer-events-none">
                                             </div>
                                         </div>
                                     </template>
@@ -120,10 +128,9 @@
                                     <div class="flex space-x-1 pb-1">
                                         <template x-for="(photo, index) in photos.slice(0,6)" :key="index">
                                             <div class="flex-shrink-0">
-                                                <img :src="photo" alt="Thumbnail"
-                                                    class="w-10 h-10 object-cover rounded-md border-2"
-                                                    :class="currentIndex === index ? 'border-blue-500' : 'border-gray-200'"
-                                                    @click="currentIndex=index">
+                                                <div class="w-10 h-10 relative overflow-hidden rounded-md border-2 cursor-pointer" :class="currentIndex === index ? 'border-blue-500' : 'border-gray-200'" @click="currentIndex=index">
+                                                    <img :src="photo" alt="Thumbnail" class="absolute inset-0 w-full h-full object-cover" />
+                                                </div>
                                             </div>
                                         </template>
                                     </div>

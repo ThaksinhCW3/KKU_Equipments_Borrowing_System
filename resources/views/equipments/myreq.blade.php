@@ -89,6 +89,7 @@
                                             @if ($req->status === 'pending') bg-yellow-50 text-yellow-700 border-yellow-300
                                             @elseif($req->status === 'approved') bg-green-50 text-green-700 border-green-300
                                             @elseif($req->status === 'rejected') bg-red-50 text-red-700 border-red-300
+                                            @elseif($req->status === 'check_out') bg-blue-50 text-blue-700 border-blue-300
                                             @elseif($req->status === 'check_in') bg-purple-50 text-purple-700 border-purple-300
                                             @elseif($req->status === 'cancelled') bg-gray-50 text-gray-700 border-gray-300
                                             @else bg-gray-50 text-gray-700 border-gray-300 @endif">
@@ -98,6 +99,8 @@
                                                 <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>อนุมัติแล้ว
                                             @elseif($req->status === 'rejected')
                                                 <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>ปฏิเสธ
+                                            @elseif($req->status === 'check_out')
+                                                <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>รับแล้ว
                                             @elseif($req->status === 'check_in')
                                                 <span class="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>คืนแล้ว
                                             @elseif($req->status === 'cancelled')

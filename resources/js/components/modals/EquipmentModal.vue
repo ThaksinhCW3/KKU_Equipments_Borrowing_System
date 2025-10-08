@@ -265,10 +265,16 @@
 
               <!-- Add New Images -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">เพิ่มรูปภาพใหม่</label>
-                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages"/>
+                <div class="flex items-center justify-between mb-3">
+                  <label class="block text-sm font-medium text-gray-700">เพิ่มรูปภาพใหม่</label>
+                  <span class="text-xs text-gray-500">
+                    {{ existingImages.length + newImageFiles.length }}/10 รูป
+                  </span>
+                </div>
+                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || (existingImages.length + newImageFiles.length >= 10)"/>
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
+                <p v-if="existingImages.length + newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
 
                 <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
@@ -286,10 +292,16 @@
             <div v-if="mode === 'create'" class="pt-4 border-t border-gray-200">
               <h4 class="text-lg font-medium text-gray-900 mb-4">รูปภาพอุปกรณ์</h4>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">เพิ่มรูปภาพ</label>
-                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages"/>
+                <div class="flex items-center justify-between mb-3">
+                  <label class="block text-sm font-medium text-gray-700">เพิ่มรูปภาพ</label>
+                  <span class="text-xs text-gray-500">
+                    {{ newImageFiles.length }}/10 รูป
+                  </span>
+                </div>
+                <input type="file" accept="image/*" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || newImageFiles.length >= 10"/>
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
+                <p v-if="newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
 
                 <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
@@ -448,7 +460,13 @@ export default {
       }
     },
     canSave() {
-      return !!(this.form && this.form.code && this.form.name && this.form.categories_id && this.form.status && !this.imageError);
+      const hasBasicInfo = !!(this.form && this.form.code && this.form.name && this.form.categories_id && this.form.status);
+      const hasNoImageError = !this.imageError;
+      const withinImageLimit = this.mode === 'create' ? 
+        this.newImageFiles.length <= 10 : 
+        (this.existingImages.length - this.imagesToDelete.length + this.newImageFiles.length) <= 10;
+      
+      return hasBasicInfo && hasNoImageError && withinImageLimit;
     },
     hasValidationError(field) {
       return this.showValidationErrors && this.validationErrors[field];
@@ -613,6 +631,18 @@ export default {
       if (!files || files.length === 0) return;
       this.imageError = "";
       this.processingImages = true;
+      
+      // Check total image limit (existing + new images)
+      const currentTotalImages = this.existingImages.length + this.newImageFiles.length;
+      const newFilesCount = files.length;
+      
+      if (currentTotalImages + newFilesCount > 10) {
+        this.imageError = `ไม่สามารถเพิ่มรูปภาพได้เกิน 10 รูป (ปัจจุบัน: ${currentTotalImages} รูป, พยายามเพิ่ม: ${newFilesCount} รูป)`;
+        this.processingImages = false;
+        event.target.value = null;
+        return;
+      }
+      
       const resizePromises = [];
       for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
