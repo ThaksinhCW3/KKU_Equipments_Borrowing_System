@@ -302,7 +302,8 @@ export default {
       try {
         const response = await api.post(`/admin/verification/${this.selectedVerification.id}/approve`);
         
-        if (response.data.success) {
+        // Check if response is successful (status 200-299)
+        if (response.status >= 200 && response.status < 300) {
           this.showSuccess('อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว');
           this.fetchVerifications();
         } else {
@@ -320,7 +321,8 @@ export default {
           reject_note: reason
         });
         
-        if (response.data.success) {
+        // Check if response is successful (status 200-299)
+        if (response.status >= 200 && response.status < 300) {
           this.showSuccess('ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว');
           this.fetchVerifications();
         } else {
