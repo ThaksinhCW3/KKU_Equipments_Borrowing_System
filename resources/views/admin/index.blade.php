@@ -272,7 +272,6 @@
                         { label: 'การยืมที่สำเร็จ', data: chartData.checkinReq, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#a855f7', borderWidth: 1 },
                         { label: 'คำขอที่รออนุมัติ', data: chartData.Pending, backgroundColor: 'rgba(251, 191, 36, 0.6)', borderColor: '#fbbf24', borderWidth: 1 },
                         { label: 'คำขอที่ถูกปฏิเสธ', data: chartData.Rejected, backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 1 },
-                        { label: 'คำขอที่ยกเลิก', data: chartData.Cancelled, backgroundColor: 'rgba(107, 114, 128, 0.6)', borderColor: '#6b7280', borderWidth: 1 },
                     ]
                 },
                 options: { 

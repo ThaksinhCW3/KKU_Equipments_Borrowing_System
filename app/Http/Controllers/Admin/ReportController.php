@@ -56,7 +56,7 @@ class ReportController extends Controller
     public function requestReport()
     {
         $requests = BorrowRequest::with(['user', 'equipment'])
-            ->whereIn('status', ['approved', 'rejected', 'cancelled'])
+            ->whereIn('status', ['approved', 'rejected'])
             ->latest()
             ->get()
             ->map(fn($req) => [

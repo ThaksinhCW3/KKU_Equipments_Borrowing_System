@@ -21,6 +21,9 @@ class BorrowRequestController extends Controller
     {
         $query = BorrowRequest::with('user', 'equipment');
 
+        // Exclude cancelled requests
+        $query->where('status', '!=', 'cancelled');
+
         // Filter by user email if provided
         if ($request->filled('user_email')) {
             $query->whereHas('user', function($q) use ($request) {
@@ -60,6 +63,7 @@ class BorrowRequestController extends Controller
             ->firstOrFail();
 
         $tableRequests = BorrowRequest::with('user', 'equipment')
+            ->where('status', '!=', 'cancelled')
             ->latest()
             ->take(25)
             ->get()
