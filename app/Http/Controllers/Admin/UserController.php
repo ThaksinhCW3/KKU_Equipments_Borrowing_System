@@ -167,8 +167,16 @@ class UserController extends Controller
         $user->ban($request->ban_reason, Auth::id());
 
         // Log the user ban
+        $adminId = Auth::id();
+        if (!$adminId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
         Log::create([
-            'admin_id' => Auth::id(),
+            'admin_id' => $adminId,
             'action' => 'user_banned',
             'target_type' => 'User',
             'target_id' => $user->id,
@@ -180,8 +188,8 @@ class UserController extends Controller
         // Clear relevant caches
         \Illuminate\Support\Facades\Cache::flush();
 
-        // Send notification to user
-        $user->notify(new UserBanned($request->ban_reason, Auth::id()));
+        // Send notification to user (temporarily disabled due to SMTP issues)
+        // $user->notify(new UserBanned($request->ban_reason, Auth::id()));
 
         return response()->json([
             'success' => true,
@@ -208,8 +216,16 @@ class UserController extends Controller
         $user->unban();
 
         // Log the user unban
+        $adminId = Auth::id();
+        if (!$adminId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
         Log::create([
-            'admin_id' => Auth::id(),
+            'admin_id' => $adminId,
             'action' => 'user_unbanned',
             'target_type' => 'User',
             'target_id' => $user->id,
@@ -221,8 +237,8 @@ class UserController extends Controller
         // Clear relevant caches
         \Illuminate\Support\Facades\Cache::flush();
 
-        // Send notification to user
-        $user->notify(new UserUnbanned(Auth::id()));
+        // Send notification to user (temporarily disabled due to SMTP issues)
+        // $user->notify(new UserUnbanned(Auth::id()));
 
         return response()->json([
             'success' => true,

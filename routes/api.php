@@ -27,6 +27,16 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update']);
     Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy']);
 
+    // User ban status check route (for banned users)
+    Route::get('/user/ban-status', function () {
+        $user = auth()->user();
+        return response()->json([
+            'success' => true,
+            'is_banned' => $user ? $user->is_banned : false,
+            'ban_reason' => $user ? $user->ban_reason : null
+        ]);
+    });
+
     // User ban/unban routes (admin only)
     Route::middleware('role:admin')->group(function () {
         Route::post('/users/{id}/ban', [App\Http\Controllers\Admin\UserController::class, 'ban']);

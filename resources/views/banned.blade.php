@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>คุณถูกแบนจากระบบ</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -28,6 +29,20 @@
         @endif
 
         @php
+            // Check if user is actually banned and redirect if not
+            if (auth()->check()) {
+                $user = auth()->user();
+                if (!$user->is_banned || !$user->ban_reason) {
+                    // User is no longer banned, redirect to home
+                    header('Location: ' . url('/'));
+                    exit();
+                }
+            } else {
+                // Not authenticated, redirect to login
+                header('Location: ' . url('/login'));
+                exit();
+            }
+
             // Attempt to get the admin who banned this user
             $bannedBy = null;
             if (auth()->check() && auth()->user()->banned_by) {
@@ -46,6 +61,31 @@
     </div>
 
     <script>
+        // Check if user is still banned every 30 seconds
+        function checkBanStatus() {
+            fetch('/api/user/ban-status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && !data.is_banned) {
+                    // User is no longer banned, redirect to home
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.log('Ban status check failed:', error);
+            });
+        }
+
+        // Check ban status immediately and then every 30 seconds
+        checkBanStatus();
+        setInterval(checkBanStatus, 30000);
+
         // Prevent user from navigating away
         window.history.pushState(null, null, window.location.href);
         window.addEventListener('popstate', function() {

@@ -54,6 +54,17 @@ Route::middleware('auth')->group(function () {
     
     // Banned user page
     Route::get('/banned', function () {
+        // Only allow banned users to access this page
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+        
+        $user = auth()->user();
+        if (!$user->is_banned || !$user->ban_reason) {
+            // User is not banned, redirect to home
+            return redirect()->route('home');
+        }
+        
         return view('banned');
     })->name('banned');
 
