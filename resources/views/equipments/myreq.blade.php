@@ -234,10 +234,11 @@
         <script>
             Swal.fire({
                 icon: 'success',
-                title: 'ยกเลิกสำเร็จ!',
+                title: 'สำเร็จ!',
                 text: '{{ session('success') }}',
                 timer: 2500,
-                showConfirmButton: false
+                showConfirmButton: true,
+                confirmButtonText: 'ตกลง'
             });
         </script>
     @endif
@@ -249,7 +250,8 @@
                 title: 'เกิดข้อผิดพลาด!',
                 text: '{{ session('error') }}',
                 timer: 2500,
-                showConfirmButton: false
+                showConfirmButton: true,
+                confirmButtonText: 'ตกลง'
             });
         </script>
     @endif

@@ -32,7 +32,7 @@ class UserController extends Controller
             'phonenumber' => 'nullable|string|max:20',
             'uid' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,user'
+            'role' => 'required|in:admin,borrower,staff'
         ]);
 
         if ($validator->fails()) {
@@ -84,7 +84,7 @@ class UserController extends Controller
             'phonenumber' => 'nullable|string|max:20',
             'uid' => 'required|string|max:255|unique:users,uid,' . $id,
             'password' => 'nullable|string|min:8',
-            'role' => 'required|in:admin,user'
+            'role' => 'required|in:admin,borrower,staff'
         ]);
 
         if ($validator->fails()) {
