@@ -149,7 +149,7 @@
 
 
         <!-- Popular Equipment -->
-        <div class="lg:col-span-4 bg-white rounded-lg border p-6">
+        <div class="lg:col-span-8 bg-white rounded-lg border p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">อุปกรณ์ยอดนิยม</h3>
             <div class="space-y-3">
                 @forelse($popularEquipment as $index => $equipment)

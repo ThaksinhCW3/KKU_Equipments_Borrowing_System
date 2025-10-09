@@ -3,7 +3,7 @@
         <div id="header-search" class="pt-3"></div>
         <x-filter />
     </div>
-    <div class="max-w-screen-2xl mx-auto py-2 px-3 sm:px-6 lg:px-8">
+    <div class=" max-w-screen-2xl mx-auto py-2 px-3 sm:px-6 lg:px-8">
         @if($equipments->count() > 0)
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-6 lg:gap-5 my-5">
                 @foreach ($equipments as $equipment)
@@ -53,7 +53,7 @@
                                     {{ $equipment->description }}
                                 </p>
 
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center p-2">
                                     <div class="text-xs text-gray-500">
                                         <span class="inline-block px-2 py-1 rounded-full mr-1 {{ $equipment->available_quantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             พร้อมใช้งาน: {{ $equipment->available_quantity }}

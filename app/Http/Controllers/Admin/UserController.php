@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Log;
+use App\Notifications\UserBanned;
+use App\Notifications\UserUnbanned;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -178,6 +180,9 @@ class UserController extends Controller
         // Clear relevant caches
         \Illuminate\Support\Facades\Cache::flush();
 
+        // Send notification to user
+        $user->notify(new UserBanned($request->ban_reason, Auth::id()));
+
         return response()->json([
             'success' => true,
             'message' => 'แบนผู้ใช้เรียบร้อยแล้ว'
@@ -215,6 +220,9 @@ class UserController extends Controller
 
         // Clear relevant caches
         \Illuminate\Support\Facades\Cache::flush();
+
+        // Send notification to user
+        $user->notify(new UserUnbanned(Auth::id()));
 
         return response()->json([
             'success' => true,

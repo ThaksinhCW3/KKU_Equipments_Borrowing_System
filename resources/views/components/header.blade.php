@@ -9,6 +9,46 @@
 .read-notification .text-sm {
     color: #9ca3af !important;
 }
+
+/* Custom responsive breadcrumb styles */
+@media (max-width: 475px) {
+    .breadcrumb-nav {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .breadcrumb-nav::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Ensure breadcrumb items don't break on very small screens */
+.breadcrumb-item {
+    min-width: fit-content;
+}
+
+/* Mobile dropdown animations */
+.mobile-dropdown-content {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.mobile-user-dropdown-content {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+/* Smooth arrow rotation */
+.mobile-dropdown-toggle svg,
+.mobile-user-dropdown-toggle svg:last-child {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Mobile dropdown hover effects */
+.mobile-dropdown-toggle:hover,
+.mobile-user-dropdown-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 0.375rem;
+}
 </style>
 
 <header class="bg-white shadow-sm border-b  border-gray-200 ">
@@ -188,12 +228,17 @@
             <div class="space-y-3">
                 <a href="{{ route('home') }}" class="block text-blue-600 hover:text-blue-700 font-medium py-2">หน้าหลัก</a>
                 <div class="space-y-2">
-                    <div class="text-gray-700 font-medium py-2">หมวดหมู่</div>
-                    <div class="pl-4 space-y-2">
+                    <button class="mobile-dropdown-toggle flex items-center justify-between w-full text-gray-700 font-medium py-2 hover:text-gray-900 transition-colors">
+                        <span>หมวดหมู่</span>
+                        <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="mobile-dropdown-content hidden pl-4 space-y-2">
                         @foreach ($categories ?? [] as $cat)
                             @if (is_object($cat))
                                 <a href="/?category={{ $cat->cate_id }}"
-                                    class="block text-gray-600 hover:text-gray-800 py-1">{{ $cat->name }}</a>
+                                    class="block text-gray-600 hover:text-gray-800 py-1 transition-colors">{{ $cat->name }}</a>
                             @endif
                         @endforeach
                     </div>
@@ -215,19 +260,22 @@
             <div class="pt-4 border-t border-gray-200">
                 @auth
                     <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center font-medium text-gray-700">
+                        <button class="mobile-user-dropdown-toggle flex items-center font-medium text-gray-700 hover:text-gray-900 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span>{{ Auth::user()->name }}</span>
-                        </div>
+                            <svg class="w-4 h-4 ml-2 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
                         <!-- Mobile Notification Bell -->
                         <notification-bell></notification-bell>
                     </div>
                     
                     <!-- Mobile User Menu -->
-                    <div class="space-y-2">
+                    <div class="mobile-user-dropdown-content space-y-2">
                         <a href="{{ route('profile.show') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -278,83 +326,84 @@
 
     <!-- Search Bar Section (Vue mount) -->
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between gap-4 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
             <!-- Breadcrumb -->
-            <nav class="flex items-center text-sm text-gray-500 space-x-1" aria-label="Breadcrumb">
+            <nav class="flex items-center text-xs sm:text-sm text-gray-500 space-x-1 overflow-x-auto breadcrumb-nav" aria-label="Breadcrumb">
             {{-- Home --}}
             <a href="{{ route('home') }}"
-                class="flex items-center hover:text-blue-600 {{ request()->routeIs('home') ? 'text-blue-600 font-medium' : '' }}">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                class="flex items-center hover:text-blue-600 {{ request()->routeIs('home') ? 'text-blue-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2L2 8h2v8h4V12h4v4h4V8h2L10 2z"></path>
                 </svg>
-                หน้าแรก
+                <span class="hidden xs:inline">หน้าแรก</span>
+                <span class="xs:hidden">หน้าแรก</span>
             </a>
             @if (!request()->routeIs('home'))
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             @endif
             @if (request()->routeIs('equipments.show'))
-                <span class="text-gray-700 font-medium">
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">
                     {{ $equipment->name ?? 'รายละเอียด' }}
                 </span>
             @endif
             @if (request()->routeIs('borrower.equipments.myreq') || request()->routeIs('borrower.equipments.reqdetail'))
                 <a href="{{ route('borrower.equipments.myreq') }}"
-                    class="hover:text-blue-600 {{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : '' }}">
+                    class="hover:text-blue-600 {{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
                     คำขอของฉัน
                 </a>
             @endif
             @if (request()->routeIs('borrower.equipments.reqdetail'))
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             @endif
             @if (request()->routeIs('borrower.equipments.reqdetail'))
-                <span class="text-gray-700 font-medium">รายละเอียดคำขอ</span>
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">รายละเอียดคำขอ</span>
             @endif
             @if (request()->routeIs('profile.show'))
-                <span class="text-gray-700 font-medium">ข้อมูลส่วนตัว</span>
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">ข้อมูลส่วนตัว</span>
             @endif
             
             {{-- Verification breadcrumb --}}
             @if (request()->routeIs('verification.index'))
-                <span class="text-gray-700 font-medium">ยืนยันตัวตน</span>
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">ยืนยันตัวตน</span>
             @endif
             
             {{-- Category breadcrumb --}}
             @if (request()->filled('category'))
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <a href="{{ route('home') }}" class="hover:text-blue-600 text-gray-700">
+                <a href="{{ route('home') }}" class="hover:text-blue-600 text-gray-700 whitespace-nowrap breadcrumb-item">
                     หมวดหมู่
                 </a>
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 @php
                     $categoryCode = request()->get('category');
                     $category = $categories->where('cate_id', $categoryCode)->first();
                 @endphp
-                <span class="text-gray-700 font-medium">
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">
                     {{ $category->name ?? 'หมวดหมู่' }}
                 </span>
             @endif
             
             {{-- Equipment detail breadcrumb --}}
             @if (request()->routeIs('equipments.show') && isset($equipment))
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="text-gray-700 font-medium">
+                <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">
                     {{ $equipment->name ?? 'รายละเอียดอุปกรณ์' }}
                 </span>
             @endif
             </nav>
             
             <!-- Filter and Search Bar -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
                 <!-- Existing Blue Filter Component -->
                 
                 
@@ -381,14 +430,79 @@
             closeIcon.classList.toggle('hidden');
         });
 
-        document.querySelectorAll('.mobile-submenu-toggle').forEach(btn => {
+        // Handle mobile dropdown toggles
+        document.querySelectorAll('.mobile-dropdown-toggle').forEach(btn => {
             btn.addEventListener('click', () => {
-                const submenu = btn.nextElementSibling;
-                submenu.classList.toggle('hidden');
+                const content = btn.nextElementSibling;
                 const arrow = btn.querySelector('svg');
-                arrow.classList.toggle('rotate-180');
+                
+                // Toggle content visibility
+                content.classList.toggle('hidden');
+                
+                // Rotate arrow
+                if (content.classList.contains('hidden')) {
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    arrow.style.transform = 'rotate(180deg)';
+                }
             });
         });
+
+        // Handle mobile user dropdown toggle
+        document.querySelectorAll('.mobile-user-dropdown-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.parentElement.nextElementSibling;
+                const arrow = btn.querySelector('svg:last-child');
+                
+                // Toggle content visibility
+                content.classList.toggle('hidden');
+                
+                // Rotate arrow
+                if (content.classList.contains('hidden')) {
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            
+            if (mobileMenu && !mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    document.getElementById('menu-icon').classList.remove('hidden');
+                    document.getElementById('close-icon').classList.add('hidden');
+                }
+            }
+        });
+
+        // Close dropdowns when mobile menu is closed
+        const originalToggle = document.getElementById('mobile-menu-button');
+        if (originalToggle) {
+            originalToggle.addEventListener('click', () => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu.classList.contains('hidden')) {
+                    // Close all dropdowns when menu is closed
+                    document.querySelectorAll('.mobile-dropdown-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.querySelectorAll('.mobile-user-dropdown-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    // Reset all arrows
+                    document.querySelectorAll('.mobile-dropdown-toggle svg').forEach(arrow => {
+                        arrow.style.transform = 'rotate(0deg)';
+                    });
+                    document.querySelectorAll('.mobile-user-dropdown-toggle svg:last-child').forEach(arrow => {
+                        arrow.style.transform = 'rotate(0deg)';
+                    });
+                }
+            });
+        }
     });
     document.addEventListener('DOMContentLoaded', function() {
         const logoutForms = document.querySelectorAll('.logout-form');
