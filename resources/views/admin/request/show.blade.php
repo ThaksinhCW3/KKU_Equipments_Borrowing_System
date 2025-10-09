@@ -336,10 +336,6 @@
         </div>
     </div>
 
-    <div class="mt-6 bg-white p-4 sm:p-6 rounded shadow">
-        <h3 class="text-lg font-semibold mb-4">คำขอล่าสุด</h3>
-        <div id="admin-table" data-requests='@json($tableRequests)'></div>
-    </div>
 </x-admin-layout>
 
 {{-- Calendar Modal --}}
