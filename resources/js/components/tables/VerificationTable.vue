@@ -1,74 +1,61 @@
 <template>
-  <BaseTable
-    :data="verifications.data"
-    :columns="columns"
-    :title="'การยืนยันตัวตน'"
-    :search-placeholder="'ค้นหาชื่อ, อีเมล, หรือ UID...'"
-    :user-role="userRole"
-    :available-filters="availableFilters"
-    :search-fields="['user.name', 'user.email', 'user.uid', 'status']"
-    :loading="loading"
-    :show-add-button="false"
-    @edit="viewDetails"
-    @delete="deleteVerification"
-  >
+  <BaseTable :data="verifications.data" :columns="columns" :title="'การยืนยันตัวตน'"
+    :search-placeholder="'ค้นหาชื่อ, อีเมล, หรือ UID...'" :user-role="userRole" :available-filters="availableFilters"
+    :search-fields="['user.name', 'user.email', 'user.uid', 'status']" :loading="loading" :show-add-button="false"
+    @edit="viewDetails" @delete="deleteVerification">
     <!-- Custom row template -->
     <template #rows="{ item: verification, actions }">
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
           <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
           </div>
         </div>
       </td>
+
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="text-sm font-medium text-gray-900">{{ verification.user.name }}</div>
         <div class="text-sm text-gray-500">{{ verification.user.email }}</div>
       </td>
+
       <td class="px-6 py-4 whitespace-nowrap">
-        <span 
-          class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-          :class="getStatusClass(verification.status)"
-        >
+        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+          :class="getStatusClass(verification.status)">
           {{ getStatusText(verification.status) }}
         </span>
       </td>
+
       <td class="px-6 py-4 whitespace-nowrap">
-        <div v-if="verification.student_id_image_path" class="w-16 h-16 cursor-pointer" @click="viewImage(verification)">
-          <img 
-            :src="verification.student_id_image_path" 
-            alt="Student ID" 
-            class="w-full h-full object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
-          />
+        <div v-if="verification.student_id_image_path" class="w-16 h-16 cursor-pointer"
+          @click="viewImage(verification)">
+          <img :src="verification.student_id_image_path" alt="Student ID"
+            class="w-full h-full object-cover rounded-lg border border-gray-200 hover:border-blue-300 transition-colors" />
         </div>
         <div v-else class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
           <span class="text-gray-400 text-xs">ไม่มีรูป</span>
         </div>
       </td>
+
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {{ formatDate(verification.created_at) }}
       </td>
+
       <td v-if="userRole === 'admin'" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div class="flex space-x-2">
-          <button 
-            @click="viewDetails(verification)"
-            class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-          >
+          <button @click="viewDetails(verification)"
+            class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
             ดูรายละเอียด
           </button>
           <template v-if="verification.status === 'pending'">
-            <button 
-              @click="approveVerification(verification)"
-              class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-            >
+            <button @click="approveVerification(verification)"
+              class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
               อนุมัติ
             </button>
-            <button 
-              @click="rejectVerification(verification)"
-              class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-            >
+            <button @click="rejectVerification(verification)"
+              class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
               ปฏิเสธ
             </button>
           </template>
@@ -78,7 +65,8 @@
   </BaseTable>
 
   <!-- Image Modal -->
-  <div v-if="showImageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click="closeImageModal">
+  <div v-if="showImageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    @click="closeImageModal">
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" @click.stop>
       <div class="mt-3">
         <div class="flex justify-between items-center mb-4">
@@ -103,9 +91,7 @@ import api from "../../api";
 
 export default {
   name: 'VerificationTable',
-  components: {
-    BaseTable,
-  },
+  components: { BaseTable },
   data() {
     const el = document.getElementById("verification-table");
     return {
@@ -120,12 +106,10 @@ export default {
         to: 0
       },
       loading: false,
-      
-      // Image modal
       showImageModal: false,
       selectedImage: '',
       selectedVerification: null,
-    }
+    };
   },
   computed: {
     columns() {
@@ -136,14 +120,9 @@ export default {
         { key: 'image', label: 'รูปบัตร' },
         { key: 'created_at', label: 'วันที่ส่ง' },
       ];
-      
-      if (this.userRole === 'admin') {
-        baseColumns.push({ key: 'actions', label: 'การดำเนินการ' });
-      }
-      
+      if (this.userRole === 'admin') baseColumns.push({ key: 'actions', label: 'การดำเนินการ' });
       return baseColumns;
     },
-    
     availableFilters() {
       return [
         {
@@ -161,7 +140,6 @@ export default {
     }
   },
   methods: {
-    // Data fetching
     async fetchVerifications() {
       this.loading = true;
       try {
@@ -173,8 +151,7 @@ export default {
         this.loading = false;
       }
     },
-    
-    // Status helpers
+
     getStatusClass(status) {
       switch (status) {
         case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -183,7 +160,7 @@ export default {
         default: return 'bg-gray-100 text-gray-800';
       }
     },
-    
+
     getStatusText(status) {
       switch (status) {
         case 'pending': return 'รอการอนุมัติ';
@@ -192,8 +169,7 @@ export default {
         default: return status;
       }
     },
-    
-    // Date formatting
+
     formatDate(dateString) {
       if (!dateString) return '-';
       const date = new Date(dateString);
@@ -205,40 +181,35 @@ export default {
         minute: '2-digit'
       });
     },
-    
-    // Image modal
+
     viewImage(verification) {
       this.selectedImage = verification.student_id_image_path;
       this.showImageModal = true;
     },
-    
+
     closeImageModal() {
       this.showImageModal = false;
       this.selectedImage = '';
     },
-    
-    // Actions
+
     viewDetails(verification) {
       window.location.href = `/admin/verification/${verification.id}`;
     },
-    
-    deleteVerification(verification) {
-      // This could be implemented if needed
-      // Removed debug/log statement
+
+    deleteVerification() {
+      // placeholder — emit handled by BaseTable consumer if needed
     },
-    
-    // Verification actions
+
     approveVerification(verification) {
       this.selectedVerification = verification;
       this.confirmApprove();
     },
-    
+
     rejectVerification(verification) {
       this.selectedVerification = verification;
       this.showRejectModal();
     },
-    
-    
+
     confirmApprove() {
       this.ensureSwal().then(() => {
         window.Swal.fire({
@@ -249,13 +220,11 @@ export default {
           confirmButtonText: 'อนุมัติ',
           cancelButtonText: 'ยกเลิก'
         }).then((result) => {
-          if (result.isConfirmed) {
-            this.processApprove();
-          }
+          if (result.isConfirmed) this.processApprove();
         });
       });
     },
-    
+
     showRejectModal() {
       this.ensureSwal().then(() => {
         window.Swal.fire({
@@ -291,50 +260,41 @@ export default {
             return reason;
           }
         }).then((result) => {
-          if (result.isConfirmed) {
-            this.processReject(result.value);
-          }
+          if (result.isConfirmed) this.processReject(result.value);
         });
       });
     },
-    
-    
+
     async processApprove() {
       try {
         const response = await api.post(`/admin/verification/${this.selectedVerification.id}/approve`);
-        
-        // Check if response is successful (status 200-299)
         if (response.status >= 200 && response.status < 300) {
           this.showSuccess('อนุมัติการยืนยันตัวตนเรียบร้อยแล้ว');
           this.fetchVerifications();
         } else {
           throw new Error('Approve failed');
         }
-      } catch (error) {
+      } catch {
         this.showError('เกิดข้อผิดพลาดในการอนุมัติ');
       }
     },
-    
+
     async processReject(reason) {
       try {
         const response = await api.post(`/admin/verification/${this.selectedVerification.id}/reject`, {
           reject_note: reason
         });
-        
-        // Check if response is successful (status 200-299)
         if (response.status >= 200 && response.status < 300) {
           this.showSuccess('ปฏิเสธการยืนยันตัวตนเรียบร้อยแล้ว');
           this.fetchVerifications();
         } else {
           throw new Error('Reject failed');
         }
-      } catch (error) {
+      } catch {
         this.showError('เกิดข้อผิดพลาดในการปฏิเสธ');
       }
     },
-    
-    
-    // Utility methods
+
     ensureSwal() {
       return new Promise((resolve) => {
         if (window.Swal) return resolve();
@@ -344,32 +304,22 @@ export default {
         document.head.appendChild(script);
       });
     },
-    
+
     showSuccess(message) {
       this.ensureSwal().then(() => {
-        window.Swal.fire({
-          title: "สำเร็จ",
-          text: message,
-          icon: "success",
-          timer: 1200,
-          showConfirmButton: false,
-        });
+        window.Swal.fire({ title: "สำเร็จ", text: message, icon: "success", timer: 1200, showConfirmButton: false });
       });
     },
-    
+
     showError(message) {
       this.ensureSwal().then(() => {
-        window.Swal.fire({
-          title: "เกิดข้อผิดพลาด",
-          text: message,
-          icon: "error",
-        });
+        window.Swal.fire({ title: "เกิดข้อผิดพลาด", text: message, icon: "error" });
       });
     }
   },
-  
+
   mounted() {
     this.fetchVerifications();
   }
-}
+};
 </script>

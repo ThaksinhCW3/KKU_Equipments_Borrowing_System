@@ -13,16 +13,15 @@
             <div class="flex-1 w-full">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h2 class="text-xl sm:text-2xl font-bold">คำขอยืม #{{ $requests->req_id }}</h2>
-                    <span
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm {{ $requests->status === 'approved'
-                            ? 'bg-green-100 text-green-700'
-                            : ($requests->status === 'rejected'
-                                ? 'bg-red-100 text-red-700'
-                                : ($requests->status === 'check_out'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : ($requests->status === 'check_in'
-                                        ? 'bg-purple-100 text-purple-700'
-                                        : 'bg-yellow-100 text-yellow-700'))) }}">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm {{ $requests->status === 'approved'
+    ? 'bg-green-100 text-green-700'
+    : ($requests->status === 'rejected'
+        ? 'bg-red-100 text-red-700'
+        : ($requests->status === 'check_out'
+            ? 'bg-blue-100 text-blue-700'
+            : ($requests->status === 'check_in'
+                ? 'bg-purple-100 text-purple-700'
+                : 'bg-yellow-100 text-yellow-700'))) }}">
                         @if ($requests->status === 'pending')
                             รออนุมัติ
                         @elseif($requests->status === 'approved')
@@ -34,7 +33,7 @@
                         @elseif($requests->status === 'check_in')
                             คืนแล้ว
                         @else
-                        {{ ucfirst($requests->status) }}
+                            {{ ucfirst($requests->status) }}
                         @endif
                     </span>
                 </div>
@@ -96,7 +95,7 @@
                     <div class="bg-gray-50 rounded p-4">
                         @if ($requests->request_reason)
                             <p class="text-sm mb-2">
-                                <span class="text-gray-500">ประเภทเหตุผล:</span> 
+                                <span class="text-gray-500">ประเภทเหตุผล:</span>
                                 <span class="font-medium">
                                     @if ($requests->request_reason === 'assignment')
                                         งานมอบหมาย/การบ้าน
@@ -109,10 +108,10 @@
                                     @endif
                                 </span>
                             </p>
-                            
+
                             @if ($requests->request_reason_detail)
                                 <p class="text-sm">
-                                    <span class="text-gray-500">รายละเอียด:</span> 
+                                    <span class="text-gray-500">รายละเอียด:</span>
                                     <span class="font-medium">{{ $requests->request_reason_detail }}</span>
                                 </p>
                             @endif
@@ -122,89 +121,17 @@
                     </div>
                 </div>
 
-                <div class="mt-6">
-                    <h3 class="font-semibold text-gray-700 mb-2">ธุรกรรม</h3>
-                    <div class="bg-gray-50 rounded p-4">
-                        <div class="space-y-3">
-
-                            <!-- Created Date -->
-                            <div class="">
-                                <span class="text-gray-500">วันที่สร้างคำขอ:</span>
-                                <span class="font-medium">{{ $requests->created_at->format('d-m-Y') }}</span>
-                            </div>
-
-                            <!-- Approved Date -->
-                            @if ($requests->status !== 'pending' && $requests->status !== 'rejected')
-                                <div class="">
-                                    <span class="text-gray-500">วันที่อนุมัติ:</span>
-                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
-                                </div>
-                            @endif
-
-                            <!-- Rejected Date and Reason -->
-                            @if ($requests->status === 'rejected')
-                                <div class="">
-                                    <span class="text-gray-500">วันที่ปฏิเสธ:</span>
-                                    <span class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
-                                </div>
-                                @if ($requests->reject_reason)
-                                    <div class="flex items-start justify-between">
-                                        <span class="text-gray-500">เหตุผลการปฏิเสธ:</span>
-                                        <span class="font-medium text-red-600">{{ $requests->reject_reason }}</span>
-                                    </div>
-                                @endif
-                            @endif
-
-                            <!-- Check Out Date -->
-                            @if ($requests->status === 'check_out' || $requests->status === 'check_in')
-                                @if ($requests->transaction && $requests->transaction->checked_out_at)
-                                    <div class="">
-                                        <span class="text-gray-500">วันที่มารับของ:</span>
-                                        <span
-                                            class="font-medium">{{ $requests->transaction->checked_out_at->format('d-m-Y') }}</span>
-                                    </div>
-                                @endif
-                            @endif
-
-                            <!-- Check In Date -->
-                            @if ($requests->status === 'check_in')
-                                @if ($requests->transaction && $requests->transaction->checked_in_at)
-                                    <div class="">
-                                        <span class="text-gray-500">วันที่มาคืนของ:</span>
-                                        <span
-                                            class="font-medium">{{ $requests->transaction->checked_in_at->format('d-m-Y') }}</span>
-                                    </div>
-                                @endif
-                            @endif
-
-                            <!-- Penalty Information -->
-                            @if ($requests->transaction && $requests->transaction->penalty_amount > 0)
-                                <div class="">
-                                    <span class="text-gray-500">ค่าปรับ:</span>
-                                    <span
-                                        class="font-medium text-red-600">฿{{ number_format($requests->transaction->penalty_amount, 2) }}</span>
-                                </div>
-                            @endif
-
-                            <!-- Notes -->
-                            @if ($requests->transaction && $requests->transaction->notes)
-                                <div class="">
-                                    <span class="text-gray-500">หมายเหตุ:</span>
-                                    <span class="font-medium text-gray-700">{{ $requests->transaction->notes }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
+                <!-- Removed duplicate 'ธุรกรรม' section — the transaction panel inside the form is kept -->
 
                 <div class="mt-8 relative">
                     <form action="{{ route('admin.requests.approve', $requests->req_id) }}" method="POST"
                         class="space-y-5">
                         @csrf
                         @method('PATCH')
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="mt-6 @if ($requests->status !== 'pending') hidden @endif">
+                            <!-- Left: วันที่ขอ (dates) -->
+                            <div class="md:col-span-1 space-y-4">
                                 <h3 class="font-semibold text-gray-700 mb-2">วันที่ขอใช้</h3>
                                 <div class="bg-gray-50 rounded p-4 ">
                                     <div>
@@ -215,10 +142,12 @@
                                         <span
                                             class="font-medium">{{ $requests->start_at ? $requests->start_at->format('d-m-Y') : '-' }}</span>
                                     </div>
+
                                     <span
                                         class="font-medium @if ($requests->status === 'pending') hidden @endif">วันที่ส่ง:
-                                        {{ $requests->end_at ? $requests->start_at->format('d-m-Y') : '-' }}</span>
-                                    <div class="@if ($requests->status !== 'pending') hidden @endif">
+                                        {{ $requests->end_at ? $requests->end_at->format('d-m-Y') : '-' }}</span>
+
+                                    <div class="@if ($requests->status !== 'pending') hidden @endif mt-4">
                                         <span class="text-gray-500">วันที่ส่ง:</span>
                                         <div class="relative ">
                                             <input type="text" id="end_at" name="end_at"
@@ -235,93 +164,175 @@
                                                 </svg>
                                             </div>
                                         </div>
-                            </div>
+                                    </div>
 
-                                    <div class="mt-2 text-sm">
+                                    <div class="mt-4 text-sm">
                                         <p class="text-gray-500">รวมวันที่จะยืมทั้งสิ้น</p>
                                         <p id="total-days" class="font-medium">0 วัน</p>
-                            </div>
-
-                                </div>
-                            </div>
-                            @if ($requests->status != 'pending')
-                                @if ($requests->status === 'check_out')
-                                    {{-- When item is already checked out and waiting to be returned --}}
-                                <div class="bg-gray-50 rounded p-4">
-                                    <label class="text-gray-500 text-sm block mb-1">ค่าปรับ</label>
-                                    <input type="number" step="0.01" min="0" name="penalty_amount"
-                                        class="w-full border rounded px-2 py-1"
-                                            value="{{ $requests->transaction->penalty_amount ?? 0 }}" />
-                                </div>
-
-                                <div class="bg-gray-50 rounded p-4 md:col-span-2">
-                                    <label class="text-gray-500 text-sm block mb-1">หมายเหตุ</label>
-                                    <textarea name="notes" id="notes" class="w-full border rounded px-2 py-1" rows="2" maxlength="255" oninput="updateCharCount('notes', 'charCount')">{{ $requests->transaction->notes ?? '' }}</textarea>
-                                    <div class="text-right text-xs text-gray-500 mt-1">
-                                        <span id="charCount">{{ strlen($requests->transaction->notes ?? '') }}</span>/255
                                     </div>
                                 </div>
+
+                                <!-- Move penalty input here (left side) -->
+                                @if ($requests->status === 'check_out')
+                                    <div class="bg-gray-50 rounded p-4 mt-2">
+                                        <label class="text-gray-500 text-sm block mb-1">ค่าปรับ</label>
+                                        <input type="number" step="0.01" min="0" name="penalty_amount"
+                                            class="w-full border rounded px-2 py-1"
+                                            value="{{ $requests->transaction->penalty_amount ?? 0 }}" />
+                                    </div>
                                 @endif
-                            @endif
+                            </div>
 
-                            {{-- Buttons --}}
+                            <!-- Right: ธุรกรรม (moved here) + conditional penalty/notes -->
+                            <div class="md:col-span-2 space-y-4">
+                                <h3 class="font-semibold text-gray-700 mb-2">ข้อมูลธุรกรรม</h3>
+                                <div class="bg-gray-50 rounded p-4">
+                                    <div class="space-y-3">
+                                        <!-- Created Date -->
+                                        <div>
+                                            <span class="text-gray-500">วันที่สร้างคำขอ:</span>
+                                            <span
+                                                class="font-medium">{{ $requests->created_at->format('d-m-Y') }}</span>
+                                        </div>
+
+                                        <!-- Approved Date -->
+                                        @if ($requests->status !== 'pending' && $requests->status !== 'rejected')
+                                            <div>
+                                                <span class="text-gray-500">วันที่อนุมัติ:</span>
+                                                <span
+                                                    class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
+                                            </div>
+                                        @endif
+
+                                        <!-- Rejected Date and Reason -->
+                                        @if ($requests->status === 'rejected')
+                                            <div>
+                                                <span class="text-gray-500">วันที่ปฏิเสธ:</span>
+                                                <span
+                                                    class="font-medium">{{ $requests->updated_at->format('d-m-Y') }}</span>
+                                            </div>
+                                            @if ($requests->reject_reason)
+                                                <div class="flex items-start justify-between">
+                                                    <span class="text-gray-500">เหตุผลการปฏิเสธ:</span>
+                                                    <span class="font-medium text-red-600">{{ $requests->reject_reason }}</span>
+                                                </div>
+                                            @endif
+                                        @endif
+
+                                        <!-- Check Out Date -->
+                                        @if (($requests->status === 'check_out' || $requests->status === 'check_in') && $requests->transaction && $requests->transaction->checked_out_at)
+                                            <div>
+                                                <span class="text-gray-500">วันที่มารับของ:</span>
+                                                <span
+                                                    class="font-medium">{{ $requests->transaction->checked_out_at->format('d-m-Y') }}</span>
+                                            </div>
+                                        @endif
+
+                                        <!-- Check In Date -->
+                                        @if ($requests->status === 'check_in' && $requests->transaction && $requests->transaction->checked_in_at)
+                                            <div>
+                                                <span class="text-gray-500">วันที่มาคืนของ:</span>
+                                                <span
+                                                    class="font-medium">{{ $requests->transaction->checked_in_at->format('d-m-Y') }}</span>
+                                            </div>
+                                        @endif
+
+                                        <div class="flex items-start gap-6">
+                                            <!-- Penalty Information -->
+                                            @if ($requests->transaction && $requests->transaction->penalty_amount > 0)
+                                                <div class="flex-1 min-w-0">
+                                                    <span class="text-gray-500">ค่าปรับ:</span>
+                                                    <span
+                                                        class="font-medium text-red-600">฿{{ number_format($requests->transaction->penalty_amount, 2) }}</span>
+                                                </div>
+                                            @endif
+
+                                            <!-- Notes -->
+                                            @if ($requests->transaction && $requests->transaction->notes)
+                                                <div class="flex-1 min-w-0">
+                                                    <span class="text-gray-500">หมายเหตุ:</span>
+                                                    <span
+                                                        class="font-medium text-gray-700 truncate">{{ $requests->transaction->notes }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- When item is already checked out and waiting to be returned: editable notes (penalty moved to left column) -->
+                                @if ($requests->status === 'check_out')
+                                    <div class="bg-gray-50 rounded p-4">
+                                        <label class="text-gray-500 text-sm block mb-1">หมายเหตุ</label>
+                                        <textarea name="notes" id="notes" class="w-full border rounded px-2 py-1" rows="2"
+                                            maxlength="255"
+                                            oninput="updateCharCount('notes', 'charCount')">{{ $requests->transaction->notes ?? '' }}</textarea>
+                                        <div class="text-right text-xs text-gray-500 mt-1">
+                                            <span
+                                                id="charCount">{{ strlen($requests->transaction->notes ?? '') }}</span>/255
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Buttons: place at bottom of form, right-aligned --}}
                             @if (!in_array($requests->status, ['check_in', 'rejected', 'cancelled']))
-                                <div class="absolute bottom-[-40px] right-4 flex gap-2">
-                            @if ($requests->status == 'pending')
+                                <div class="col-span-full mt-4 flex justify-end gap-3">
+                                    @if ($requests->status == 'pending')
                                         {{-- Pending: Approve or Reject --}}
-                                <button type="button"
-                                            class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out shadow-sm"
-                                    onclick="showRejectModal()">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        <button type="button"
+                                            class="inline-flex items-center px-5 py-3 text-base font-semibold rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out shadow-sm"
+                                            onclick="showRejectModal()">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
-                                    ปฏิเสธ
-                                </button>
+                                            ปฏิเสธ
+                                        </button>
 
-                                <button type="submit"
-                                    formaction="{{ route('admin.requests.approve', $requests->req_id) }}"
-                                    formmethod="post"
-                                            class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out shadow-sm"
-                                    onclick="event.preventDefault(); 
-                                        const f=this.closest('form'); 
-                                        const m=document.createElement('input'); 
-                                        m.type='hidden'; 
-                                        m.name='_method'; 
-                                        m.value='PATCH'; 
-                                        f.appendChild(m); 
-                                                f.action='{{ route('admin.requests.approve', $requests->req_id) }}'; 
-                                        f.submit();">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        <button type="submit"
+                                            formaction="{{ route('admin.requests.approve', $requests->req_id) }}"
+                                            formmethod="post"
+                                            class="inline-flex items-center px-5 py-3 text-base font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out shadow-sm"
+                                            onclick="event.preventDefault(); 
+                                                                                                                                                        const f=this.closest('form'); 
+                                                                                                                                                        const m=document.createElement('input'); 
+                                                                                                                                                        m.type='hidden'; 
+                                                                                                                                                        m.name='_method'; 
+                                                                                                                                                        m.value='PATCH'; 
+                                                                                                                                                        f.appendChild(m); 
+                                                                                                                                                        f.action='{{ route('admin.requests.approve', $requests->req_id) }}'; 
+                                                                                                                                                        f.submit();">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
                                             </svg>
                                             อนุมัติ
-                                </button>
+                                        </button>
                                     @elseif ($requests->status !== 'pending' && $requests->status !== 'rejected')
                                         {{-- Approved or Checked Out: Check out or Check in --}}
-                                <button type="submit"
-                                    formaction="{{ route('admin.requests.update', $requests->req_id) }}"
-                                    formmethod="post"
-                                            class="inline-flex items-center px-4 py-3 text-xs font-medium rounded-md text-white bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 ease-in-out shadow-sm"
-                                    onclick="event.preventDefault(); 
-                                        const f=this.closest('form'); 
-                                        const m=document.createElement('input'); 
-                                        m.type='hidden'; 
-                                        m.name='_method'; 
-                                        m.value='PATCH'; 
-                                        f.appendChild(m); 
-                                        f.action='{{ route('admin.requests.update', $requests->req_id) }}'; 
-                                        f.submit();">
+                                        <button type="submit"
+                                            formaction="{{ route('admin.requests.update', $requests->req_id) }}"
+                                            formmethod="post"
+                                            class="inline-flex items-center px-5 py-3 text-base font-semibold rounded-md text-white bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 ease-in-out shadow-sm"
+                                            onclick="event.preventDefault(); 
+                                                                                                                                                        const f=this.closest('form'); 
+                                                                                                                                                        const m=document.createElement('input'); 
+                                                                                                                                                        m.type='hidden'; 
+                                                                                                                                                        m.name='_method'; 
+                                                                                                                                                        m.value='PATCH'; 
+                                                                                                                                                        f.appendChild(m); 
+                                                                                                                                                        f.action='{{ route('admin.requests.update', $requests->req_id) }}'; 
+                                                                                                                                                        f.submit();">
                                             @if($requests->status === 'approved')
                                                 รับแล้ว
                                             @else
                                                 คืนแล้ว
                                             @endif
-                                </button>
+                                        </button>
+                                    @endif
+                                </div>
                             @endif
                         </div>
-                            @endif
-
-
                     </form>
 
                     @if ($requests->status == 'pending')
@@ -351,7 +362,7 @@
 </div>
 
 <script>
-    window.showRejectModal = function() {
+    window.showRejectModal = function () {
         Swal.fire({
             title: 'ปฏิเสธคำขอ',
             html: `
@@ -417,7 +428,7 @@
             const daysInMonth = lastDay.getDate();
             const startWeek = firstDay.getDay();
             let html =
-                `<div class="bg-white border-gray-200 rounded-lg"><div class="flex justify-between items-center p-2 bg-gray-50 border-b"><button onclick="calendar.prev()" class="px-2 py-1 rounded-full hover:bg-gray-200 transition">‹</button><div class="text-sm font-medium">${monthNames[m]} ${y}</div><button onclick="calendar.next()" class="px-2 py-1 rounded-full hover:bg-gray-200 transition">›</button></div><div class="grid grid-cols-7 bg-gray-50 border-b text-xs font-semibold text-gray-500">${['อา','จ','อ','พ','พฤ','ศ','ส'].map(d => `<div class="p-2 text-center">${d}</div>`).join('')}</div><div class="grid grid-cols-7 text-center">`;
+                `<div class="bg-white border-gray-200 rounded-lg"><div class="flex justify-between items-center p-2 bg-gray-50 border-b"><button onclick="calendar.prev()" class="px-2 py-1 rounded-full hover:bg-gray-200 transition">‹</button><div class="text-sm font-medium">${monthNames[m]} ${y}</div><button onclick="calendar.next()" class="px-2 py-1 rounded-full hover:bg-gray-200 transition">›</button></div><div class="grid grid-cols-7 bg-gray-50 border-b text-xs font-semibold text-gray-500">${['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map(d => `<div class="p-2 text-center">${d}</div>`).join('')}</div><div class="grid grid-cols-7 text-center">`;
             for (let i = 0; i < startWeek; i++) html += `<div></div>`;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -581,7 +592,7 @@
             } else {
                 output.textContent = '0 วัน';
                 output.classList.add('text-red-700');
-                
+
                 // Show alert for invalid date range
                 Swal.fire({
                     icon: 'warning',
@@ -601,12 +612,12 @@
     function validateDateInput(inputId, label) {
         const input = document.getElementById(inputId);
         const value = input.value;
-        
+
         if (value) {
             const selectedDate = new Date(value);
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Reset time to start of day
-            
+
             if (selectedDate < today) {
                 Swal.fire({
                     icon: 'warning',
@@ -622,11 +633,11 @@
         return true;
     }
 
-    document.getElementById('start_at').addEventListener('change', function() {
+    document.getElementById('start_at').addEventListener('change', function () {
         validateDateInput('start_at', 'วันที่เริ่ม');
         calculateDays();
     });
-    document.getElementById('end_at').addEventListener('change', function() {
+    document.getElementById('end_at').addEventListener('change', function () {
         validateDateInput('end_at', 'วันที่สิ้นสุด');
         calculateDays();
     });
@@ -638,26 +649,26 @@
         const endDate = document.getElementById('end_at').value;
         const checkoutDate = document.getElementById('checked_out_at').value;
         const hint = document.getElementById('checkout-date-hint');
-        
+
         if (!startDate || !endDate) {
             return;
         }
-        
+
         if (checkoutDate) {
             const start = new Date(startDate);
             const end = new Date(endDate);
             const checkout = new Date(checkoutDate);
-            
+
             // Set min and max attributes for the input
             document.getElementById('checked_out_at').min = startDate + 'T00:00';
             document.getElementById('checked_out_at').max = endDate + 'T23:59';
-            
+
             if (checkout < start || checkout > end) {
                 hint.textContent = 'วันที่มาเเอาของต้องอยู่ในช่วงวันที่เริ่มถึงวันที่สิ้นสุดที่อนุญาต';
                 hint.classList.remove('text-gray-500');
                 hint.classList.add('text-red-500');
                 document.getElementById('checked_out_at').classList.add('border-red-500');
-                
+
                 // Show alert for invalid date selection
                 Swal.fire({
                     icon: 'warning',
@@ -666,7 +677,7 @@
                     timer: 3000,
                     showConfirmButton: false
                 });
-                
+
                 // Clear the invalid date
                 document.getElementById('checked_out_at').value = '';
             } else {
@@ -687,7 +698,7 @@
     function setCheckoutConstraints() {
         const startDate = document.getElementById('start_at').value;
         const endDate = document.getElementById('end_at').value;
-        
+
         if (startDate && endDate) {
             document.getElementById('checked_out_at').min = startDate + 'T00:00';
             document.getElementById('checked_out_at').max = endDate + 'T23:59';
@@ -696,30 +707,30 @@
 
     document.getElementById('start_at').addEventListener('change', setCheckoutConstraints);
     document.getElementById('end_at').addEventListener('change', setCheckoutConstraints);
-    document.getElementById('checked_out_at').addEventListener('change', function() {
+    document.getElementById('checked_out_at').addEventListener('change', function () {
         validateCheckoutDate();
         setCheckinConstraints();
     });
-    
+
     // Add validation for check-in date
     function validateCheckinDate() {
         const checkoutDate = document.getElementById('checked_out_at').value;
         const checkinDate = document.getElementById('checked_in_at').value;
         const hint = document.getElementById('checkin-date-hint');
-        
+
         if (!checkoutDate || !checkinDate) {
             return;
         }
-        
+
         const checkout = new Date(checkoutDate);
         const checkin = new Date(checkinDate);
-        
+
         if (checkin <= checkout) {
             hint.textContent = 'วันที่มาส่งต้องอยู่หลังวันที่มาเเอาของ';
             hint.classList.remove('text-gray-500');
             hint.classList.add('text-red-500');
             document.getElementById('checked_in_at').classList.add('border-red-500');
-            
+
             // Show alert for invalid date selection
             Swal.fire({
                 icon: 'warning',
@@ -728,7 +739,7 @@
                 timer: 3000,
                 showConfirmButton: false
             });
-            
+
             // Clear the invalid date
             document.getElementById('checked_in_at').value = '';
         } else {
@@ -743,17 +754,17 @@
     function setCheckinConstraints() {
         const checkoutDate = document.getElementById('checked_out_at').value;
         const checkinInput = document.getElementById('checked_in_at');
-        
+
         if (checkoutDate && checkinInput) {
             // Set minimum date to the day after checkout date
             const checkout = new Date(checkoutDate);
             const nextDay = new Date(checkout);
             nextDay.setDate(checkout.getDate() + 1);
-            
+
             // Format for datetime-local input (YYYY-MM-DDTHH:MM)
             const minDate = nextDay.toISOString().slice(0, 16);
             checkinInput.min = minDate;
-            
+
             // Clear current value if it's before the minimum date
             if (checkinInput.value && new Date(checkinInput.value) <= checkout) {
                 checkinInput.value = '';
@@ -778,7 +789,7 @@
         const endDate = document.getElementById('end_at').value;
         const checkoutDate = document.getElementById('checked_out_at').value;
         const checkinDate = document.getElementById('checked_in_at')?.value;
-        
+
         if (!startDate || !endDate) {
             Swal.fire({
                 icon: 'error',
@@ -788,12 +799,12 @@
             });
             return false;
         }
-        
+
         if (checkoutDate) {
             const start = new Date(startDate);
             const end = new Date(endDate);
             const checkout = new Date(checkoutDate);
-            
+
             if (checkout < start || checkout > end) {
                 Swal.fire({
                     icon: 'error',
@@ -804,16 +815,16 @@
                 return false;
             }
         }
-        
+
         if (checkinDate && checkoutDate) {
             const checkout = new Date(checkoutDate);
             const checkin = new Date(checkinDate);
-            
+
             // Check if check-in is at least one day after check-out
             const nextDay = new Date(checkout);
             nextDay.setDate(checkout.getDate() + 1);
             nextDay.setHours(0, 0, 0, 0);
-            
+
             if (checkin < nextDay) {
                 Swal.fire({
                     icon: 'error',
@@ -824,12 +835,12 @@
                 return false;
             }
         }
-        
+
         return true;
     }
 
     // Show success/error alerts based on URL parameters
-    window.showSubmissionAlert = function() {
+    window.showSubmissionAlert = function () {
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
         const error = urlParams.get('error');
@@ -853,13 +864,13 @@
     };
 
     // Add event listener to form submission
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Show success/error alerts on page load
         showSubmissionAlert();
 
         const forms = document.querySelectorAll('form');
         forms.forEach(form => {
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 if (!validateFormSubmission()) {
                     e.preventDefault();
                     return false;
@@ -870,7 +881,7 @@
         // Add event listener for calendar modal
         const calendarModal = document.getElementById('calendarModal');
         if (calendarModal) {
-            calendarModal.addEventListener('click', function(e) {
+            calendarModal.addEventListener('click', function (e) {
                 if (e.target === calendarModal) {
                     closeCalendar();
                 }
@@ -885,9 +896,9 @@
         if (textarea && charCount) {
             const currentLength = textarea.value.length;
             const maxLength = parseInt(textarea.getAttribute('maxlength')) || 255;
-            
+
             charCount.textContent = currentLength;
-            
+
             // Change color based on remaining characters
             if (currentLength > maxLength * 0.9) {
                 charCount.style.color = '#ef4444'; // red
