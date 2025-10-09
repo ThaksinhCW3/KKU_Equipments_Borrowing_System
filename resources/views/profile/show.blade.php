@@ -80,11 +80,6 @@
                                 <label class="text-sm text-gray-700">รหัสผ่านปัจจุบัน</label>
                                 <input type="password" name="current_password"
                                     class="mt-2 w-full rounded-lg border-gray-300 bg-gray-50 text-gray-800 focus:ring-blue-500 focus:border-blue-500">
-
-                                <a href="{{ route('password.request') }}"
-                                    class="absolute right-0 -bottom-5 text-xs text-blue-600 hover:underline">
-                                    ลืมรหัสผ่าน?
-                                </a>
                             </div>
 
                             <!-- New Password -->

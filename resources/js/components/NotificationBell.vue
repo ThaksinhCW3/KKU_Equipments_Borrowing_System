@@ -176,6 +176,18 @@ export default {
         this.markAsRead(notification.id)
       }
       
+      // Handle ban/unban notifications
+      if (notification.data.type === 'ban') {
+        // Redirect to banned page
+        window.location.href = notification.data.action_url || '/banned'
+        return
+      }
+      if (notification.data.type === 'unban') {
+        // Redirect to login page
+        window.location.href = notification.data.action_url || '/login'
+        return
+      }
+      
       // Navigate to URL if available
       if (notification.data.url && notification.data.url !== '#') {
         window.location.href = notification.data.url
@@ -198,6 +210,10 @@ export default {
     },
     
     getNotificationSender(notification) {
+      // For ban/unban notifications
+      if (notification.data.type === 'ban' || notification.data.type === 'unban') {
+        return notification.data.title || 'ระบบแจ้งเตือน'
+      }
       // For verification notifications
       if (notification.data.type === 'verification_submitted' || notification.data.type === 'verification_processed') {
         return notification.data.user_name || notification.data.user_email || 'admin'
@@ -207,6 +223,13 @@ export default {
     },
     
     getNotificationColor(notification) {
+      // For ban/unban notifications
+      if (notification.data.type === 'ban') {
+        return 'text-red-600'
+      }
+      if (notification.data.type === 'unban') {
+        return 'text-green-600'
+      }
       // For verification notifications
       if (notification.data.type === 'verification_submitted') {
         return 'text-yellow-600'
@@ -231,6 +254,27 @@ export default {
     },
     
     getNotificationDetails(notification) {
+      // For ban/unban notifications
+      if (notification.data.type === 'ban') {
+        let details = `เหตุผล: ${notification.data.ban_reason}`
+        if (notification.data.banned_by_email || notification.data.banned_by_phone) {
+          details += ' | ติดต่อ: '
+          if (notification.data.banned_by_email) details += notification.data.banned_by_email
+          if (notification.data.banned_by_email && notification.data.banned_by_phone) details += ', '
+          if (notification.data.banned_by_phone) details += notification.data.banned_by_phone
+        }
+        return details
+      }
+      if (notification.data.type === 'unban') {
+        let details = 'บัญชีได้รับการปลดแบน'
+        if (notification.data.unbanned_by_email || notification.data.unbanned_by_phone) {
+          details += ' | ติดต่อ: '
+          if (notification.data.unbanned_by_email) details += notification.data.unbanned_by_email
+          if (notification.data.unbanned_by_email && notification.data.unbanned_by_phone) details += ', '
+          if (notification.data.unbanned_by_phone) details += notification.data.unbanned_by_phone
+        }
+        return details
+      }
       // For verification notifications
       if (notification.data.type === 'verification_submitted') {
         return 'การยืนยันตัวตน'

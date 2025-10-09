@@ -260,7 +260,8 @@
                                 is_array($photos) && count($photos) > 0 ? $photos[0] : $req->equipment->photo_path;
                         @endphp
                         <img src="{{ $firstPhoto }}" alt="equipment photo"
-                            class="w-full sm:w-28 h-28 object-cover rounded-lg shadow">
+                            class="w-full sm:w-32 h-40 sm:h-32 object-contain bg-gray-100 rounded-lg shadow max-w-full cursor-pointer hover:opacity-80 transition-opacity"
+                            onclick="openImageModal('{{ $firstPhoto }}', '{{ $req->equipment->name }}')">
                         <div class="space-y-3 flex-1">
                             <h3 class="font-semibold text-gray-800 break-words">{{ $req->equipment->name }}</h3>
                             <p class="text-sm text-gray-500 break-words">รหัส: {{ $req->equipment->code }}</p>
@@ -407,6 +408,19 @@
         @endif
     </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="relative max-w-4xl max-h-full p-4">
+            <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-10">
+                ×
+            </button>
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+            <div class="text-center mt-4">
+                <h3 id="modalTitle" class="text-white text-lg font-semibold"></h3>
+            </div>
+        </div>
+    </div>
+
     @if (session('error'))
         <script>
             Swal.fire({
@@ -420,6 +434,33 @@
     @endif
 
     <script>
+        // Image modal functions
+        window.openImageModal = function(imageSrc, equipmentName) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('modalTitle').textContent = equipmentName;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+
         // SweetAlert cancel modal function
         window.showCancelModal = function(requestId) {
             Swal.fire({

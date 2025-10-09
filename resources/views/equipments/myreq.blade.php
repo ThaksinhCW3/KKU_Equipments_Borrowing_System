@@ -118,7 +118,8 @@
                                             $firstPhoto = is_array($photos) && count($photos) > 0 ? $photos[0] : $req->equipment->photo_path;
                                         @endphp
                                         <img src="{{ $firstPhoto }}" alt="equipment photo"
-                                            class="w-full h-28 object-cover rounded-lg shadow col-span-1 sm:col-span-1">
+                                            class="w-full h-32 sm:h-28 object-contain bg-gray-100 rounded-lg shadow col-span-1 sm:col-span-1 max-w-full cursor-pointer hover:opacity-80 transition-opacity"
+                                            onclick="openImageModal('{{ $firstPhoto }}', '{{ $req->equipment->name }}')">
 
                                         <div class="col-span-1 sm:col-span-3 space-y-3 relative">
                                             <h3 class="font-semibold text-gray-800 break-words">{{ $req->equipment->name }}</h3>
@@ -229,6 +230,19 @@
         @endif
     </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="relative max-w-4xl max-h-full p-4">
+            <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-10">
+                ×
+            </button>
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+            <div class="text-center mt-4">
+                <h3 id="modalTitle" class="text-white text-lg font-semibold"></h3>
+            </div>
+        </div>
+    </div>
+
     <!-- SweetAlert -->
     @if (session('success'))
         <script>
@@ -255,6 +269,33 @@
     @endif
 
     <script>
+        // Image modal functions
+        window.openImageModal = function(imageSrc, equipmentName) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('modalTitle').textContent = equipmentName;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+
         // SweetAlert cancel modal function
         window.showCancelModal = function(requestId) {
             Swal.fire({
@@ -563,7 +604,7 @@
                         </div>
 
                         <div class="mb-4 grid grid-cols-1 sm:grid-cols-4 gap-4">
-                            <img src="${photoSrc}" alt="equipment photo" class="w-full h-28 object-cover rounded-lg shadow col-span-1 sm:col-span-1">
+                            <img src="${photoSrc}" alt="equipment photo" class="w-full h-32 sm:h-28 object-contain bg-gray-100 rounded-lg shadow col-span-1 sm:col-span-1 max-w-full cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal('${photoSrc}', '${request.equipment.name}')">
                             <div class="col-span-1 sm:col-span-3 space-y-3 relative">
                                 <h3 class="font-semibold text-gray-800 break-words">${request.equipment.name}</h3>
                                 <p class="text-sm text-gray-500 break-words">รหัส: ${request.equipment.code}</p>
