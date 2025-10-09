@@ -27,10 +27,21 @@
             </div>
         @endif
 
+        @php
+            // Attempt to get the admin who banned this user
+            $bannedBy = null;
+            if (auth()->check() && auth()->user()->banned_by) {
+                $bannedBy = \App\Models\User::find(auth()->user()->banned_by);
+            }
+        @endphp
         <div class="bg-gray-100 rounded-lg px-4 py-3 mt-6 text-gray-600 text-sm">
             <strong>ช่องทางการติดต่อผู้ดูแลระบบเพื่อยื่นขออุทธรณ์:</strong><br>
-            อีเมล: unik09john@gmail.com<br>
-            โทรศัพท์: 06-xxx-xxxx
+            @if($bannedBy)
+                อีเมล: {{ $bannedBy->email ?? '-' }}<br>
+                โทรศัพท์: {{ $bannedBy->phonenumber ?? '-' }}
+            @else
+                <span class="text-gray-400">ไม่พบข้อมูลผู้แบน กรุณาติดต่อผู้ดูแลระบบหลัก</span>
+            @endif
         </div>
     </div>
 

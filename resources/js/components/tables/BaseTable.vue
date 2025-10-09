@@ -348,8 +348,8 @@ export default {
   data() {
     return {
       searchQuery: "",
-      sortKey: "",
-      sortDirection: "asc",
+      sortKey: this.sortField || "created_at",
+      sortDirection: "desc",
       currentPage: 1,
       filtersOpen: false,
       filters: {},
@@ -758,6 +758,12 @@ export default {
   },
   
   mounted() {
+    // Initialize default sort to show recent data first
+    if (!this.sortKey && this.sortField) {
+      this.sortKey = this.sortField;
+      this.sortDirection = "desc";
+    }
+
     // Initialize filters
     this.availableFilters.forEach(filter => {
       this.filters[filter.key] = '';

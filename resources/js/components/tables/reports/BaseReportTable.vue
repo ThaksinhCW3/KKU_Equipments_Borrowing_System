@@ -317,8 +317,8 @@ export default {
         return {
             searchQuery: '',
             filters: {},
-            sortKey: '',
-            sortDirection: 'asc',
+            sortKey: 'created_at',
+            sortDirection: 'desc',
             currentPage: 1,
             filtersOpen: false
         }
@@ -785,6 +785,12 @@ export default {
         console.log('BaseReportTable mounted with data:', this.totalData);
         console.log('Columns:', this.columns);
         console.log('Available filters:', this.availableFilters);
+
+        // Initialize default sort to show recent data first
+        if (!this.sortKey) {
+            this.sortKey = 'created_at';
+            this.sortDirection = 'desc';
+        }
 
         // Debug: Log the first item's created_at value
         if (this.totalData && this.totalData.length > 0) {

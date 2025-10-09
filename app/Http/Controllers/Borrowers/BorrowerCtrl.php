@@ -253,7 +253,7 @@ class BorrowerCtrl extends Controller
         Cache::forget("myreq:" . Auth::id());
         
         return redirect()->route('borrower.equipments.reqdetail', $borrowRequest->req_id)
-            ->with('success', 'ส่งคำขอยืมสำเร็จ');
+            ->with('success', 'ส่งคำขอยืมสำเร็จ กรุณาเข้ามารับอุปกรณ์ตามเวลาที่กำหนด เช้า: 09:00-10:00 น. | บ่าย: 14:00-15:00 น. (เฉพาะวันจันทร์-ศุกร์)');
     }
     public function search(Request $request)
     {

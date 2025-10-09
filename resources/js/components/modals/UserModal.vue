@@ -256,7 +256,7 @@ export default {
         phonenumber: '',
         uid: '',
         password: '',
-        role: 'user'
+        role: 'borrower'
       };
       this.submitting = false;
     },
@@ -282,6 +282,8 @@ export default {
       if (this.mode === 'create') {
         this.$emit("create", saveData);
       } else {
+        // Include user ID for edit mode
+        saveData.id = this.user.id;
         this.$emit("save", saveData);
       }
     },
