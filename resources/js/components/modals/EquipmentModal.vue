@@ -2,19 +2,26 @@
   <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="closeModal"></div>
-    
+
     <!-- Modal -->
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col min-h-0">
+      <div
+        class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col min-h-0">
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <div class="flex items-center space-x-3">
             <div class="p-2 bg-blue-100 rounded-lg">
               <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path v-if="mode === 'view'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path v-if="mode === 'view'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                <path v-if="mode === 'edit'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                <path v-if="mode === 'create'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                <path v-if="mode === 'view'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path v-if="mode === 'view'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                </path>
+                <path v-if="mode === 'edit'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                </path>
+                <path v-if="mode === 'create'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
               </svg>
             </div>
             <div>
@@ -22,7 +29,7 @@
                 {{ mode === 'view' ? 'รายละเอียดอุปกรณ์' : mode === 'edit' ? 'แก้ไขอุปกรณ์' : 'เพิ่มอุปกรณ์ใหม่' }}
               </h3>
               <p class="text-sm text-gray-500">
-                {{ mode === 'view' ? equipment?.name : mode === 'edit' ? form?.name : 'อุปกรณ์ใหม่' }} 
+                {{ mode === 'view' ? equipment?.name : mode === 'edit' ? form?.name : 'อุปกรณ์ใหม่' }}
                 {{ mode === 'view' ? `(${equipment?.code})` : mode === 'edit' ? `(${form?.code})` : '' }}
               </p>
             </div>
@@ -42,20 +49,16 @@
             <div v-if="equipmentPhotos.length > 0" class="space-y-4">
               <h4 class="text-lg font-medium text-gray-900">รูปภาพอุปกรณ์</h4>
               <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div 
-                  v-for="(photo, index) in equipmentPhotos" 
-                  :key="index"
-                  class="relative group cursor-pointer"
-                  @click="openPhotoModal(photo)"
-                >
-                  <img 
-                    :src="photo" 
-                    :alt="`Equipment photo ${index + 1}`"
-                    class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-shadow"
-                  />
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                <div v-for="(photo, index) in equipmentPhotos" :key="index" class="relative group cursor-pointer"
+                  @click="openPhotoModal(photo)">
+                  <img :src="photo" :alt="`Equipment photo ${index + 1}`"
+                    class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-shadow" />
+                  <div
+                    class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none"
+                      stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
                     </svg>
                   </div>
                 </div>
@@ -92,10 +95,8 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
                   <div class="px-3 py-2 bg-gray-50 rounded-md border">
-                    <span 
-                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="getStatusClass(equipment.status)"
-                    >
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                      :class="getStatusClass(equipment.status)">
                       {{ getStatusLabel(equipment.status) }}
                     </span>
                   </div>
@@ -153,56 +154,55 @@
           </div>
 
           <!-- Edit/Create Mode -->
-          <form v-else-if="mode === 'edit' || mode === 'create'" id="equipment-form" @submit.prevent="onSave" novalidate class="space-y-6">
+          <form v-else-if="mode === 'edit' || mode === 'create'" id="equipment-form" @submit.prevent="onSave" novalidate
+            class="space-y-6">
             <!-- Basic Information -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Left Column -->
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">รหัสอุปกรณ์</label>
-                  <input
-                    required
-                    type="text"
-                    v-model.trim="form.code"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    รหัสอุปกรณ์ <span class="text-red-500 ml-1">*</span>
+                  </label>
+                  <input required type="text" v-model.trim="form.code" :class="getFieldClass('code')" />
+                  <p v-if="validationErrors.code" class="text-xs text-red-600 mt-1">{{ validationErrors.code }}</p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">ชื่ออุปกรณ์</label>
-                  <input
-                    required
-                    type="text"
-                    v-model.trim="form.name"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    ชื่ออุปกรณ์ <span class="text-red-500 ml-1">*</span>
+                  </label>
+                  <input required type="text" v-model.trim="form.name" :class="getFieldClass('name')" />
+                  <p v-if="validationErrors.name" class="text-xs text-red-600 mt-1">{{ validationErrors.name }}</p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
-                  <select
-                    required
-                    v-model="form.categories_id"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    หมวดหมู่ <span class="text-red-500 ml-1">*</span>
+                  </label>
+                  <select required v-model="form.categories_id" :class="getFieldClass('categories_id')">
                     <option value="">เลือกหมวดหมู่</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                       {{ cat.name }}
                     </option>
                   </select>
+                  <p v-if="validationErrors.categories_id" class="text-xs text-red-600 mt-1">{{
+                    validationErrors.categories_id }}</p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
-                  <select
-                    required
-                    v-model="form.status"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    สถานะ <span class="text-red-500 ml-1">*</span>
+                  </label>
+                  <select required v-model="form.status" :class="getFieldClass('status')">
+                    <!-- add explicit placeholder option (empty value) so validation can catch not-selected -->
+                    <option value="">เลือกสถานะ</option>
                     <option v-for="s in statuses" :key="s" :value="s">
-                      {{ capitalize(s) }}
+                      <!-- show Thai label instead of raw/English -->
+                      {{ getStatusLabel(s) }}
                     </option>
                   </select>
+                  <p v-if="validationErrors.status" class="text-xs text-red-600 mt-1">{{ validationErrors.status }}</p>
                 </div>
               </div>
 
@@ -210,21 +210,18 @@
               <div class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label>
-                  <textarea
-                    v-model.trim="form.description"
+                  <textarea v-model.trim="form.description"
                     class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="กรอกรายละเอียดอุปกรณ์"
-                  ></textarea>
+                    placeholder="กรอกรายละเอียดอุปกรณ์"></textarea>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">อุปกรณ์เสริม</label>
-                  <textarea
-                    v-model.trim="form.accessories"
+                  <textarea v-model.trim="form.accessories"
                     class="w-full h-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="กรอกรายการอุปกรณ์ที่ติดมากับเครื่อง (เช่น สายไฟ, แบตเตอรี่, คู่มือ)&#10;สามารถแยกด้วยเครื่องหมายจุลภาค (,) หรือขึ้นบรรทัดใหม่"
-                  ></textarea>
-                  <p class="text-xs text-gray-500 mt-1">ตัวอย่าง: สายไฟ, แบตเตอรี่, คู่มือ หรือแยกแต่ละรายการในบรรทัดใหม่</p>
+                    placeholder="กรอกรายการอุปกรณ์ที่ติดมากับเครื่อง (เช่น สายไฟ, แบตเตอรี่, คู่มือ)&#10;สามารถแยกด้วยเครื่องหมายจุลภาค (,) หรือขึ้นบรรทัดใหม่"></textarea>
+                  <p class="text-xs text-gray-500 mt-1">ตัวอย่าง: สายไฟ, แบตเตอรี่, คู่มือ
+                    หรือแยกแต่ละรายการในบรรทัดใหม่</p>
                 </div>
               </div>
             </div>
@@ -237,27 +234,23 @@
               <div v-if="existingImages.length > 0" class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">รูปภาพปัจจุบัน</label>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <div
-                    v-for="image in existingImages"
-                    :key="image.id"
-                    class="relative group"
-                  >
-                    <img
-                      :src="image.url"
-                      alt="Existing image"
-                      class="w-full h-32 object-cover rounded-lg border-2 transition-all duration-200"
-                      :class="{ 
+                  <div v-for="image in existingImages" :key="image.id" class="relative group">
+                    <img :src="image.url" alt="Existing image"
+                      class="w-full h-32 object-cover rounded-lg border-2 transition-all duration-200" :class="{
                         'opacity-30': imagesToDelete.includes(image.url),
                         'border-blue-500 shadow-lg': selectedMainIdentifier === image.url && !imagesToDelete.includes(image.url),
                         'border-gray-200': selectedMainIdentifier !== image.url
-                      }"
-                    />
-                    <div v-if="imagesToDelete.includes(image.url)" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                        <span class="text-white font-bold text-sm">ลบ</span>
+                      }" />
+                    <div v-if="imagesToDelete.includes(image.url)"
+                      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                      <span class="text-white font-bold text-sm">ลบ</span>
                     </div>
-                    <div v-if="!imagesToDelete.includes(image.url)" class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
-                        <button type="button" @click="setAsMain(image.url)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ตั้งเป็นภาพหลัก">★</button>
-                        <button type="button" @click="toggleDeletion(image)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ลบรูปภาพ">×</button>
+                    <div v-if="!imagesToDelete.includes(image.url)"
+                      class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
+                      <!-- removed set-as-main (star) button -->
+                      <button type="button" @click.stop="toggleDeletion(image)"
+                        class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white"
+                        title="ลบรูปภาพ">×</button>
                     </div>
                   </div>
                 </div>
@@ -271,18 +264,26 @@
                     {{ existingImages.length + newImageFiles.length }}/10 รูป
                   </span>
                 </div>
-                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || (existingImages.length + newImageFiles.length >= 10)"/>
+                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange"
+                  class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  :disabled="processingImages || (existingImages.length + newImageFiles.length >= 10)" />
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
-                <p v-if="existingImages.length + newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
+                <p v-if="existingImages.length + newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">
+                  ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
                 <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: JPG, PNG, WebP (ขนาดไม่เกิน 5MB)</p>
 
-                <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div v-if="newImagePreviewUrls.length > 0"
+                  class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
-                    <img :src="url" alt="New preview" class="w-full h-32 object-cover rounded-lg border-2" :class="selectedMainIdentifier === newImageFiles[index].name ? 'border-blue-500 shadow-lg' : 'border-gray-200'"/>
-                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
-                        <button type="button" @click="setAsMain(newImageFiles[index].name)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ตั้งเป็นภาพหลัก">★</button>
-                        <button type="button" @click="removeNewImage(index)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ลบรูปภาพ">×</button>
+                    <img :src="url" alt="New preview" class="w-full h-32 object-cover rounded-lg border-2"
+                      :class="selectedMainIdentifier === newImageFiles[index].name ? 'border-blue-500 shadow-lg' : 'border-gray-200'" />
+                    <div
+                      class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
+                      <!-- removed set-as-main (star) button -->
+                      <button type="button" @click.stop="removeNewImage(index)"
+                        class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white"
+                        title="ลบรูปภาพ">×</button>
                     </div>
                   </div>
                 </div>
@@ -299,18 +300,26 @@
                     {{ newImageFiles.length }}/10 รูป
                   </span>
                 </div>
-                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" :disabled="processingImages || newImageFiles.length >= 10"/>
+                <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple @change="onImageChange"
+                  class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  :disabled="processingImages || newImageFiles.length >= 10" />
                 <p v-if="processingImages" class="text-sm text-blue-600 mt-1">กำลังประมวลผลรูปภาพ...</p>
                 <p v-if="imageError" class="text-sm text-red-600 mt-1">{{ imageError }}</p>
-                <p v-if="newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว</p>
+                <p v-if="newImageFiles.length >= 10" class="text-sm text-orange-600 mt-1">ถึงขีดจำกัดสูงสุด 10 รูปแล้ว
+                </p>
                 <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: JPG, PNG, WebP (ขนาดไม่เกิน 5MB)</p>
 
-                <div v-if="newImagePreviewUrls.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div v-if="newImagePreviewUrls.length > 0"
+                  class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div v-for="(url, index) in newImagePreviewUrls" :key="index" class="relative group">
-                    <img :src="url" alt="New preview" class="w-full h-32 object-cover rounded-lg border-2" :class="selectedMainIdentifier === newImageFiles[index].name ? 'border-blue-500 shadow-lg' : 'border-gray-200'"/>
-                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
-                        <button type="button" @click="setAsMain(newImageFiles[index].name)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ตั้งเป็นภาพหลัก">★</button>
-                        <button type="button" @click="removeNewImage(index)" class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white" title="ลบรูปภาพ">×</button>
+                    <img :src="url" alt="New preview" class="w-full h-32 object-cover rounded-lg border-2"
+                      :class="selectedMainIdentifier === newImageFiles[index].name ? 'border-blue-500 shadow-lg' : 'border-gray-200'" />
+                    <div
+                      class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity rounded-lg">
+                      <!-- removed set-as-main (star) button -->
+                      <button type="button" @click.stop="removeNewImage(index)"
+                        class="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full text-lg hover:bg-white"
+                        title="ลบรูปภาพ">×</button>
                     </div>
                   </div>
                 </div>
@@ -326,29 +335,23 @@
 
         <!-- Footer -->
         <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-          <button 
-            @click="closeModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <button @click="closeModal"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
             {{ mode === 'view' ? 'ปิด' : 'ยกเลิก' }}
           </button>
-          <button 
-            v-if="mode === 'view' && userRole === 'admin'"
-            @click="switchToEdit"
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <button v-if="mode === 'view' && userRole === 'admin'" @click="switchToEdit"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             แก้ไขข้อมูล
           </button>
-          <button 
-            v-if="mode === 'edit' || mode === 'create'"
-            type="submit" 
-            form="equipment-form"
+          <button v-if="mode === 'edit' || mode === 'create'" type="submit" form="equipment-form"
             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
-            :disabled="submitting || processingImages || !canSave"
-          >
-            <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            :disabled="submitting || processingImages">
+            <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
             </svg>
             <span v-if="submitting">กำลังบันทึก...</span>
             <span v-else>{{ mode === 'create' ? 'สร้างอุปกรณ์' : 'บันทึกการเปลี่ยนแปลง' }}</span>
@@ -362,15 +365,10 @@
       <div class="fixed inset-0 bg-black bg-opacity-75" @click="closePhotoModal"></div>
       <div class="flex min-h-full items-center justify-center p-4">
         <div class="relative max-w-4xl max-h-[90vh]">
-          <img 
-            :src="photoModal.url" 
-            alt="Equipment photo"
-            class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
-          />
-          <button 
-            @click="closePhotoModal"
-            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 transition-all"
-          >
+          <img :src="photoModal.url" alt="Equipment photo"
+            class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl" />
+          <button @click="closePhotoModal"
+            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 transition-all">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -415,7 +413,7 @@ export default {
     return {
       form: {},
       existingImages: [],
-      imagesToDelete: [], 
+      imagesToDelete: [],
       newImageFiles: [],
       newImagePreviewUrls: [],
       imageError: "",
@@ -433,7 +431,7 @@ export default {
   computed: {
     equipmentPhotos() {
       if (!this.equipment || !this.equipment.photo_path) return [];
-      
+
       try {
         const photos = JSON.parse(this.equipment.photo_path);
         return Array.isArray(photos) ? photos : [];
@@ -443,7 +441,7 @@ export default {
     },
     formattedAccessories() {
       if (!this.equipment || !this.equipment.accessories) return [];
-      
+
       try {
         // Handle different formats
         if (Array.isArray(this.equipment.accessories)) {
@@ -464,22 +462,13 @@ export default {
     canSave() {
       const hasBasicInfo = !!(this.form && this.form.code && this.form.name && this.form.categories_id && this.form.status);
       const hasNoImageError = !this.imageError;
-      const withinImageLimit = this.mode === 'create' ? 
-        this.newImageFiles.length <= 10 : 
+      const withinImageLimit = this.mode === 'create' ?
+        this.newImageFiles.length <= 10 :
         (this.existingImages.length - this.imagesToDelete.length + this.newImageFiles.length) <= 10;
-      
+
       return hasBasicInfo && hasNoImageError && withinImageLimit;
-    },
-    hasValidationError(field) {
-      return this.showValidationErrors && this.validationErrors[field];
-    },
-    getFieldClass(field) {
-      const baseClass = "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2";
-      if (this.hasValidationError(field)) {
-        return `${baseClass} border-red-500 focus:ring-red-500`;
-      }
-      return `${baseClass} border-gray-300 focus:ring-blue-500`;
     }
+    // removed hasValidationError and getFieldClass from computed
   },
   watch: {
     isOpen(newVal) {
@@ -489,6 +478,9 @@ export default {
         } else if (this.mode === 'create') {
           this.setupCreateForm();
         }
+        // reset validation UI when modal re-opens
+        this.showValidationErrors = false;
+        this.validationErrors = {};
       }
     },
     mode(newVal) {
@@ -497,17 +489,33 @@ export default {
       } else if (newVal === 'create') {
         this.setupCreateForm();
       }
+      this.showValidationErrors = false;
+      this.validationErrors = {};
+    },
+
+    // Live-validate fields after first submit attempt
+    'form.code'(newVal) {
+      if (this.showValidationErrors) this.validateField('code');
+    },
+    'form.name'(newVal) {
+      if (this.showValidationErrors) this.validateField('name');
+    },
+    'form.categories_id'(newVal) {
+      if (this.showValidationErrors) this.validateField('categories_id');
+    },
+    'form.status'(newVal) {
+      if (this.showValidationErrors) this.validateField('status');
     }
   },
   methods: {
     closeModal() {
       this.$emit('close');
     },
-    
+
     switchToEdit() {
       this.$emit('edit', this.equipment);
     },
-    
+
     setupCreateForm() {
       this.form = {
         code: '',
@@ -515,9 +523,10 @@ export default {
         description: '',
         accessories: '',
         categories_id: '',
-        status: 'available'
+        // set empty by default so user must pick and validation shows message
+        status: ''
       };
-      
+
       this.existingImages = [];
       this.imagesToDelete = [];
       this.newImageFiles = [];
@@ -526,12 +535,16 @@ export default {
       this.submitting = false;
       this.processingImages = false;
       this.selectedMainIdentifier = null;
+
+      // reset validation
+      this.validationErrors = {};
+      this.showValidationErrors = false;
     },
-    
+
     setupForm() {
       this.form = JSON.parse(JSON.stringify(this.equipment));
       this.form.categories_id = this.equipment.category?.id || null;
-      
+
       // Handle accessories - convert from JSON array to string for editing
       if (this.equipment.accessories) {
         if (Array.isArray(this.equipment.accessories)) {
@@ -553,7 +566,7 @@ export default {
       } else {
         this.form.accessories = '';
       }
-      
+
       this.existingImages = [];
       this.selectedMainIdentifier = null;
 
@@ -576,37 +589,99 @@ export default {
       this.imageError = "";
       this.submitting = false;
       this.processingImages = false;
+
+      // reset validation
+      this.validationErrors = {};
+      this.showValidationErrors = false;
     },
-    
+
     onSave() {
-      if (this.submitting || !this.canSave) return;
+      // always run validation so UI shows errors when required fields missing
+      const valid = this.validateForm();
+      this.showValidationErrors = true;
+
+      if (!valid) {
+        this.submitting = false;
+        return;
+      }
+
+      if (this.submitting) return;
       this.submitting = true;
-      
+
       const saveData = {
         ...this.form,
         newImageFiles: this.newImageFiles,
-        imagesToDelete: this.imagesToDelete, 
-        selectedMainIdentifier: this.selectedMainIdentifier, 
+        imagesToDelete: this.imagesToDelete,
+        selectedMainIdentifier: this.selectedMainIdentifier,
       };
-      
+
       if (this.mode === 'create') {
         this.$emit("create", saveData);
       } else {
         this.$emit("save", saveData);
       }
     },
-    
+
+    validateField(field) {
+      // simple required validation for the required fields
+      const val = this.form ? this.form[field] : null;
+      switch (field) {
+        case 'code':
+          this.validationErrors.code = val && String(val).trim() ? '' : 'กรุณากรอกรหัสอุปกรณ์';
+          break;
+        case 'name':
+          this.validationErrors.name = val && String(val).trim() ? '' : 'กรุณากรอกชื่ออุปกรณ์';
+          break;
+        case 'categories_id':
+          // allow numeric/string ids but not empty
+          this.validationErrors.categories_id = (val || val === 0) ? '' : 'กรุณาเลือกหมวดหมู่';
+          break;
+        case 'status':
+          this.validationErrors.status = val ? '' : 'กรุณาเลือกสถานะ';
+          break;
+        default:
+          break;
+      }
+
+      // remove empty keys
+      for (const k of Object.keys(this.validationErrors)) {
+        if (!this.validationErrors[k]) delete this.validationErrors[k];
+      }
+
+      return !this.validationErrors[field];
+    },
+
+    validateForm() {
+      this.validationErrors = {}; // reset
+      const requiredFields = ['code', 'name', 'categories_id', 'status'];
+      let allValid = true;
+      for (const f of requiredFields) {
+        const ok = this.validateField(f);
+        if (!ok) allValid = false;
+      }
+
+      // also ensure image error or limits are considered
+      if (this.imageError) {
+        allValid = false;
+      }
+
+      return allValid;
+    },
+
     resetSubmitting() {
       this.submitting = false;
     },
-    
+
     // Image management methods (same as EquipmentEditModal)
     setAsMain(identifier) {
       this.selectedMainIdentifier = identifier;
     },
-    
+
     toggleDeletion(image) {
-      const imageUrl = image.url;
+      // accept either an object { url } or a raw string
+      const imageUrl = typeof image === 'string' ? image : (image && (image.url || image.id)) || null;
+      if (!imageUrl) return;
+
       const index = this.imagesToDelete.indexOf(imageUrl);
       if (index > -1) {
         this.imagesToDelete.splice(index, 1);
@@ -617,37 +692,45 @@ export default {
         }
       }
     },
-    
+
     removeNewImage(index) {
       const removedFile = this.newImageFiles[index];
+      if (!removedFile) return;
+
+      // remove file and preview
       this.newImageFiles.splice(index, 1);
       this.newImagePreviewUrls.splice(index, 1);
-      
+
+      // if that file was set as main, clear it
       if (this.selectedMainIdentifier === removedFile.name) {
         this.selectedMainIdentifier = null;
       }
+
+      // also if any deletion tracking accidentally referenced its name, remove it
+      const nameIdx = this.imagesToDelete.indexOf(removedFile.name);
+      if (nameIdx > -1) this.imagesToDelete.splice(nameIdx, 1);
     },
-    
+
     async onImageChange(event) {
       const files = event.target.files;
       if (!files || files.length === 0) return;
       this.imageError = "";
       this.processingImages = true;
-      
+
       // Check total image limit (existing + new images)
       const currentTotalImages = this.existingImages.length + this.newImageFiles.length;
       const newFilesCount = files.length;
-      
+
       if (currentTotalImages + newFilesCount > 10) {
         this.imageError = `ไม่สามารถเพิ่มรูปภาพได้เกิน 10 รูป (ปัจจุบัน: ${currentTotalImages} รูป, พยายามเพิ่ม: ${newFilesCount} รูป)`;
         this.processingImages = false;
         event.target.value = null;
         return;
       }
-      
+
       // Allowed image types
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      
+
       const resizePromises = [];
       for (const file of files) {
         // Check file type
@@ -657,7 +740,7 @@ export default {
           event.target.value = null;
           return;
         }
-        
+
         // Check file size
         if (file.size > 5 * 1024 * 1024) {
           this.imageError = `ไฟล์ '${file.name}' ใหญ่เกินไป (จำกัด 5MB)`;
@@ -665,7 +748,7 @@ export default {
           event.target.value = null;
           return;
         }
-        
+
         resizePromises.push(this.resizeImage(file));
       }
       try {
@@ -682,7 +765,7 @@ export default {
         event.target.value = null;
       }
     },
-    
+
     resizeImage(file, { maxWidth = 1280, quality = 0.85 } = {}) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -712,23 +795,23 @@ export default {
         reader.onerror = reject;
       });
     },
-    
+
     // Photo modal methods
     openPhotoModal(url) {
       this.photoModal.url = url;
       this.photoModal.isOpen = true;
     },
-    
+
     closePhotoModal() {
       this.photoModal.url = '';
       this.photoModal.isOpen = false;
     },
-    
+
     // Utility methods
     capitalize(str) {
       return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
     },
-    
+
     getStatusClass(status) {
       switch (status) {
         case "available":
@@ -743,7 +826,7 @@ export default {
           return "bg-gray-100 text-gray-800";
       }
     },
-    
+
     getStatusLabel(status) {
       switch (status) {
         case "available":
@@ -758,10 +841,10 @@ export default {
           return "ไม่ระบุ";
       }
     },
-    
+
     formatDate(dateString) {
       if (!dateString) return 'ไม่ระบุ';
-      
+
       try {
         const date = new Date(dateString);
         return date.toLocaleDateString('th-TH', {
@@ -774,7 +857,20 @@ export default {
       } catch (e) {
         return 'ไม่ระบุ';
       }
-    }
+    },
+
+    // add these utility methods so they can accept a field parameter
+    hasValidationError(field) {
+      return this.showValidationErrors && !!this.validationErrors[field];
+    },
+
+    getFieldClass(field) {
+      const baseClass = "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2";
+      if (this.hasValidationError(field)) {
+        return `${baseClass} border-red-500 focus:ring-red-500`;
+      }
+      return `${baseClass} border-gray-300 focus:ring-blue-500`;
+    },
   }
 }
 </script>
