@@ -2,7 +2,7 @@
     <BaseTable :data="users" :columns="columns" :title="'รายการผู้ใช้'"
         :search-placeholder="'ค้นหาด้วยชื่อ, อีเมล, หรือหมายเลขโทรศัพท์...'" :add-button-text="'เพิ่มผู้ใช้ใหม่'"
         :user-role="userRole" :available-filters="availableFilters"
-        :search-fields="['name', 'email', 'phonenumber', 'uid', 'role']" :loading="loading" @create="openCreateModal"
+        :search-fields="['name', 'email', 'phonenumber', 'uid', 'role', 'status']" :loading="loading" @create="openCreateModal"
         @edit="openModal" @delete="deleteUser">
         <!-- Custom row template -->
         <template #rows="{ item: user, actions }">
@@ -31,11 +31,24 @@
                     {{ getRoleLabel(user.role) }}
                 </span>
             </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                    <span v-if="!user.is_banned" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        ใช้งานได้
+                    </span>
+                    <div v-if="user.is_banned" class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        ถูกแบน
+                    </div>
+                </div>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(user.created_at) }}
             </td>
             <td v-if="userRole === 'admin'" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex space-x-2">
+                <div class="flex space-x-2 flex-wrap">
                     <button @click="actions.edit"
                         class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
                         แก้ไข
@@ -43,6 +56,15 @@
                     <button @click="actions.delete"
                         class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
                         ลบ
+                    </button>
+                    <!-- Ban/Unban actions (only for non-admin users) -->
+                    <button v-if="!user.is_banned && user.role !== 'admin'" @click="banUser(user)"
+                        class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                        แบนผู้ใช้
+                    </button>
+                    <button v-else-if="user.is_banned && user.role !== 'admin'" @click="unbanUser(user)"
+                        class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                        ยกเลิกการแบน
                     </button>
                 </div>
             </td>
@@ -86,6 +108,7 @@ export default {
                 { key: 'email', label: 'อีเมล' },
                 { key: 'phonenumber', label: 'เบอร์โทร' },
                 { key: 'role', label: 'บทบาท' },
+                { key: 'status', label: 'สถานะ' },
                 { key: 'created_at', label: 'วันที่สมัคร' },
             ];
 
@@ -107,6 +130,16 @@ export default {
                         { value: 'admin', label: 'ผู้ดูแลระบบ' },
                         { value: 'borrower', label: 'ผู้ยืม' },
                         { value: 'staff', label: 'เจ้าหน้าที่' }
+                    ]
+                },
+                {
+                    key: 'is_banned',
+                    label: 'สถานะการแบน',
+                    type: 'select',
+                    placeholder: 'เลือกสถานะการแบน',
+                    options: [
+                        { value: 'true', label: 'ถูกแบน' },
+                        { value: 'false', label: 'ไม่ถูกแบน' }
                     ]
                 }
             ];
@@ -246,6 +279,117 @@ export default {
                     }
                 });
             });
+        },
+
+        // Ban/Unban methods
+        banUser(user) {
+            this.ensureSwal().then(() => {
+                window.Swal.fire({
+                    title: 'แบนผู้ใช้',
+                    html: `
+                        <div class="text-left space-y-2">
+                            <p class="text-red-600 font-medium">คุณกำลังจะแบนผู้ใช้: <strong>${user.name}</strong></p>
+                            <p class="text-sm text-gray-600">การแบนจะทำให้ผู้ใช้ไม่สามารถเข้าถึงระบบได้</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2"><input type="radio" name="ban-reason" value="ละเมิดกฎระเบียบของระบบ"> ละเมิดกฎระเบียบของระบบ</label>
+                                <label class="flex items-center gap-2"><input type="radio" name="ban-reason" value="พฤติกรรมไม่เหมาะสม"> พฤติกรรมไม่เหมาะสม</label>
+                                <label class="flex items-center gap-2"><input type="radio" name="ban-reason" value="ส่งสแปมหรือเนื้อหาที่ไม่เหมาะสม"> ส่งสแปมหรือเนื้อหาที่ไม่เหมาะสม</label>
+                                <label class="flex items-center gap-2"><input type="radio" name="ban-reason" value="อื่นๆ"> อื่นๆ</label>
+                                <input id="ban-reason-text" type="text" placeholder="ระบุเหตุผลเพิ่มเติม (ถ้าเลือก อื่นๆ)" maxlength="200" class="w-full border rounded px-2 py-1" />
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'แบนผู้ใช้',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#dc2626',
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        const selected = document.querySelector('input[name="ban-reason"]:checked');
+                        const text = (document.getElementById('ban-reason-text') || {}).value || '';
+                        let reason = selected ? selected.value : '';
+                        if (!reason) {
+                            window.Swal.showValidationMessage('กรุณาเลือกเหตุผล');
+                            return false;
+                        }
+                        if (reason === 'อื่นๆ') {
+                            if (!text.trim()) {
+                                window.Swal.showValidationMessage('กรุณาระบุเหตุผลเพิ่มเติม');
+                                return false;
+                            }
+                            reason = text.trim();
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.processBan(user, result.value);
+                    }
+                });
+            });
+        },
+
+        unbanUser(user) {
+            this.ensureSwal().then(() => {
+                window.Swal.fire({
+                    title: 'ยกเลิกการแบนผู้ใช้',
+                    html: `
+                        <div class="text-left space-y-2">
+                            <p class="text-green-600 font-medium">คุณกำลังจะยกเลิกการแบนผู้ใช้: <strong>${user.name}</strong></p>
+                            <p class="text-sm text-gray-600">การยกเลิกการแบนจะทำให้ผู้ใช้สามารถเข้าถึงระบบได้อีกครั้ง</p>
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <p class="text-sm text-yellow-800">
+                                    <strong>เหตุผลที่ถูกแบน:</strong> ${user.ban_reason || 'ไม่ระบุ'}
+                                </p>
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'ยกเลิกการแบน',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#10b981',
+                    focusConfirm: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.processUnban(user);
+                    }
+                });
+            });
+        },
+
+        // API processing methods for ban/unban
+        async processBan(user, reason) {
+            try {
+                const response = await api.post(`/api/users/${user.id}/ban`, {
+                    ban_reason: reason
+                });
+                
+                if (response.status >= 200 && response.status < 300) {
+                    this.showSuccess('แบนผู้ใช้เรียบร้อยแล้ว');
+                    this.fetchUsers();
+                } else {
+                    throw new Error('Ban failed');
+                }
+            } catch (error) {
+                console.error('Ban user failed:', error);
+                this.showError('เกิดข้อผิดพลาดในการแบนผู้ใช้');
+            }
+        },
+
+        async processUnban(user) {
+            try {
+                const response = await api.post(`/api/users/${user.id}/unban`);
+                
+                if (response.status >= 200 && response.status < 300) {
+                    this.showSuccess('ยกเลิกการแบนผู้ใช้เรียบร้อยแล้ว');
+                    this.fetchUsers();
+                } else {
+                    throw new Error('Unban failed');
+                }
+            } catch (error) {
+                console.error('Unban user failed:', error);
+                this.showError('เกิดข้อผิดพลาดในการยกเลิกการแบน');
+            }
         },
 
         // Utility methods

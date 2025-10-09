@@ -15,20 +15,29 @@ Route::get('/categories', function () {
     $categories = Category::withCount('equipments')->get();
     return response()->json($categories);
 });
-Route::get('/users', function () {
-    return User::all();
+// Protected routes (authentication required)
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/users', function () {
+        return User::all();
+    });
+
+    // User CRUD routes
+    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store']);
+    Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show']);
+    Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update']);
+    Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy']);
+
+    // User ban/unban routes (admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/users/{id}/ban', [App\Http\Controllers\Admin\UserController::class, 'ban']);
+        Route::post('/users/{id}/unban', [App\Http\Controllers\Admin\UserController::class, 'unban']);
+    });
 });
 
-// User CRUD routes
-Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store']);
-Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show']);
-Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update']);
-Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy']);
 
 
-
-// Logs API route
-Route::get('/logs', function (Request $request) {
+    // Logs API route
+    Route::get('/logs', function (Request $request) {
     $logs = \App\Models\Log::with('admin')
         ->when($request->admin, function($q) use ($request) {
             // Try exact match first, then partial match
@@ -66,7 +75,7 @@ Route::get('/logs', function (Request $request) {
 });
 
 
-route::get('/requests', function () {
+    Route::get('/requests', function () {
     return BorrowRequest::with('user', 'equipment')
         ->where('status', '!=', 'cancelled')
         ->get()->map(function ($req) {
@@ -85,8 +94,8 @@ route::get('/requests', function () {
     });
 });
 
-// Transactions API route
-Route::get('/transactions', function (Request $request) {
+    // Transactions API route
+    Route::get('/transactions', function (Request $request) {
     try {
         $transactions = \App\Models\BorrowTransaction::with(['borrowRequest.user', 'borrowRequest.equipment'])
             ->get();

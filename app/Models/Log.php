@@ -12,25 +12,19 @@ class Log extends Model
     protected $fillable = [
         'admin_id',
         'action',
-        'ip_address',
+        'target_name',
         'target_type',
         'target_id',
-        'target_name',
         'description',
         'old_values',
         'new_values',
         'user_agent',
-        'session_id',
-        'request_method',
-        'request_url',
-        'request_data',
-        'notes',
+        'ip_address',
     ];
 
     protected $casts = [
         'old_values' => 'array',
         'new_values' => 'array',
-        'request_data' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

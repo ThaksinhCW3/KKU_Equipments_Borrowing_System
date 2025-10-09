@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -137,6 +139,86 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully'
+        ]);
+    }
+
+    /**
+     * Ban a user
+     */
+    public function ban(Request $request, string $id)
+    {
+        $request->validate([
+            'ban_reason' => 'required|string|max:1000',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Prevent banning admin users
+        if ($user->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot ban admin users'
+            ], 400);
+        }
+
+        // Ban the user
+        $user->ban($request->ban_reason, Auth::id());
+
+        // Log the user ban
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user_banned',
+            'target_type' => 'User',
+            'target_id' => $user->id,
+            'target_name' => $user->name,
+            'description' => "User banned: {$user->name} (ID: {$user->id}) - Reason: {$request->ban_reason}",
+            'ip_address' => request()->ip(),
+        ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'แบนผู้ใช้เรียบร้อยแล้ว'
+        ]);
+    }
+
+    /**
+     * Unban a user
+     */
+    public function unban(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+
+        // Check if user is actually banned
+        if (!$user->isBanned()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is not banned'
+            ], 400);
+        }
+
+        // Unban the user
+        $user->unban();
+
+        // Log the user unban
+        Log::create([
+            'admin_id' => Auth::id(),
+            'action' => 'user_unbanned',
+            'target_type' => 'User',
+            'target_id' => $user->id,
+            'target_name' => $user->name,
+            'description' => "User unbanned: {$user->name} (ID: {$user->id})",
+            'ip_address' => request()->ip(),
+        ]);
+
+        // Clear relevant caches
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'ยกเลิกการแบนผู้ใช้เรียบร้อยแล้ว'
         ]);
     }
 }

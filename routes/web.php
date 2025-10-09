@@ -112,8 +112,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
             Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
             Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
-            Route::post('/{id}/ban', [AdminVerificationController::class, 'banUser'])->name('admin.verification.ban');
-            Route::post('/{id}/unban', [AdminVerificationController::class, 'unbanUser'])->name('admin.verification.unban');
         });
 
         // Category and Equipment index pages
