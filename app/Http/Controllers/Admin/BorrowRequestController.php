@@ -36,7 +36,7 @@ class BorrowRequestController extends Controller
             $query->where('status', $request->status);
         }
 
-        $requests = $query->latest() 
+        $requests = $query->orderBy('created_at', 'desc') 
     ->get()
     ->map(function ($r) {
         return [
@@ -46,11 +46,13 @@ class BorrowRequestController extends Controller
             'user_name' => $r->user->name ?? 'N/A',
             'user_email' => $r->user->email ?? 'N/A',
             'equipment_name' => $r->equipment->name ?? 'N/A',
+            'equipment_code' => $r->equipment->code ?? 'N/A',
             'equipment_photo' => $r->equipment->photo_path ?? null,
             'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
             'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
             'date' => $r->created_at->format('d-m-Y'),
-            'status' => ucfirst($r->status),
+            'created_at' => $r->created_at->format('Y-m-d'),
+            'status' => $r->status, // Keep original status for Vue component
             'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
         ];
     });
@@ -67,7 +69,7 @@ class BorrowRequestController extends Controller
 
         $tableRequests = BorrowRequest::with('user', 'equipment')
             ->where('status', '!=', 'cancelled')
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->take(25)
             ->get()
             ->map(function ($r) {
@@ -77,11 +79,13 @@ class BorrowRequestController extends Controller
                     'uid' => $r->user->uid ?? null,
                     'user_name' => $r->user->name ?? 'N/A',
                     'equipment_name' => $r->equipment->name ?? 'N/A',
+                    'equipment_code' => $r->equipment->code ?? 'N/A',
                     'equipment_photo' => $r->equipment->photo_path ?? null,
                     'start_at' => $r->start_at ? $r->start_at->format('d-m-Y') : '-',
                     'end_at' => $r->end_at ? $r->end_at->format('d-m-Y') : '-',
                     'date' => $r->created_at->format('d-m-Y'),
-                    'status' => ucfirst($r->status),
+                    'created_at' => $r->created_at->format('Y-m-d'),
+                    'status' => $r->status,
                     'reason' => $r->reject_reason ?? $r->cancel_reason ?? '-',
                 ];
             });
@@ -167,7 +171,7 @@ class BorrowRequestController extends Controller
 
         $this->clearDashboardCache($borrowRequest);
 
-        return redirect()->route('admin.requests.show', $borrowRequest->req_id)
+        return redirect()->route('admin.requests.index', $borrowRequest->req_id)
             ->with('success', 'Request approved. Allowed dates saved.');
     }
 

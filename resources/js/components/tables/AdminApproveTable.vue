@@ -1,8 +1,8 @@
 <template>
   <BaseTable :data="requests || []" :columns="columns" :title="'หน้าจัดการคำขอ'"
-    :search-placeholder="'ค้นหา รหัสคำขอ, ผู้ขอ, อุปกรณ์, สถานะ...'" :user-role="'admin'"
-    :available-filters="availableFilters" :search-fields="['req_id', 'user_name', 'equipment_name', 'status']"
-    :page-size="pageSize">
+    :search-placeholder="'ค้นหา รหัสคำขอ, ผู้ขอ, อุปกรณ์, รหัสอุปกรณ์, สถานะ...'" :user-role="'admin'"
+    :available-filters="availableFilters" :search-fields="['req_id', 'user_name', 'equipment_name', 'equipment_code', 'status']"
+    :page-size="pageSize" :default-sort="'created_at'" :default-sort-direction="'desc'">
     <template #rows="{ item: request, actions }">
       <td class="px-4 py-2">
         <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
@@ -17,13 +17,14 @@
           {{ request.user_name }}
         </span>
       </td>
-
+      <td class="px-4 py-2">{{ request.equipment_code || '-' }}</td>
       <td class="px-4 py-2">
         <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"
           @click="viewEquipmentDetails(request)">
           {{ request.equipment_name }}
         </span>
       </td>
+
 
       <td class="px-4 py-2">{{ request.start_at || '-' }}</td>
       <td class="px-4 py-2">{{ request.end_at || '-' }}</td>
@@ -68,6 +69,7 @@ export default {
         { key: "req_id", label: "รหัสคำขอ" },
         { key: "user_name", label: "ผู้ขอ" },
         { key: "equipment_name", label: "อุปกรณ์" },
+        { key: "equipment_code", label: "รหัสอุปกรณ์" },
         { key: "start_at", label: "วันที่ขอ" },
         { key: "end_at", label: "วันที่ส่ง" },
         { key: "status", label: "สถานะ" },

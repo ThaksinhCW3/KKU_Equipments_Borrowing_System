@@ -88,12 +88,14 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/requests', function () {
     return BorrowRequest::with('user', 'equipment')
         ->where('status', '!=', 'cancelled')
+        ->orderBy('created_at', 'desc')
         ->get()->map(function ($req) {
         return [
             'id' => $req->id,
             'req_id' => $req->req_id,
             'user_name' => $req->user->name ?? 'N/A',
             'equipment_name' => $req->equipment->name ?? 'N/A',
+            'equipment_code' => $req->equipment->code ?? 'N/A',
             'start_at' => $req->start_at ? $req->start_at->format('Y-m-d') : '-',
             'end_at' => $req->end_at ? $req->end_at->format('Y-m-d') : '-',
             'status' => $req->status,
