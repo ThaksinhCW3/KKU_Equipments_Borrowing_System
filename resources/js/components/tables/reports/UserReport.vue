@@ -1,5 +1,5 @@
 <template>
-    <BaseReportTable :report-title="'รายงานผู้ใช้'" :report-description="'จัดการและติดตามข้อมูลผู้ใช้ในระบบ'"
+    <BaseReportTable :breadcrumbs="breadcrumbs" :report-title="'รายงานผู้ใช้'" :report-description="'จัดการและติดตามข้อมูลผู้ใช้ในระบบ'"
         :data="users" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยชื่อ, อีเมล, หรือรหัสผู้ใช้...'" :page-size="20" @export="exportUsers">
         <!-- Custom cell templates -->
@@ -98,6 +98,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานผู้ใช้' }
+            ],
             users: [],
             selectedUser: null,
             columns: [

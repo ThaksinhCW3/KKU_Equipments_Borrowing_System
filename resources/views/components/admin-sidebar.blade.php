@@ -1,4 +1,4 @@
-<aside id="admin-sidebar" class="w-64 bg-white border-r min-h-screen md:sticky md:top-0">
+<aside id="admin-sidebar" class="w-64 bg-white border-r min-h-screen">
     <nav class="p-4 space-y-4">
         <!-- Dashboard Section -->
         <div class="space-y-1">
@@ -22,30 +22,7 @@
                 การจัดการ
             </h3>
 
-<div x-data="{ open: false }" class="space-y-1">
-                <button @click="open = !open"
-                    class="w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-900 hover:focus:outline-none">
-                    <span class="flex items-center gap-2">
-                        <!-- Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        จัดการคำขอ
-                    </span>
-                    <!-- Arrow -->
-                    <svg :class="{ 'rotate-180': open }"
-                        class="w-4 h-4 text-gray-500 transform transition-transform duration-200" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                <!-- Dropdown container -->
-                <div x-show="open" x-transition class="pl-6 mt-1 space-y-1 border-l border-gray-200">
-
-                    <a href="{{ route('admin.requests.index') }}"
+        <a href="{{ route('admin.requests.index') }}"
                         class="{{ request()->routeIs('admin.requests.index') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -63,9 +40,6 @@
                         </svg>
                         สรุปคำขอ
                     </a> --}}
-                </div>
-            </div>
-           
         </div>
 
         <!-- Divider Line -->
@@ -78,6 +52,17 @@
                 เครื่องมือผู้ดูแลระบบ
             </h3>
 
+            
+            <a href="{{ route('admin.verification.index') }}"
+                class="{{ request()->routeIs('admin.verification.*') ? 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 text-gray-500">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                หน้าจัดการยืนยันตัวตน
+            </a>
+
             <a href="{{ route('admin.users.index') }}"
                 class="{{ request()->routeIs('admin.users.index') ? 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900' }}">
                 <!-- Icon -->
@@ -89,8 +74,24 @@
                 จัดการผู้ใช้
             </a>
 
-                <!-- Dropdown container -->
+            <a href="{{ route('admin.category.index') }}"
+                class="{{ request()->routeIs('admin.category.index') ? 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900' }}">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                จัดการหมวดหมู่
+            </a>
 
+            <a href="{{ route('admin.equipment.index') }}"
+                class="{{ request()->routeIs('admin.equipment.index') ? 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                จัดการอุปกรณ์
+            </a>
 
             {{-- หน้ารายงาน --}}
             <div x-data="{ open: false }" class="space-y-1">
@@ -176,92 +177,6 @@
                     </a>
                 </div>
             </div>
-
- {{-- หน้าจัดการอุปกรณ์ --}}
-            <div x-data="{ open: false }" class="space-y-1">
-                <button @click="open = !open"
-                    class="w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium text-gray-900 hover:focus:outline-none">
-                    <span class="flex items-center gap-2">
-                        <!-- Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        อุปกรณ์และหมวดหมู่
-                    </span>
-                    <!-- Arrow -->
-                    <svg :class="{ 'rotate-180': open }"
-                        class="w-4 h-4 text-gray-500 transform transition-transform duration-200" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                <!-- Dropdown container -->
-                <div x-show="open" x-transition class="pl-6 mt-1 space-y-1 border-l border-gray-200">
-
-                    <a href="{{ route('admin.category.index') }}"
-                        class="{{ request()->routeIs('admin.category.index') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-                        <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        จัดการหมวดหมู่
-                    </a>
-
-                    <a href="{{ route('admin.equipment.index') }}"
-                        class="{{ request()->routeIs('admin.equipment.index') ? 'flex items-center px-3 py-2 rounded-md text-sm bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                        </svg>
-                        จัดการอุปกรณ์
-                    </a>
-
-                    {{-- <a href="{{ route('admin.equipment.summary') }}"
-                        class="{{ request()->routeIs('admin.equipment.summary') ? 'flex items-center px-3 py-2 rounded-md text-sm bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                        </svg>
-                        สรุปอุปกรณ์
-                    </a> --}}
-
-                </div>
-                        <a href="{{ route('admin.verification.index') }}"
-            class="{{ request()->routeIs('admin.verification.*') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-
-            หน้าจัดการยืนยันตัวตน
-        </a>
-            </div>
-            {{-- <a href="{{ route('admin.user.index') }}"
-                class="{{ request()->routeIs('admin.user.*') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-                จัดการผู้ใช้
-            </a> --}}
-            
-            {{-- <a href="{{ route('admin.verification.index') }}"
-                class="{{ request()->routeIs('admin.verification.*') ? 'flex items-center px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'flex items-center px-3 py-2 rounded-md text-sm text-gray-900' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                คำขอยืนยันตัวตน
-            </a> --}}
         </div>
         @endcan
     </nav>

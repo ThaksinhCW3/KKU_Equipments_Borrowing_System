@@ -1,5 +1,6 @@
 <template>
     <BaseReportTable
+        :breadcrumbs="breadcrumbs"
         :report-title="'รายงานคำร้องขอยืม'"
         :report-description="'ติดตามและวิเคราะห์คำร้องขอยืมอุปกรณ์ทั้งหมด'"
         :data="requests"
@@ -72,6 +73,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานคำร้องขอยืม' }
+            ],
             requests: [],
             columns: [
                 { key: 'id', label: 'ไอดี', type: 'number' },

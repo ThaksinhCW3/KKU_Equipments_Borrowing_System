@@ -1,5 +1,5 @@
 <template>
-    <BaseReportTable :report-title="'รายงานหมวดหมู่อุปกรณ์'"
+    <BaseReportTable :breadcrumbs="breadcrumbs" :report-title="'รายงานหมวดหมู่อุปกรณ์'"
         :report-description="'จัดการและติดตามหมวดหมู่อุปกรณ์ทั้งหมดในระบบ'" :data="categories" :columns="columns"
         :available-filters="availableFilters" :search-placeholder="'ค้นหาด้วยชื่อหมวดหมู่หรือรหัสหมวดหมู่...'"
         :page-size="20" @export="exportCategories">
@@ -45,6 +45,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานหมวดหมู่อุปกรณ์' }
+            ],
             categories: [],
             columns: [
                 { key: 'id', label: 'ไอดี', type: 'number' },

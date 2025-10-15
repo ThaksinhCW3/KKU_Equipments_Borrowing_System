@@ -69,27 +69,27 @@
             <!-- Navigation Links moved here -->
             <div class="hidden md:flex space-x-8">
                 <a href="{{ route('home') }}"
-                    class="{{ request()->routeIs('home') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                    class="{{ request()->routeIs('home') && !request()->filled('category') ? 'text-orange-600 font-medium' : 'text-gray-700 hover:text-orange-700' }}">
                     หน้าหลัก
                 </a>
 
                 <!-- Dropdown -->
-                <div class="relative group">
+                <div class="relative desktop-category-dropdown">
                     <button
-                        class="flex items-center {{ request()->is('category*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                        class="desktop-category-toggle flex items-center {{ request()->filled('category') ? 'text-orange-600 font-medium' : 'text-gray-700 hover:text-orange-700' }}">
                         หมวดหมู่
-                        <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
                             111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
                             010-1.414z" clip-rule="evenodd" />
                         </svg>
                     </button>
                     <div
-                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        class="desktop-category-content absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden transition-all duration-200 max-h-96 overflow-y-auto">
                         @foreach ($categories ?? [] as $cat)
                             @if (is_object($cat))
                                 <a href="/?category={{ $cat->cate_id }}"
-                                    class="block px-4 py-2 text-sm {{ request('category') == $cat->cate_id ? 'text-blue-600 font-medium bg-gray-50' : 'text-gray-700 hover:bg-gray-100' }}">
+                                    class="block px-4 py-2 text-sm {{ request('category') == $cat->cate_id ? 'text-orange-600 font-medium bg-orange-50' : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}">
                                     {{ $cat->name }}
                                 </a>
                             @endif
@@ -104,7 +104,7 @@
                 @auth
                     @if ($user && in_array($user->role, ['admin', 'staff']))
                         <a href="{{ route('admin.index') }}"
-                            class="{{ request()->routeIs('admin.*') ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-700' }}">
+                            class="{{ request()->routeIs('admin.*') ? 'text-orange-600 font-medium' : 'text-gray-700 hover:text-orange-700' }}">
                             แอดมิน
                         </a>
                     @endif
@@ -135,23 +135,24 @@
                     <div class="w-px h-6 bg-gray-300"></div>
                     @auth
                         <!-- User Dropdown -->
-                        <div class="relative group">
-                            <button class="flex items-center space-x-2 font-medium hover:text-blue-600 transition-colors">
+                        <div class="relative desktop-user-dropdown">
+                            <button class="desktop-user-toggle flex items-center space-x-2 font-medium hover:text-orange-600 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <span>{{ Auth::user()->name }}</span>
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
-                                                                        111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
-                                                                        010-1.414z" clip-rule="evenodd" />
+                                                                                                    111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
+                                                                                                    010-1.414z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </button>
                             <div
-                                class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                class="desktop-user-content absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-10 hidden transition-all duration-200">
                                 <a href="{{ route('profile.show') }}"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -159,7 +160,7 @@
                                     ข้อมูลส่วนตัว
                                 </a>
                                 <a href="{{ route('borrower.equipments.myreq') }}"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -170,7 +171,7 @@
                                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit"
-                                        class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        class="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 hover:text-red-600">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -199,7 +200,7 @@
                         @endif
                     @else
                         <a href="{{ route('login') }}"
-                            class="flex items-center text-gray-700 hover:text-gray-900 font-medium">
+                            class="flex items-center text-gray-700 hover:text-orange-700 font-medium">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -208,7 +209,7 @@
                         </a>
                         <span class="text-gray-400">/</span>
                         <a href="{{ route('register') }}"
-                            class="text-gray-700 hover:text-gray-900 font-medium">ลงทะเบียน</a>
+                            class="text-gray-700 hover:text-orange-700 font-medium">ลงทะเบียน</a>
                     @endauth
                 </div>
 
@@ -237,7 +238,7 @@
             <!-- Mobile Navigation Links -->
             <div class="space-y-3">
                 <a href="{{ route('home') }}"
-                    class="block text-blue-600 hover:text-blue-700 font-medium py-2">หน้าหลัก</a>
+                    class="block text-orange-600 hover:text-orange-700 font-medium py-2">หน้าหลัก</a>
                 <div class="space-y-2">
                     <button
                         class="mobile-dropdown-toggle flex items-center justify-between w-full text-gray-700 font-medium py-2 hover:text-gray-900 transition-colors">
@@ -352,7 +353,7 @@
                 aria-label="Breadcrumb">
                 {{-- Home --}}
                 <a href="{{ route('home') }}"
-                    class="flex items-center hover:text-blue-600 {{ request()->routeIs('home') ? 'text-blue-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
+                    class="flex items-center hover:text-orange-600 {{ request()->routeIs('home') && !request()->filled('category') ? 'text-orange-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
                     <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2L2 8h2v8h4V12h4v4h4V8h2L10 2z"></path>
                     </svg>
@@ -366,13 +367,13 @@
                     </svg>
                 @endif
                 @if (request()->routeIs('equipments.show'))
-                    <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">
+                    <span class="text-orange-600 font-medium whitespace-nowrap breadcrumb-item">
                         {{ $equipment->name ?? 'รายละเอียด' }}
                     </span>
                 @endif
                 @if (request()->routeIs('borrower.equipments.myreq') || request()->routeIs('borrower.equipments.reqdetail'))
                     <a href="{{ route('borrower.equipments.myreq') }}"
-                        class="hover:text-blue-600 {{ request()->routeIs('borrower.equipments.myreq') ? 'text-blue-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
+                        class="hover:text-orange-600 {{ request()->routeIs('borrower.equipments.myreq') ? 'text-orange-600 font-medium' : '' }} whitespace-nowrap breadcrumb-item">
                         คำขอของฉัน
                     </a>
                 @endif
@@ -383,15 +384,15 @@
                     </svg>
                 @endif
                 @if (request()->routeIs('borrower.equipments.reqdetail'))
-                    <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">รายละเอียดคำขอ</span>
+                    <span class="text-orange-600 font-medium whitespace-nowrap breadcrumb-item">รายละเอียดคำขอ</span>
                 @endif
                 @if (request()->routeIs('profile.show'))
-                    <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">ข้อมูลส่วนตัว</span>
+                    <span class="text-orange-600 font-medium whitespace-nowrap breadcrumb-item">ข้อมูลส่วนตัว</span>
                 @endif
 
                 {{-- Verification breadcrumb --}}
                 @if (request()->routeIs('verification.index'))
-                    <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">ยืนยันตัวตน</span>
+                    <span class="text-orange-600 font-medium whitespace-nowrap breadcrumb-item">ยืนยันตัวตน</span>
                 @endif
 
                 {{-- Category breadcrumb --}}
@@ -401,7 +402,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                     <a href="{{ route('home') }}"
-                        class="hover:text-blue-600 text-gray-700 whitespace-nowrap breadcrumb-item">
+                        class="hover:text-orange-600 text-gray-700 whitespace-nowrap breadcrumb-item">
                         หมวดหมู่
                     </a>
                     <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor"
@@ -412,7 +413,7 @@
                         $categoryCode = request()->get('category');
                         $category = $categories->where('cate_id', $categoryCode)->first();
                     @endphp
-                    <span class="text-gray-700 font-medium whitespace-nowrap breadcrumb-item">
+                    <span class="text-orange-600 font-medium whitespace-nowrap breadcrumb-item">
                         {{ $category->name ?? 'หมวดหมู่' }}
                     </span>
                 @endif
@@ -446,6 +447,70 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Desktop dropdown toggles
+        const desktopCategoryToggle = document.querySelector('.desktop-category-toggle');
+        const desktopCategoryContent = document.querySelector('.desktop-category-content');
+        const desktopUserToggle = document.querySelector('.desktop-user-toggle');
+        const desktopUserContent = document.querySelector('.desktop-user-content');
+
+        // Toggle desktop category dropdown
+        if (desktopCategoryToggle && desktopCategoryContent) {
+            desktopCategoryToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                desktopCategoryContent.classList.toggle('hidden');
+                const arrow = desktopCategoryToggle.querySelector('svg');
+                if (desktopCategoryContent.classList.contains('hidden')) {
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    arrow.style.transform = 'rotate(180deg)';
+                    // Close user dropdown if open
+                    if (desktopUserContent) {
+                        desktopUserContent.classList.add('hidden');
+                        const userArrow = desktopUserToggle.querySelector('svg:last-child');
+                        userArrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+
+        // Toggle desktop user dropdown
+        if (desktopUserToggle && desktopUserContent) {
+            desktopUserToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                desktopUserContent.classList.toggle('hidden');
+                const arrow = desktopUserToggle.querySelector('svg:last-child');
+                if (desktopUserContent.classList.contains('hidden')) {
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    arrow.style.transform = 'rotate(180deg)';
+                    // Close category dropdown if open
+                    if (desktopCategoryContent) {
+                        desktopCategoryContent.classList.add('hidden');
+                        const categoryArrow = desktopCategoryToggle.querySelector('svg');
+                        categoryArrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+
+        // Close desktop dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (desktopCategoryContent && !desktopCategoryContent.classList.contains('hidden')) {
+                if (!e.target.closest('.desktop-category-dropdown')) {
+                    desktopCategoryContent.classList.add('hidden');
+                    const arrow = desktopCategoryToggle.querySelector('svg');
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+            if (desktopUserContent && !desktopUserContent.classList.contains('hidden')) {
+                if (!e.target.closest('.desktop-user-dropdown')) {
+                    desktopUserContent.classList.add('hidden');
+                    const arrow = desktopUserToggle.querySelector('svg:last-child');
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        });
+
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuIcon = document.getElementById('menu-icon');

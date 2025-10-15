@@ -34,5 +34,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'role' => 'borrower',
         ]);
+        $this->call(UsersTableSeeder::class);
     }
 }

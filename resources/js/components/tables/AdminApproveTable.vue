@@ -2,7 +2,7 @@
   <BaseTable :data="requests || []" :columns="columns" :title="'หน้าจัดการคำขอ'"
     :search-placeholder="'ค้นหา รหัสคำขอ, ผู้ขอ, อุปกรณ์, รหัสอุปกรณ์, สถานะ...'" :user-role="'admin'"
     :available-filters="availableFilters" :search-fields="['req_id', 'user_name', 'equipment_name', 'equipment_code', 'status']"
-    :page-size="pageSize" :default-sort="'created_at'" :default-sort-direction="'desc'">
+    :page-size="pageSize" :default-sort="'created_at'" :default-sort-direction="'desc'" :show-add-button="false">
     <template #rows="{ item: request, actions }">
       <td class="px-4 py-2">
         <span class="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline"

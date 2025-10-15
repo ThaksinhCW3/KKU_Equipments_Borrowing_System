@@ -34,37 +34,39 @@ const changePage = (page) => {
 </script>
 
 <template>
+  <div v-if="total > 0">
     <hr>
-  <nav class="flex max-w-screen-2xl items-center justify-center gap-1 sm:gap-2 m-4 sm:m-6">
-    <div class="text-xs sm:text-sm text-gray-600 mb-4 text-center w-full">
-      Showing {{ (currentPage - 1) * perPage + 1 }} to {{ Math.min(currentPage * perPage, total) }} of {{ total }} results
-    </div>
-    <button
-      @click="changePage(currentPage - 1)"
-      :disabled="currentPage === 1"
-      class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Prev
-    </button>
+    <nav class="flex max-w-screen-2xl items-center justify-center gap-1 sm:gap-2 m-4 sm:m-6">
+      <div class="text-xs sm:text-sm text-gray-600 mb-4 text-center w-full">
+        กำลังแสดง {{ (currentPage - 1) * perPage + 1 }} ถึง {{ Math.min(currentPage * perPage, total) }} จาก {{ total }} รายการ
+      </div>
+      <button
+        @click="changePage(currentPage - 1)"
+        :disabled="currentPage === 1"
+        class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ก่อนหน้า
+      </button>
 
-    <button
-      v-for="page in pages"
-      :key="page"
-      @click="changePage(page)"
-      class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border"
-      :class="page === currentPage 
-        ? 'bg-blue-500 text-white border-blue-500' 
-        : 'bg-white text-gray-700 hover:bg-gray-100'"
-    >
-      {{ page }}
-    </button>
-    <button
-      @click="changePage(currentPage + 1)"
-      :disabled="currentPage === totalPages"
-      class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Next
-    </button>
-  </nav>
-  <hr>
+      <button
+        v-for="page in pages"
+        :key="page"
+        @click="changePage(page)"
+        class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border"
+        :class="page === currentPage 
+          ? 'bg-orange-500 text-white border-orange-500' 
+          : 'bg-white text-gray-700 hover:bg-gray-100'"
+      >
+        {{ page }}
+      </button>
+      <button
+        @click="changePage(currentPage + 1)"
+        :disabled="currentPage === totalPages"
+        class="px-2 py-1 text-sm sm:px-3 sm:text-base rounded-md border bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ถัดไป
+      </button>
+    </nav>
+    <hr>
+  </div>
 </template>

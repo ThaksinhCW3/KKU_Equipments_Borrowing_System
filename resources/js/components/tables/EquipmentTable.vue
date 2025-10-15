@@ -1,14 +1,8 @@
 <template>
-  <!-- Breadcrumb -->
-  <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-    <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
-    <span>/</span>
-    <span class="font-semibold text-gray-900">หน้าจัดการอุปกรณ์</span>
-  </nav>
-
   <BaseTable
     :data="equipments"
     :columns="columns"
+    :breadcrumbs="breadcrumbs"
     :user-role="userRole"
     :loading="loading"
     title="อุปกรณ์รวมกันทั้งหมด"
@@ -153,6 +147,10 @@ export default {
   data() {
     const el = document.getElementById("equipment-table");
     return {
+      breadcrumbs: [
+        { label: 'แดชบอร์ด', url: '/admin' },
+        { label: 'หน้าจัดการอุปกรณ์' }
+      ],
       userRole: el?.dataset?.role || "",
       equipments: JSON.parse(el?.dataset?.equipments || "[]"),
       categories: JSON.parse(el?.dataset?.categories || "[]"),

@@ -1,9 +1,9 @@
 <template>
-    <BaseTable :data="users" :columns="columns" :title="'รายการผู้ใช้'"
-        :search-placeholder="'ค้นหาด้วยชื่อ, อีเมล, หรือหมายเลขโทรศัพท์...'" :add-button-text="'เพิ่มผู้ใช้ใหม่'"
+    <BaseTable :data="users" :columns="columns" :breadcrumbs="breadcrumbs" :title="'รายการผู้ใช้'"
+        :search-placeholder="'ค้นหาด้วยชื่อ, อีเมล, หรือหมายเลขโทรศัพท์...'"
         :user-role="userRole" :available-filters="availableFilters"
         :search-fields="['name', 'email', 'phonenumber', 'uid', 'role', 'status']" :loading="loading" @create="openCreateModal"
-        @edit="openModal" @delete="deleteUser">
+        @edit="openModal" @delete="deleteUser" :show-add-button="false">
         <!-- Custom row template -->
         <template #rows="{ item: user, actions }">
             <td class="px-6 py-4 whitespace-nowrap">
@@ -90,7 +90,11 @@ export default {
     data() {
         const el = document.getElementById("user-table");
         return {
-            userRole: el?.dataset?.role || "admin",
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'จัดการผู้ใช้' }
+            ],
+            userRole: el?.dataset?.role || "",
             users: [],
             loading: false,
 

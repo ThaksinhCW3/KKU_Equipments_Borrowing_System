@@ -1,4 +1,5 @@
 <x-admin-layout>
+    @section('title', 'รายการหมวดหมู่')
     <div class="bg-white p-6 rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-4">Categories</h2>
 

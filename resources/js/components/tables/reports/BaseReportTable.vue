@@ -1,12 +1,12 @@
 <template>
     <div class="bg-white p-6 rounded-lg shadow">
         <!-- Breadcrumb -->
-        <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-            <a href="/admin" class="hover:text-gray-700">แดชบอร์ด</a>
-            <span>/</span>
-            <a href="/admin/report" class="hover:text-gray-700">รายงาน</a>
-            <span>/</span>
-            <span class="font-semibold text-gray-900">{{ reportTitle }}</span>
+        <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+            <template v-for="(crumb, index) in breadcrumbs" :key="index">
+                <a v-if="crumb.url" :href="crumb.url" class="hover:text-orange-600 hover:underline">{{ crumb.label }}</a>
+                <span v-else class="font-semibold text-gray-900">{{ crumb.label }}</span>
+                <span v-if="index < breadcrumbs.length - 1">/</span>
+            </template>
         </nav>
 
         <!-- Header Section -->
@@ -280,6 +280,10 @@
 export default {
     name: 'BaseReportTable',
     props: {
+        breadcrumbs: {
+            type: Array,
+            default: () => []
+        },
         reportTitle: {
             type: String,
             required: true

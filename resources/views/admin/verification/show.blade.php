@@ -1,8 +1,21 @@
 <x-admin-layout>
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+    @section('title', 'รายละเอียดการยืนยันตัวตน')
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center text-sm text-gray-500 space-x-2 mb-4" aria-label="Breadcrumb">
+                <a href="{{ route('admin.index') }}" class="hover:text-blue-600">
+                    แดชบอร์ด
+                </a>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <a href="{{ route('admin.verification.index') }}" class="hover:text-blue-600">การยืนยันตัวตน</a>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <span class="text-blue-600 font-medium">รายละเอียด</span>
+            </nav>
                     <div class="flex items-center justify-between mb-6">
                         <h1 class="text-2xl font-bold text-gray-900">รายละเอียดการยืนยันตัวตน</h1>
                         <a href="{{ route('admin.verification.index') }}" 
@@ -166,8 +179,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
     @if($verificationRequest->status === 'pending')
         <form id="reject-form" action="{{ route('admin.verification.reject', $verificationRequest->id) }}" method="POST" class="hidden">

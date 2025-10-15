@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <BaseReportTable ref="baseTable" :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
+    <BaseReportTable ref="baseTable" :breadcrumbs="breadcrumbs" :report-title="'รายงานกิจกรรมระบบ'" :report-description="'ติดตามและวิเคราะห์กิจกรรมต่างๆ ในระบบ'"
         :data="logs" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยชื่อผู้ใช้, การดำเนินการ, เป้าหมาย, หรือรายละเอียด...'" :page-size="20"
         @export="exportLogs" @filter-change="onFilterChange">
@@ -290,6 +290,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานกิจกรรมระบบ' }
+            ],
             logs: [],
             pendingAdminFilter: null,
             selectedLog: null,

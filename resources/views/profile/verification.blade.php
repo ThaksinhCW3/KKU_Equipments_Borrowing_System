@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', 'การยืนยันตัวตน')
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -137,7 +138,7 @@
                                            id="student_id_image" 
                                            name="student_id_image" 
                                            accept="image/*"
-                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                                            required
                                            onchange="previewImage(event)">
                                     <p class="text-xs text-gray-500 mt-1">
@@ -173,7 +174,9 @@
 
                                 <div class="flex justify-end">
                                     <button type="submit" 
-                                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                            id="submitBtn"
+                                            disabled
+                                            class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
                                         {{ !$verificationRequest ? 'ส่งคำขอยืนยันตัวตน' : 'อัปเดตคำขอ' }}
                                     </button>
                                 </div>
@@ -202,6 +205,7 @@
             const file = event.target.files[0];
             const preview = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
+            const submitBtn = document.getElementById('submitBtn');
             
             if (file) {
                 // Validate file type
@@ -224,10 +228,14 @@
                 reader.onload = function(e) {
                     previewImg.src = e.target.result;
                     preview.classList.remove('hidden');
+                    // Enable submit button when file is selected
+                    submitBtn.disabled = false;
                 };
                 reader.readAsDataURL(file);
             } else {
                 preview.classList.add('hidden');
+                // Disable submit button when no file
+                submitBtn.disabled = true;
             }
         }
         
@@ -235,10 +243,13 @@
             const fileInput = document.getElementById('student_id_image');
             const preview = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
+            const submitBtn = document.getElementById('submitBtn');
             
             fileInput.value = '';
             previewImg.src = '';
             preview.classList.add('hidden');
+            // Disable submit button when file is removed
+            submitBtn.disabled = true;
         }
     </script>
 </x-app-layout>

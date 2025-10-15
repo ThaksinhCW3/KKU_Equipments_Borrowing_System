@@ -1,19 +1,20 @@
 <x-admin-layout>
+    @section('title', 'หน้าแรก')
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Analytics Section -->
         <div class="lg:col-span-12 ">
                 <div class="flex justify-end gap-2">
                     <a href="{{ route('admin.dashboard.export', ['type' => 'borrow_requests', 'year' => $selectedYear, 'month' => $selectedMonth]) }}" 
                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                         Borrow Requests
+                         คำขอยืม
                     </a>
                     <a href="{{ route('admin.dashboard.export', ['type' => 'device_usage', 'year' => $selectedYear, 'month' => $selectedMonth]) }}" 
                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm">
-                         Device Usage
+                         ยอดใช้งานอุปกรณ์
                     </a>
                     <a href="{{ route('admin.dashboard.export', ['type' => 'user_activity', 'year' => $selectedYear, 'month' => $selectedMonth]) }}" 
                        class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm">
-                         User Activity
+                         ประวัติการยืม
                     </a>
                 </div>
         </div>

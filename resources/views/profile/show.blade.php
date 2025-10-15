@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', 'ข้อมูลส่วนตัว')
     <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div class="bg-white rounded-2xl shadow-md border border-gray-200">
 

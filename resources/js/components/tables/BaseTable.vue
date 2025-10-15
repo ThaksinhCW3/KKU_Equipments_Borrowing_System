@@ -1,5 +1,16 @@
 <template>
   <div class="bg-white p-6 rounded-lg shadow">
+    <!-- Breadcrumb -->
+    <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+      <template v-for="(crumb, index) in breadcrumbs" :key="index">
+        <a v-if="crumb.url" :href="crumb.url" class="hover:text-blue-600 hover:underline">{{ crumb.label }}</a>
+        <span v-else class="font-semibold text-blue-600">{{ crumb.label }}</span>
+        <svg v-if="index < breadcrumbs.length - 1" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </template>
+    </nav>
+
     <!-- Header Section -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
       <div>
@@ -270,6 +281,12 @@ export default {
       default: () => []
     },
     columns: {
+      type: Array,
+      default: () => []
+    },
+    
+    // Breadcrumbs
+    breadcrumbs: {
       type: Array,
       default: () => []
     },

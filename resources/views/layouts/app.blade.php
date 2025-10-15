@@ -6,7 +6,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>ระบบยืมอุปกรณ์ - @yield('title', "หน้าแรก")</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="{{ asset('enkku_logo_icon.ico') }}">
+        <link rel="apple-touch-icon" href="{{ asset('enkku_logo_icon.ico') }}">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
@@ -32,14 +36,14 @@
         </script>
         @endauth
     </head>
-    <body class="font-noto-sans-thai antialiased ">
-        <div class="bg-gray-10 sticky">   
+    <body class="font-noto-sans-thai antialiased">
+        <div class="flex flex-col min-h-screen">   
             <!-- Page Heading -->
             <x-header />
-        <hr>
+            <hr>
             
             <!-- Page Content -->
-            <main>
+            <main class="flex-grow">
                 {{ $slot }}
             </main>
             <x-footer />

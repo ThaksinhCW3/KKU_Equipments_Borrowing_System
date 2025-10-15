@@ -1,5 +1,5 @@
 <template>
-    <BaseReportTable :report-title="'รายงานธุรกรรม'" :report-description="'ติดตามและวิเคราะห์ธุรกรรมทั้งหมดในระบบ'"
+    <BaseReportTable :breadcrumbs="breadcrumbs" :report-title="'รายงานธุรกรรม'" :report-description="'ติดตามและวิเคราะห์ธุรกรรมทั้งหมดในระบบ'"
         :data="transactions" :columns="columns" :available-filters="availableFilters"
         :search-placeholder="'ค้นหาด้วยรหัสธุรกรรม, ชื่อผู้ใช้, หรือชื่ออุปกรณ์...'" :page-size="20"
         @export="exportTransactions">
@@ -160,6 +160,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานธุรกรรม' }
+            ],
             transactions: [],
             selectedTransaction: null,
             columns: [

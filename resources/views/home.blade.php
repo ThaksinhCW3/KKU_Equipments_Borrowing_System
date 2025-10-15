@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', request('category') ? ($categories->firstWhere('cate_id', request('category'))->name ?? 'หน้าแรก') : 'หน้าแรก')
     <div class=" ">
         <div id="header-search" class="pt-3"></div>
         <x-filter />
@@ -125,12 +126,10 @@
         @endif
 
         <!-- Pagination -->
-        @if ($equipments->hasPages())
-            <div id="pagination" data-current-page="{{ $equipments->currentPage() }}"
-                data-total-pages="{{ $equipments->lastPage() }}" data-per-page="{{ $equipments->perPage() }}"
-                data-total="{{ $equipments->total() }}">
-            </div>
-        @endif
+        <div id="pagination" data-current-page="{{ $equipments->currentPage() }}"
+            data-total-pages="{{ $equipments->lastPage() }}" data-per-page="{{ $equipments->perPage() }}"
+            data-total="{{ $equipments->total() }}">
+        </div>
     </div>
     <div class="">
         <x-pagination />

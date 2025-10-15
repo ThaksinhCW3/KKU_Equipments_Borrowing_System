@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import SearchBar from './SearchBar.vue';
 
 const items = ref([]);
 const query = ref('');
 const loading = ref(false);
+const searchContainer = ref(null);
 
 async function onSearch(val) {
   if (!val) {
@@ -87,24 +88,35 @@ function getTotalQuantity(equipment) {
   // This will be calculated on the backend and passed in the response
   return equipment.total_quantity || 0;
 }
+
+function closeResults() {
+  items.value = [];
+  query.value = '';
+}
+
+function handleClickOutside(event) {
+  if (searchContainer.value && !searchContainer.value.contains(event.target)) {
+    closeResults();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>
-  <div class="w-full mb-5">
+  <div ref="searchContainer" class="relative w-full mb-5">
     <div class="flex items-center gap-3">
       <div class="flex-1">
-        <SearchBar
-          v-model="query"
-          placeholder="ค้นหาอุปกรณ์..."
-          :debounce="250"
-          @search="onSearch"
-        />
+        <SearchBar v-model="query" placeholder="ค้นหาอุปกรณ์..." :debounce="250" @search="onSearch" />
       </div>
-      <button
-        type="button"
-        @click="triggerSearch"
-        class="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-3 rounded-lg items-center justify-center transition duration-200 whitespace-nowrap"
-      >
+      <button type="button" @click="triggerSearch"
+        class="hidden md:flex bg-orange-600 hover:bg-orange-700 text-white font-medium px-5 py-3 rounded-lg items-center justify-center transition duration-200 whitespace-nowrap">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -112,7 +124,8 @@ function getTotalQuantity(equipment) {
         ค้นหา
       </button>
     </div>
-    <div v-if="query || items.length > 0" class="mt-2 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div v-if="query || items.length > 0"
+      class="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
       <div v-if="loading" class="p-4">
         <div class="space-y-3">
           <div v-for="i in 3" :key="i" class="flex items-start gap-3">
@@ -131,51 +144,36 @@ function getTotalQuantity(equipment) {
           <span class="text-sm font-medium text-gray-700">
             {{ query ? `ผลการค้นหา "${query}"` : 'อุปกรณ์ทั้งหมด' }} ({{ items.length }} รายการ)
           </span>
-          <a 
-            href="/equipments" 
-            class="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-          >
+          <a href="/equipments" class="text-sm text-orange-600 hover:text-orange-800 hover:underline">
             ดูทั้งหมด
           </a>
         </div>
         <ul class="max-h-96 overflow-y-auto">
-          <li
-            v-for="item in items"
-            :key="item.id"
-            class="px-3 py-3 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-200"
-          >
+          <li v-for="item in items" :key="item.id"
+            class="px-3 py-3 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-200">
             <a :href="getEquipmentUrl(item)" class="block">
               <div class="flex items-start gap-3">
                 <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                  <img 
-                    v-if="getFirstPhoto(item)" 
-                    :src="getFirstPhoto(item)" 
-                    :alt="item.name"
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    @error="handleImageError"
-                  />
+                  <img v-if="getFirstPhoto(item)" :src="getFirstPhoto(item)" :alt="item.name"
+                    class="w-full h-full object-cover" loading="lazy" @error="handleImageError" />
                   <div v-else class="w-full h-full flex items-center justify-center bg-gray-200">
                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-800 hover:text-blue-600 transition-colors duration-200">
+                  <div class="font-medium text-gray-800 hover:text-orange-600 transition-colors duration-200">
                     {{ item.name }}
                   </div>
                   <div class="text-gray-500 text-xs mt-1">
-                    <span 
-                      class="inline-block px-2 py-1 rounded-full text-xs font-medium mr-2"
-                      :class="getAvailableQuantity(item) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                    >
+                    <span class="inline-block px-2 py-1 rounded-full text-xs font-medium mr-2"
+                      :class="getAvailableQuantity(item) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
                       Available: {{ getAvailableQuantity(item) }}
                     </span>
-                    <span 
-                      v-if="getTotalQuantity(item) > 1"
-                      class="inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
+                    <span v-if="getTotalQuantity(item) > 1"
+                      class="inline-block px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                       Total: {{ getTotalQuantity(item) }}
                     </span>
                   </div>

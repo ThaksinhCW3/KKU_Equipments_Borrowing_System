@@ -1,8 +1,10 @@
 <template>
   <BaseTable :data="verifications.data" :columns="columns" :title="'การยืนยันตัวตน'"
+    :breadcrumbs="breadcrumbs"
     :search-placeholder="'ค้นหาชื่อ, อีเมล, หรือ UID...'" :user-role="userRole" :available-filters="availableFilters"
     :search-fields="['user.name', 'user.email', 'user.uid', 'status']" :loading="loading" :show-add-button="false"
     @edit="viewDetails" @delete="deleteVerification">
+
     <!-- Custom row template -->
     <template #rows="{ item: verification, actions }">
       <td class="px-6 py-4 whitespace-nowrap">
@@ -96,6 +98,10 @@ export default {
     const el = document.getElementById("verification-table");
     return {
       userRole: el?.dataset?.role || "admin",
+      breadcrumbs: [
+        { label: 'แดชบอร์ด', url: '/admin' },
+        { label: 'การยืนยันตัวตน', url: null }
+      ],
       verifications: {
         data: [],
         current_page: 1,

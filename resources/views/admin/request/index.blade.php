@@ -1,4 +1,5 @@
 <x-admin-layout>
+    @section('title', 'รายการคำขอ')
     @if(request('user_email'))
         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div class="flex items-center justify-between">

@@ -1,4 +1,5 @@
 <x-admin-layout>
+    @section('title', 'รายละเอียดคำขอ')
     <div class="max-w-7xl mx-auto bg-white p-4 sm:p-6 rounded shadow">
         <div class="flex flex-col lg:flex-row items-start gap-6">
             @if ($requests->equipment?->photo_path)

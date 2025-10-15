@@ -1,14 +1,8 @@
 <template>
-  <!-- Breadcrumb -->
-  <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-    <a href="/admin" class="hover:text-gray-700 hover:underline">แดชบอร์ด</a>
-    <span>/</span>
-    <span class="font-semibold text-gray-900">หน้าจัดการหมวดหมู่</span>
-  </nav>
-
   <BaseTable
     :data="categories"
     :columns="columns"
+    :breadcrumbs="breadcrumbs"
     :user-role="userRole"
     :loading="loading"
     title="หมวดหมู่ทั้งหมด"
@@ -118,6 +112,10 @@ export default {
   data() {
     const el = document.getElementById("category-table");
     return {
+      breadcrumbs: [
+        { label: 'แดชบอร์ด', url: '/admin' },
+        { label: 'หน้าจัดการหมวดหมู่' }
+      ],
       userRole: el?.dataset?.role || "",
       categories: [],
       allEquipments: JSON.parse(el?.dataset?.equipments || "[]"),

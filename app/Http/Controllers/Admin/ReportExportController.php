@@ -27,7 +27,7 @@ class ReportExportController extends Controller
         ]);
 
         try {
-            $fileName = "{$type}-report-" . now()->format('Y-m-d-H-i-s') . ".xlsx";
+            $fileName = "report_export_{$type}_" . now()->format('Y-m-d-H-i-s') . ".csv";
             
             // Log successful export
             $response = Excel::download(new MultiFilteredExport($request, $type), $fileName);

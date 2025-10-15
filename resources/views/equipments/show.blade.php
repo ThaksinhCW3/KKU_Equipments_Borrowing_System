@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', 'รายละเอียดอุปกรณ์')
     {{-- Session messages for success and error ----}}
     @if (session('success'))
         <script>
@@ -320,7 +321,7 @@
                             <button type="button" class="w-full bg-gray-400 text-white font-bold py-2 rounded-lg cursor-not-allowed" disabled>ไม่สามารถยืมได้ ({{ $equipment->status }})</button>
                             </div>
                         @else
-                            <button type="submit" id="borrowButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition duration-200 disabled:opacity-50" disabled>ส่งคำขอการยืม</button>
+                            <button type="submit" id="borrowButton" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg transition duration-200 disabled:opacity-50" disabled>ส่งคำขอการยืม</button>
                         @endif
                     </form>
                 </div>

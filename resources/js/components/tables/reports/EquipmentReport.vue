@@ -1,5 +1,6 @@
 <template>
     <BaseReportTable
+        :breadcrumbs="breadcrumbs"
         :report-title="'รายงานอุปกรณ์'"
         :report-description="'จัดการและติดตามข้อมูลอุปกรณ์ทั้งหมดในระบบ'"
         :data="equipments"
@@ -56,6 +57,11 @@ export default {
     },
     data() {
         return {
+            breadcrumbs: [
+                { label: 'แดชบอร์ด', url: '/admin' },
+                { label: 'รายงาน', url: '/admin/report' },
+                { label: 'รายงานอุปกรณ์' }
+            ],
             equipments: [],
             categories: [],
             columns: [

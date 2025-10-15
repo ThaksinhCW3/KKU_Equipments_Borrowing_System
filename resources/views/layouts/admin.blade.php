@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Admin Dashboard - {{ config('app.name', 'Laravel') }}</title>
+    <title>แดชบอร์ดผู้ดูแลระบบ - @yield('title', 'หน้าแอดมิน')</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('enkku_logo_icon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('enkku_logo_icon.ico') }}">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -20,10 +24,10 @@
     <div class="min-h-screen">
         <x-admin-header />
         <div class="flex">
-            <div class="hidden md:block">
+            <div class="hidden md:block flex-shrink-0">
                 <x-admin-sidebar />
             </div>
-            <main id="admin-main" class="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+            <main id="admin-main" class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6">
                 {{ $slot }}
             </main>
         </div>

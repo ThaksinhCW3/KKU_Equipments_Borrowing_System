@@ -32,7 +32,7 @@
         <button 
           v-if="unreadCount > 0"
           @click="markAllAsRead" 
-          class="text-sm text-blue-600 hover:underline"
+          class="text-sm text-orange-600 hover:underline"
           :disabled="isMarkingAll"
         >
           {{ isMarkingAll ? 'กำลังดำเนินการ...' : 'Mark all read' }}
@@ -80,7 +80,7 @@
             <button 
               v-if="!notification.read_at"
               @click="markAsRead(notification.id)"
-              class="text-xs text-blue-600 hover:underline ml-2"
+              class="text-xs text-orange-600 hover:underline ml-2"
               :disabled="isMarking"
             >
               Mark read
