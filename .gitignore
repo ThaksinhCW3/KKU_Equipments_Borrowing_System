@@ -7,7 +7,7 @@
 .phpunit.result.cache
 .compose.yaml
 .Dockerfile
-/database/migrations
+.database/migrations
 /.fleet
 /.idea
 /.nova
