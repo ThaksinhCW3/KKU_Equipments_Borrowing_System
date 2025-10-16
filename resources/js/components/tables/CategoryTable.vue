@@ -17,13 +17,6 @@
     @delete="deleteCategory"
     @view="viewCategoryEquipments"
   >
-    <!-- Custom Headers -->
-    <template #headers="{ columns }">
-      <th class="px-4 py-2 text-left">รหัสหมวดหมู่</th>
-      <th class="px-4 py-2 text-left">ชื่อหมวดหมู่</th>
-      <th class="px-4 py-2 text-left">จํานวนอุปกรณ์</th>
-      <th v-if="userRole === 'admin'" class="px-4 py-2 text-left">แอคชั่น</th>
-    </template>
 
     <!-- Custom Rows -->
     <template #rows="{ item: category, actions }">
@@ -127,11 +120,6 @@ export default {
       },
       updatingCategory: null,
       deletingCategory: null,
-      columns: [
-        { key: 'cate_id', label: 'รหัสหมวดหมู่' },
-        { key: 'name', label: 'ชื่อหมวดหมู่' },
-        { key: 'equipments_count', label: 'จํานวนอุปกรณ์' }
-      ],
       availableFilters: [
         {
           key: 'created_at',
@@ -142,6 +130,23 @@ export default {
         }
       ]
     };
+  },
+  
+  computed: {
+    columns() {
+      const cols = [
+        { key: 'cate_id', label: 'รหัสหมวดหมู่' },
+        { key: 'name', label: 'ชื่อหมวดหมู่' },
+        { key: 'equipments_count', label: 'จํานวนอุปกรณ์' }
+      ];
+      
+      // Only show actions column for admin
+      if (this.userRole === 'admin') {
+        cols.push({ key: 'actions', label: 'แอคชั่น' });
+      }
+      
+      return cols;
+    }
   },
   
   methods: {

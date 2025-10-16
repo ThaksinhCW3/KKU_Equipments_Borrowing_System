@@ -17,6 +17,11 @@ class ReportController extends Controller
     //! Vue
     public function index(string $type)
     {
+        // Prevent staff from accessing logs report
+        if ($type === 'logs' && auth()->user()->role === 'staff') {
+            abort(403, 'Unauthorized access to logs report.');
+        }
+        
         return view('admin.report.index', ['type' => $type]);
     }
     //! Report

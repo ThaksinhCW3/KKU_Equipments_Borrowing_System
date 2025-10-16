@@ -68,38 +68,20 @@ Route::middleware('auth')->group(function () {
         return view('banned');
     })->name('banned');
 
-    // Admin-only routes
+    // Admin-only routes (actions only)
     Route::middleware('role:admin')->group(function () {
-        // Equipment management
+        // Equipment management actions
         Route::prefix('admin/equipment')->group(function () {
             Route::post('/store', [EquipmentController::class, 'store'])->name('admin.equipment.store');
             Route::put('/update/{id}', [EquipmentController::class, 'update'])->name('admin.equipment.update');
             Route::delete('/destroy/{id}', [EquipmentController::class, 'destroy'])->name('admin.equipment.destroy');
         });
 
-        // Category management
+        // Category management actions
         Route::prefix('admin/category')->group(function () {
             Route::post('/store', [CategoryController::class, 'store'])->name('admin.category.store');
             Route::put('/update/{id}', [CategoryController::class, 'update'])->name('admin.category.update');
             Route::delete('/destroy/{id}', [CategoryController::class, 'destroy'])->name('admin.category.destroy');
-        });
-
-        // Reports (subset)
-        Route::prefix('admin/report')->group(function () {
-            Route::get('/logs', [ReportController::class, 'logReport'])->name('admin.report.logs');
-        });
-    });
-
-    // Staff and Admin routes
-    Route::middleware('role:admin,staff')->group(function () {
-        // Admin dashboard
-        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-        Route::get('/admin/export', [AdminController::class, 'exportCsv'])->name('admin.dashboard.export');
-
-        // Full reports
-        Route::prefix('admin/report')->group(function () {
-            Route::get('/{type}', [ReportController::class, 'index'])->name('admin.report.index');
-            Route::get('/export/{type}', [ReportExportController::class, 'export'])->name('admin.report.export');
         });
 
         // User management
@@ -107,7 +89,33 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
         });
 
-        // Requests
+        // Logs report (admin only)
+        Route::prefix('admin/report')->group(function () {
+            Route::get('/logs', [ReportController::class, 'logReport'])->name('admin.report.logs');
+        });
+    });
+
+    // Staff and Admin routes (view access)
+    Route::middleware('role:admin,staff')->group(function () {
+        // Admin dashboard
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+        Route::get('/admin/export', [AdminController::class, 'exportCsv'])->name('admin.dashboard.export');
+
+        // Equipment and Category index pages (view only for staff)
+        Route::prefix('admin/equipment')->group(function () {
+            Route::get('/', [EquipmentController::class, 'index'])->name('admin.equipment.index');
+        });
+        Route::prefix('admin/category')->group(function () {
+            Route::get('/', [CategoryController::class, 'index'])->name('admin.category.index');
+        });
+
+        // Reports (exclude logs - staff can view all other reports)
+        Route::prefix('admin/report')->group(function () {
+            Route::get('/{type}', [ReportController::class, 'index'])->name('admin.report.index');
+            Route::get('/export/{type}', [ReportExportController::class, 'export'])->name('admin.report.export');
+        });
+
+        // Requests management
         Route::prefix('admin/requests')->group(function () {
             Route::get('/', [BorrowRequestController::class, 'index'])->name('admin.requests.index');
             Route::get('/{req_id}', [BorrowRequestController::class, 'show'])->name('admin.requests.show');
@@ -123,14 +131,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
             Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
             Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
-        });
-
-        // Category and Equipment index pages
-        Route::prefix('admin/category')->group(function () {
-            Route::get('/', [CategoryController::class, 'index'])->name('admin.category.index');
-        });
-        Route::prefix('admin/equipment')->group(function () {
-            Route::get('/', [EquipmentController::class, 'index'])->name('admin.equipment.index');
         });
     });
 });
