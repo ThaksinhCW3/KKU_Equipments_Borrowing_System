@@ -93,6 +93,15 @@ Route::middleware('auth')->group(function () {
         Route::prefix('admin/report')->group(function () {
             Route::get('/logs', [ReportController::class, 'logReport'])->name('admin.report.logs');
         });
+
+        // Verification management (admin only)
+        Route::prefix('admin/verification')->group(function () {
+            Route::get('/', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
+            Route::get('/api', [AdminVerificationController::class, 'api'])->name('admin.verification.api');
+            Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
+            Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
+            Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
+        });
     });
 
     // Staff and Admin routes (view access)
@@ -122,15 +131,6 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{req_id}', [BorrowRequestController::class, 'update'])->name('admin.requests.update');
             Route::match(['post', 'patch'], '/{req_id}/approve', [BorrowRequestController::class, 'approve'])->name('admin.requests.approve');
             Route::post('/{req_id}/reject', [BorrowRequestController::class, 'reject'])->name('admin.requests.reject');
-        });
-
-        // Verification management
-        Route::prefix('admin/verification')->group(function () {
-            Route::get('/', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
-            Route::get('/api', [AdminVerificationController::class, 'api'])->name('admin.verification.api');
-            Route::get('/{id}', [AdminVerificationController::class, 'show'])->name('admin.verification.show');
-            Route::post('/{id}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
-            Route::post('/{id}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verification.reject');
         });
     });
 });

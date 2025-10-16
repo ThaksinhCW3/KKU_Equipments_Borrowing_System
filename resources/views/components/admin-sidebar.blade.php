@@ -119,7 +119,7 @@
                         </svg>
                 จัดการคำขอยืมอุปกรณ์
             </a>
-            
+
             @can('admin')
             <a href="{{ route('admin.verification.index') }}"
                 class="{{ request()->routeIs('admin.verification.*') ? 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 text-gray-900' : 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900' }}">
