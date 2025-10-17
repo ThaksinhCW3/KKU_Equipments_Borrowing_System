@@ -7,11 +7,9 @@ services:
       dockerfile: Dockerfile
     container_name: eq_borrow_sys
     working_dir: /var/www/html
-    command: sh -c "php artisan key:generate && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+    command: sh -c "composer install && php artisan key:generate && php artisan serve --host=0.0.0.0 --port=8000"
     volumes:
       - .:/var/www/html
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
     ports:
       - "8000:8000"
     depends_on:
@@ -26,11 +24,9 @@ services:
       dockerfile: Dockerfile
     container_name: borrow_queue
     working_dir: /var/www/html
-    command: sh -c "php artisan queue:work --sleep=3 --tries=3 --verbose"
+    command: sh -c "composer install && php artisan queue:work --sleep=3 --tries=3 --verbose"
     volumes:
       - .:/var/www/html
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
     depends_on:
       - redis
       - mysql
