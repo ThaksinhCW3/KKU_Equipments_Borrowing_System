@@ -17,6 +17,8 @@ COPY . .
 # Then install composer dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist
 
+RUN composer require --dev kitloong/laravel-migrations-generator
+
 RUN php artisan storage:link \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
