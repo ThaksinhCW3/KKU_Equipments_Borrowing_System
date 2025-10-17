@@ -1,11 +1,9 @@
-version: "3.8"
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: borrow_app
+    container_name: eq_borrow_sys
     working_dir: /var/www/html
     command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
     volumes:
@@ -56,7 +54,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: borrow_mysql
+      MYSQL_DATABASE: db_kku_borrow_sys
     ports:
       - "3306:3306"
     volumes:
